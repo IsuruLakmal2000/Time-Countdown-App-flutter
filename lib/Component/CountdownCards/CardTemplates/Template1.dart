@@ -17,7 +17,7 @@ class Template1 extends StatefulWidget {
   String templateData;
 //  int index = 0;
   DateTime? templateDateTime;
-  int dimCount = 8;
+  double dimCount = 8;
 
   @override
   State<Template1> createState() => _Template1State();
@@ -30,7 +30,6 @@ class _Template1State extends State<Template1> {
   int hours = 0;
   int minutes = 0;
   int seconds = 0;
-  double dimValue = 0.8;
 
   @override
   void initState() {
@@ -88,9 +87,9 @@ class _Template1State extends State<Template1> {
                 "https://images.unsplash.com/photo-1723653263152-f20aae931b99?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(dimValue),
+                Colors.black.withOpacity(widget.dimCount),
                 BlendMode
-                    .darken), // here can use the double value for edition purpose
+                    .multiply), // here can use the double value for edition purpose
           ),
         ),
         // Sample content for each page
@@ -165,7 +164,7 @@ class _Template1State extends State<Template1> {
   void didUpdateWidget(covariant Template1 oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Update dimValue based on count from parent widget
-    dimValue = widget.dimCount / 10; // Adjust this calculation as needed
+    // Adjust this calculation as needed
     setState(() {}); // Rebuild the widget to apply the new dimValue
   }
 }

@@ -34,21 +34,21 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
           case TemplateType.template1:
             return Template1(
               //  index: index,
-              dimCount: 8,
+              dimCount: 0.8,
               templateData: data.title,
               templateDateTime: userDateTime,
             );
           case TemplateType.template2:
             return Template1(
               //  index: index,
-              dimCount: 8,
+              dimCount: 0.8,
               templateData: data.title,
               templateDateTime: userDateTime,
             );
           case TemplateType.template3:
             return Template1(
               //  index: index,
-              dimCount: 8,
+              dimCount: 0.8,
               templateData: data.title,
               templateDateTime: userDateTime,
             );
