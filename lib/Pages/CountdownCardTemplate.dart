@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template1.dart';
+import 'package:timecountdown/Model/TemplateData.dart';
 
 // ignore: must_be_immutable
 class CountDownCardTemplate extends StatefulWidget {
@@ -20,36 +21,38 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
   Widget build(BuildContext context) {
     final List<TemplateData> templateData = [
       TemplateData(
-          title: 'Template 1 Data', templateType: TemplateType.template1),
+          title: 'Template 1 Data',
+          templateId: 'template_1',
+          createdDate: DateTime.now()),
       TemplateData(
-          title: 'Template 2 Data', templateType: TemplateType.template2),
-      TemplateData(
-          title: 'Template 3 Data', templateType: TemplateType.template3),
+          title: 'Template 2 Data',
+          templateId: 'template_2',
+          createdDate: DateTime.now()),
     ];
     return PageView.builder(
       itemCount: templateData.length,
       itemBuilder: (context, index) {
         final data = templateData[index];
-        switch (data.templateType) {
-          case TemplateType.template1:
+        switch (data.templateId) {
+          case 'template_1':
             return Template1(
               //  index: index,
               dimCount: 0.8,
-              templateData: data.title,
+              templateData: data,
               templateDateTime: userDateTime,
             );
-          case TemplateType.template2:
+          case 'template_2':
             return Template1(
               //  index: index,
               dimCount: 0.8,
-              templateData: data.title,
+              templateData: data,
               templateDateTime: userDateTime,
             );
-          case TemplateType.template3:
+          case 'template_3':
             return Template1(
               //  index: index,
               dimCount: 0.8,
-              templateData: data.title,
+              templateData: data,
               templateDateTime: userDateTime,
             );
           default:
@@ -61,10 +64,3 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
 }
 
 enum TemplateType { template1, template2, template3 }
-
-class TemplateData {
-  final String title;
-  final TemplateType templateType;
-
-  TemplateData({required this.title, required this.templateType});
-}

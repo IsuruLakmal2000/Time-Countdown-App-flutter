@@ -1,11 +1,10 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:timecountdown/Component/ButtonComponent.dart';
-import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template1.dart';
 import 'package:timecountdown/Component/TextFieldComponent.dart';
+import 'package:timecountdown/Model/TemplateData.dart';
+import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/TemplateSelectEditPage.dart';
 
 class NewcountdownAddBottomSheet extends StatefulWidget {
@@ -127,12 +126,19 @@ class _NewcountdownAddBottomSheetState
                 _selectedTime!.hour,
                 _selectedTime!.minute,
               );
+
+              TemplateData templateData = TemplateData(
+                templateId: 'template_1',
+                title: _textFieldValue,
+                createdDate: DateTime.now(),
+              );
+
               print("--------" + _selectedDateTime.toString());
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => TemplateSelectEditPage(
-                    templateData: '',
+                    templateData: templateData,
                     templateDateTime: _selectedDateTime,
                   ), // Replace with your new page
                 ),

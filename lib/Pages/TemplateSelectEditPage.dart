@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template1.dart';
+import 'package:timecountdown/Model/TemplateData.dart';
+import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 
 class TemplateSelectEditPage extends StatefulWidget {
   TemplateSelectEditPage({
@@ -7,7 +9,7 @@ class TemplateSelectEditPage extends StatefulWidget {
     required this.templateData,
     required this.templateDateTime,
   });
-  String templateData;
+  TemplateData templateData;
   DateTime? templateDateTime;
   @override
   State<TemplateSelectEditPage> createState() => _TemplateSelectEditPageState();

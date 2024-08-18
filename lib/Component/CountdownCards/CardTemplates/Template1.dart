@@ -4,6 +4,8 @@ import 'dart:async';
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
+import 'package:timecountdown/Model/TemplateData.dart';
+import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 
 class Template1 extends StatefulWidget {
   Template1({
@@ -14,7 +16,7 @@ class Template1 extends StatefulWidget {
     required this.dimCount,
   });
 
-  String templateData;
+  TemplateData templateData;
 //  int index = 0;
   DateTime? templateDateTime;
   double dimCount = 8;
@@ -99,7 +101,7 @@ class _Template1State extends State<Template1> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              widget.templateData,
+              widget.templateData.title,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.normal,
