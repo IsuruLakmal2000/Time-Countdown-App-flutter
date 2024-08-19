@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Pages/HomePage.dart';
+import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/Theme/Theme.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(ChangeNotifierProvider(
+    child: MyApp(),
+    create: (context) => RenderedWidgetProvider(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
