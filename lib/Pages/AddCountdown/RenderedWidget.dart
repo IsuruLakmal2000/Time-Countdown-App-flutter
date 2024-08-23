@@ -1,39 +1,48 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
+import 'dart:io';
 
-Widget renderWidget(BuildContext context) {
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:timecountdown/Component/BottomBarItemComponent.dart';
+import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Model/CountDownData.dart';
+import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
+import 'package:timecountdown/main.dart';
+
+Widget BottomWidgetBar(BuildContext context) {
+  final widgetStateProvider =
+      Provider.of<RenderedWidgetProvider>(context, listen: false);
   final List<Map<String, dynamic>> templates = [
     {
       'icon': Icons.local_attraction_sharp,
-      'id': 'Template_1',
-      'widget': 'template1_widget', // Replace with your actual widget name
+      'id': 'template_1',
+      'label': 'Template 1', // Replace with your actual widget name
     },
     {
       'icon': Icons.local_offer,
-      'id': 'Template_2',
-      'widget': 'template2_widget', // Replace with your actual widget name
+      'id': 'template_2',
+      'label': 'Template 2', // Replace with your actual widget name
     },
     {
       'icon': Icons.favorite,
-      'id': 'Template_3',
-      'widget': 'template3_widget', // Replace with your actual widget name
+      'id': 'template_3',
+      'label': 'Template 3', // Replace with your actual widget name
     },
     {
       'icon': Icons.star,
-      'id': 'Template_4',
-      'widget': 'template4_widget', // Replace with your actual widget name
+      'id': 'template_4',
+      'label': 'Template 4', // Replace with your actual widget name
     },
     {
       'icon': Icons.home,
-      'id': 'Template_5',
-      'widget': 'template5_widget', // Replace with your actual widget name
+      'id': 'template_5',
+      'label': 'Template 5', // Replace with your actual widget name
     },
   ];
+//save all template values and countdown data to loacal and firebase
 
-  final widgetStateProvider =
-      Provider.of<RenderedWidgetProvider>(context, listen: false);
   switch (widgetStateProvider.renderedWidget) {
+    //setting dim bottom bar -------------------------------------------------items -----------
     case 'dim':
       return Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -54,13 +63,82 @@ Widget renderWidget(BuildContext context) {
               ),
               IconButton(
                   onPressed: () {
-                    widgetStateProvider.renderedWidget = "none";
+                    widgetStateProvider.renderedWidget = "settings";
                   },
                   icon: const Icon(
                     Icons.check,
                     color: Colors.white,
                   )),
             ],
+          ),
+        ],
+      );
+    //setting bottom bar -----------------------------------------------------------------------
+    // case 'background':
+
+    // // return Column(
+    // //   mainAxisAlignment: MainAxisAlignment.end,
+    // //   children: [
+    // //     Row(
+    // //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    // //       children: [
+    // //         IconButton(
+    // //             onPressed: () {},
+    // //             icon: const Icon(
+    // //               Icons.add_photo_alternate,
+    // //               color: Colors.white,
+    // //             )),
+    // //         IconButton(
+    // //             onPressed: () {
+    // //               widgetStateProvider.renderedWidget = "settings";
+    // //             },
+    // //             icon: const Icon(
+    // //               Icons.check,
+    // //               color: Colors.white,
+    // //             )),
+    // //       ],
+    // //     ),
+    // //   ],
+    // // );
+    case 'settings':
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  BottomBarItemComponent(
+                      context, Icons.light_mode_sharp, 'Dark', "dim", () {
+                    widgetStateProvider.renderedWidget = "dim";
+                  }),
+                  BottomBarItemComponent(context, Icons.add_photo_alternate,
+                      'Background', "background", () async {
+                    final pickedFile = await ImagePicker()
+                        .pickImage(source: ImageSource.gallery);
+
+                    if (pickedFile != null) {
+                      widgetStateProvider.image = pickedFile.path;
+                      print("image path: ${pickedFile.path}");
+                    }
+                  }),
+                  // Replace Container() with the desired widget for each template
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: IconButton(
+                onPressed: () {
+                  widgetStateProvider.renderedWidget = "none";
+                },
+                icon: Icon(
+                  Icons.check,
+                  color: Colors.white,
+                )),
           ),
         ],
       );
@@ -74,30 +152,14 @@ Widget renderWidget(BuildContext context) {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: templates.map((template) {
-                  return InkWell(
-                    onTap: () => {
-                      print('Template 1'),
-                      widgetStateProvider.renderedWidget = 'none',
+                  return BottomBarItemComponent(
+                    context,
+                    Icons.local_attraction_sharp,
+                    template['label'],
+                    template['id'],
+                    () {
+                      widgetStateProvider.templateId = template['id'];
                     },
-                    child: const Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Icon(
-                            Icons.local_attraction_sharp,
-                            color: Color.fromARGB(255, 184, 54, 244),
-                          ),
-                          Text(
-                            'Template 1',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ); // Replace Container() with the desired widget for each template
                 }).toList(),
               ),
@@ -121,68 +183,44 @@ Widget renderWidget(BuildContext context) {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          InkWell(
-            onTap: () => {
-              print('Template'),
-              widgetStateProvider.renderedWidget = "template",
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    Icons.local_attraction_sharp,
-                    color: const Color.fromARGB(255, 184, 54, 244),
-                  ),
-                  Text(
-                    'Template',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          BottomBarItemComponent(
+              context, Icons.local_attraction_sharp, "template", "template",
+              () {
+            widgetStateProvider.renderedWidget = "template";
+          }),
           Padding(
             padding: const EdgeInsets.only(top: 20.0, bottom: 20),
             child: SizedBox(
               width: 200,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Save'),
-              ),
-            ),
-          ),
-          InkWell(
-            onTap: () => {
-              print('dark'),
-              widgetStateProvider.renderedWidget = "dim",
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    Icons.light_mode_sharp,
-                    color: const Color.fromARGB(255, 184, 54, 244),
-                  ),
-                  Text(
-                    'Dark',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
+                onPressed: () async {
+                  widgetStateProvider.isLoading = true;
+                  CountDownData countDownData = CountDownData(
+                    countDownTempId: widgetStateProvider.templateId,
+                    countDownTitle: widgetStateProvider.countDownTitle,
+                    countDownTargetDate: widgetStateProvider.selectedDate,
+                    countDownDim: widgetStateProvider.dimCount,
+                    countDownCreatedDate: DateTime.now(),
+                    countDownImage: widgetStateProvider.image,
+                  );
+                  await saveCountDownData(countDownData);
+                  widgetStateProvider.isLoading = false;
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MyApp(),
                     ),
-                  ),
-                ],
+                  );
+                },
+                child:
+                    const Text('Save', style: TextStyle(color: Colors.black)),
               ),
             ),
           ),
+          BottomBarItemComponent(
+              context, Icons.settings, 'Settings', 'settings', () {
+            widgetStateProvider.renderedWidget = "settings";
+          }),
         ],
       );
     default:
@@ -190,31 +228,11 @@ Widget renderWidget(BuildContext context) {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          InkWell(
-            onTap: () => {
-              print('Template'),
-              widgetStateProvider.renderedWidget = "template",
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    Icons.local_attraction_sharp,
-                    color: const Color.fromARGB(255, 184, 54, 244),
-                  ),
-                  Text(
-                    'Template',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          BottomBarItemComponent(
+              context, Icons.local_attraction_sharp, "Template", "template",
+              () {
+            widgetStateProvider.renderedWidget = "template";
+          }),
           Padding(
             padding: const EdgeInsets.only(top: 20.0, bottom: 20),
             child: SizedBox(
@@ -223,36 +241,20 @@ Widget renderWidget(BuildContext context) {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text('Save'),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
           ),
-          InkWell(
-            onTap: () => {
-              print('dark'),
-              widgetStateProvider.renderedWidget = "dim",
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Icon(
-                    Icons.light_mode_sharp,
-                    color: const Color.fromARGB(255, 184, 54, 244),
-                  ),
-                  Text(
-                    'Dark',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          BottomBarItemComponent(
+              context, Icons.settings, 'Settings', 'settings', () {
+            widgetStateProvider.renderedWidget = "settings";
+          }),
         ],
       );
   }
+
+  //pick image
 }

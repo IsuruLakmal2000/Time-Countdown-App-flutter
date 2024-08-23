@@ -1,19 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template1.dart';
 import 'package:timecountdown/Model/TemplateData.dart';
 import 'package:timecountdown/Pages/AddCountdown/RenderedWidget.dart';
+import 'package:timecountdown/Pages/AddCountdown/ShowSelectedTemplate.dart';
 import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 class TemplateSelectEditPage extends StatefulWidget {
   TemplateSelectEditPage({
     super.key,
-    required this.templateData,
-    required this.templateDateTime,
   });
-  TemplateData templateData;
-  DateTime? templateDateTime;
+
   @override
   State<TemplateSelectEditPage> createState() => _TemplateSelectEditPageState();
 }
@@ -38,11 +39,7 @@ class _TemplateSelectEditPageState extends State<TemplateSelectEditPage> {
       ),
       body: Stack(
         children: [
-          Template1(
-            dimCount: widgetStateProvider.dimCount,
-            templateData: widget.templateData,
-            templateDateTime: widget.templateDateTime,
-          ),
+          ShowSelectedTemplate(context),
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -58,8 +55,19 @@ class _TemplateSelectEditPageState extends State<TemplateSelectEditPage> {
               ),
             ),
             alignment: Alignment.bottomCenter,
-            child: renderWidget(context),
+            child: BottomWidgetBar(context),
           ),
+          if (widgetStateProvider.isLoading)
+            Container(
+              color: Color.fromARGB(97, 0, 0, 0),
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                      Color.fromARGB(174, 26, 0, 0)),
+                  backgroundColor: Color.fromARGB(230, 174, 2, 218),
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/AddCountdown/NewCountDownAddBottomSheet.dart';
@@ -20,8 +21,10 @@ class HomePage extends StatelessWidget {
         backgroundColor: Colors.transparent,
         centerTitle: true,
         title: const Text(
-          'Material 3 App',
-          style: TextStyle(color: Colors.white),
+          'Time CountDown',
+          style: TextStyle(
+              color: Color.fromRGBO(255, 255, 255, 1),
+              fontWeight: FontWeight.bold),
         ),
       ),
       body: CountDownCardTemplate(),

@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "325064125380",
+    "firebase_url": "https://time-countdown--dev-default-rtdb.firebaseio.com",
+    "project_id": "time-countdown--dev",
+    "storage_bucket": "time-countdown--dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:325064125380:android:b06243c517075dd9d51291",
+        "android_client_info": {
+          "package_name": "com.example.timecountdown"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDj9_4CprCGMVmoSxFd3mzxg9xL5vYM-0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

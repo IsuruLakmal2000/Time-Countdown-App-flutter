@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_adjacent_string_concatenation, prefer_const_literals_to_create_immutables
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Model/TemplateData.dart';
@@ -10,15 +11,17 @@ class Template1 extends StatefulWidget {
   Template1({
     super.key,
     // required this.index,
-    required this.templateData,
+    required this.countDownTitle,
     required this.templateDateTime,
     required this.dimCount,
+    required this.image,
   });
 
-  TemplateData templateData;
+  String countDownTitle;
 //  int index = 0;
   DateTime? templateDateTime;
   double dimCount = 8;
+  String image;
 
   @override
   State<Template1> createState() => _Template1State();
@@ -37,7 +40,7 @@ class _Template1State extends State<Template1> {
     super.initState();
 
     timer = Timer.periodic(
-      Duration(seconds: 1),
+      Duration(milliseconds: 200),
       (_) => setState(() {
         if (widget.templateDateTime == null) {
           return;
@@ -83,15 +86,18 @@ class _Template1State extends State<Template1> {
               Color.fromARGB(255, 13, 14, 14),
             ],
           ),
-          image: DecorationImage(
-            image: NetworkImage(
-                "https://images.unsplash.com/photo-1723653263152-f20aae931b99?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(widget.dimCount),
-                BlendMode
-                    .multiply), // here can use the double value for edition purpose
-          ),
+          image: widget.image != ''
+              ? DecorationImage(
+                  // image: NetworkImage(
+                  //     "https://images.unsplash.com/photo-1723653263152-f20aae931b99?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
+                  image: FileImage(File(widget.image)),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(widget.dimCount),
+                      BlendMode
+                          .multiply), // here can use the double value for edition purpose
+                )
+              : null,
         ),
         // Sample content for each page
         child: Center(
@@ -100,11 +106,11 @@ class _Template1State extends State<Template1> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              widget.templateData.title,
+              widget.countDownTitle,
               style: const TextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.normal,
-                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontSize: 30,
               ),
             ),
             SizedBox(

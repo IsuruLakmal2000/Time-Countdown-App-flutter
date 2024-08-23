@@ -1,11 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/ButtonComponent.dart';
 import 'package:timecountdown/Component/TextFieldComponent.dart';
 import 'package:timecountdown/Model/TemplateData.dart';
 import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/TemplateSelectEditPage.dart';
+import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 class NewcountdownAddBottomSheet extends StatefulWidget {
   NewcountdownAddBottomSheet({super.key});
@@ -23,6 +25,9 @@ class _NewcountdownAddBottomSheetState
 
   @override
   Widget build(BuildContext context) {
+    final widgetStateProvider =
+        Provider.of<RenderedWidgetProvider>(context, listen: false);
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -119,7 +124,7 @@ class _NewcountdownAddBottomSheetState
           Buttoncomponent(
             onPressed: () {
               //set date and time as one
-              DateTime _selectedDateTime = DateTime(
+              widgetStateProvider.selectedDate = DateTime(
                 _selectedDate!.year,
                 _selectedDate!.month,
                 _selectedDate!.day,
@@ -127,20 +132,18 @@ class _NewcountdownAddBottomSheetState
                 _selectedTime!.minute,
               );
 
-              TemplateData templateData = TemplateData(
-                templateId: 'template_1',
-                title: _textFieldValue,
-                createdDate: DateTime.now(),
-              );
-
-              print("--------" + _selectedDateTime.toString());
+              // TemplateData templateData = TemplateData(
+              //   templateId: 'template_1',
+              //   title: _textFieldValue,
+              //   createdDate: DateTime.now(),
+              // );
+              widgetStateProvider.countDownTitle = _textFieldValue;
+              print("--------" + widgetStateProvider.selectedDate.toString());
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TemplateSelectEditPage(
-                    templateData: templateData,
-                    templateDateTime: _selectedDateTime,
-                  ), // Replace with your new page
+                  builder: (context) =>
+                      TemplateSelectEditPage(), // Replace with your new page
                 ),
               );
             },

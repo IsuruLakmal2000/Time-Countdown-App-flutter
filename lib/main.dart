@@ -1,10 +1,15 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Pages/HomePage.dart';
+import 'package:timecountdown/Pages/SignInPage.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
-import 'package:timecountdown/Theme/Theme.dart';
-import 'package:provider/provider.dart';
 
-void main() {
+import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(ChangeNotifierProvider(
     child: MyApp(),
     create: (context) => RenderedWidgetProvider(),
@@ -26,7 +31,20 @@ class MyApp extends StatelessWidget {
       ),
       // theme: lightMode,
       //   darkTheme: darkMode,
-      home: HomePage(),
+      //  home: HomePage(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            // User is signed in
+
+            return HomePage();
+          } else {
+            // User is not signed in
+            return SignInPage();
+          }
+        },
+      ),
     );
   }
 }
