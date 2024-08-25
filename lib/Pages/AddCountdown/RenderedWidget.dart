@@ -2,16 +2,21 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/BottomBarItemComponent.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/main.dart';
+//import 'package:firebase_storage/firebase_storage.dart';
 
 Widget BottomWidgetBar(BuildContext context) {
   final widgetStateProvider =
       Provider.of<RenderedWidgetProvider>(context, listen: false);
+
+  String firebaseBackgroundImage = '';
   final List<Map<String, dynamic>> templates = [
     {
       'icon': Icons.local_attraction_sharp,
@@ -40,6 +45,27 @@ Widget BottomWidgetBar(BuildContext context) {
     },
   ];
 //save all template values and countdown data to loacal and firebase
+
+  Future<void> SaveImageOnLocalAndFirebase() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+//save to specific path on local
+    if (pickedFile != null) {
+      String fileName =
+          DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
+      final directory = await getApplicationDocumentsDirectory();
+      // Create a new file in the documents directory
+      final File newImage = File('${directory.path}/$fileName');
+      widgetStateProvider.isLoading = true;
+      await File(pickedFile.path).copy(newImage.path);
+      //save img on firebase
+      firebaseBackgroundImage = await SaveImgOnFirebase(pickedFile);
+      widgetStateProvider.isLoading = false;
+      widgetStateProvider.image = pickedFile.path;
+      print("image path: ${pickedFile.path}");
+    }
+    //save to firebase
+  }
 
   switch (widgetStateProvider.renderedWidget) {
     //setting dim bottom bar -------------------------------------------------items -----------
@@ -116,13 +142,7 @@ Widget BottomWidgetBar(BuildContext context) {
                   }),
                   BottomBarItemComponent(context, Icons.add_photo_alternate,
                       'Background', "background", () async {
-                    final pickedFile = await ImagePicker()
-                        .pickImage(source: ImageSource.gallery);
-
-                    if (pickedFile != null) {
-                      widgetStateProvider.image = pickedFile.path;
-                      print("image path: ${pickedFile.path}");
-                    }
+                    SaveImageOnLocalAndFirebase();
                   }),
                   // Replace Container() with the desired widget for each template
                 ],
@@ -202,6 +222,7 @@ Widget BottomWidgetBar(BuildContext context) {
                     countDownDim: widgetStateProvider.dimCount,
                     countDownCreatedDate: DateTime.now(),
                     countDownImage: widgetStateProvider.image,
+                    countdownBackgroundImageUrl: firebaseBackgroundImage,
                   );
                   await saveCountDownData(countDownData);
                   widgetStateProvider.isLoading = false;
