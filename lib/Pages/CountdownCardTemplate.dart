@@ -10,6 +10,7 @@ import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Model/TemplateData.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
+import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 
 // ignore: must_be_immutable
 class CountDownCardTemplate extends StatefulWidget {
@@ -25,6 +26,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
   DateTime? userDateTime;
   List<CountDownData> countdowns = [];
   bool isLoading = false;
+  PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -51,6 +53,9 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
   Widget build(BuildContext context) {
     final widgetStateProvider =
         Provider.of<RenderedWidgetProvider>(context, listen: false);
+
+    final editCountDownProvider =
+        Provider.of<Editcountdownprovider>(context, listen: false);
     if (isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -65,7 +70,14 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
             templateDateTime: DateTime.now(),
           )
         : PageView.builder(
+            controller: _pageController,
             itemCount: countdowns.length,
+            onPageChanged: (index) {
+              setState(() {
+                editCountDownProvider.currentPage =
+                    index; // Update the current index
+              });
+            },
             itemBuilder: (context, index) {
               final data = countdowns[index];
               switch (data.countDownTempId) {

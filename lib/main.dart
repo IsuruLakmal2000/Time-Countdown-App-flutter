@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Pages/HomePage.dart';
 import 'package:timecountdown/Pages/SignInPage.dart';
+import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 import 'package:provider/provider.dart';
@@ -10,10 +11,12 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(ChangeNotifierProvider(
-    child: MyApp(),
-    create: (context) => RenderedWidgetProvider(),
-  ));
+  runApp(
+    MultiProvider(providers: [
+      ChangeNotifierProvider(create: (context) => RenderedWidgetProvider()),
+      ChangeNotifierProvider(create: (context) => Editcountdownprovider()),
+    ], child: MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {

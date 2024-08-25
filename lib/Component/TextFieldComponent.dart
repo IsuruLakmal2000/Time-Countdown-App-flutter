@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 class Textfieldcomponent extends StatefulWidget {
   final int maxLength;
+  final String? initialValue;
   final String hintText;
   final ValueChanged<String> onTextChanged;
 
   const Textfieldcomponent({
     Key? key,
+    required this.initialValue,
     required this.maxLength,
     required this.hintText,
     required this.onTextChanged,

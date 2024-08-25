@@ -10,18 +10,23 @@ import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/TemplateSelectEditPage.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
-class NewcountdownAddBottomSheet extends StatefulWidget {
-  NewcountdownAddBottomSheet({
+class EditCountDownBottomSheet extends StatefulWidget {
+  EditCountDownBottomSheet({
+    required this.initialTitle,
+    required this.initialDate,
+    required this.initialTime,
     super.key,
   });
+  final String initialTitle;
+  final DateTime? initialDate;
+  final TimeOfDay? initialTime;
 
   @override
-  State<NewcountdownAddBottomSheet> createState() =>
-      _NewcountdownAddBottomSheetState();
+  State<EditCountDownBottomSheet> createState() =>
+      _EditCountDownBottomSheetState();
 }
 
-class _NewcountdownAddBottomSheetState
-    extends State<NewcountdownAddBottomSheet> {
+class _EditCountDownBottomSheetState extends State<EditCountDownBottomSheet> {
   String _textFieldValue = '';
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime = const TimeOfDay(hour: 0, minute: 0);
@@ -30,6 +35,16 @@ class _NewcountdownAddBottomSheetState
   Widget build(BuildContext context) {
     final widgetStateProvider =
         Provider.of<RenderedWidgetProvider>(context, listen: false);
+
+    @override
+    void initState() {
+      super.initState();
+      // setState(() {
+      //   _textFieldValue = widget.initialTitle; // Set the initial title
+      //   _selectedDate = widget.initialDate; // Set the initial date
+      //   _selectedTime = widget.initialTime;
+      // }); // Set the initial time
+    }
 
     void _SaveDateTimeTitle() {
       if (_textFieldValue.isEmpty) {
@@ -102,7 +117,7 @@ class _NewcountdownAddBottomSheetState
             height: 20,
           ),
           Textfieldcomponent(
-            initialValue: null,
+            initialValue: widget.initialTitle,
             hintText: "Enter Title",
             maxLength: 20,
             onTextChanged: (Text) {

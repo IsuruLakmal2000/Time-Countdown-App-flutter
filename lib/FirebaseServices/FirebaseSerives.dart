@@ -119,8 +119,6 @@ Future<List<CountDownData>> getCountdowns() async {
     countdownMap.forEach((key, value) {
       // Directly create CountDownData instance without fromMap
       countdowns.add(CountDownData(
-        countdownBackgroundImageUrl:
-            value['countdownBackgroundImageUrl'] as String,
         countDownImage: value['countDownImage'] as String,
         countDownTempId: value['countDownTempId'] as String,
         countDownTitle: value['countDownTitle'] as String,
@@ -138,6 +136,7 @@ Future<List<CountDownData>> getCountdowns() async {
 
 Future<String> SaveImgOnFirebase(final pickedFile) async {
   String uid = _auth.currentUser!.uid;
+  print('call save img');
   try {
     if (pickedFile != null) {
       // Create a reference to the Firebase Storage
@@ -148,12 +147,13 @@ Future<String> SaveImgOnFirebase(final pickedFile) async {
 
       // Upload the image to Firebase Storage
       UploadTask uploadTask = storageReference.putFile(File(pickedFile.path));
-
+      print('uploading');
       // Wait for the upload to complete
       TaskSnapshot snapshot = await uploadTask;
 
       // Get the download URL
       String downloadUrl = await snapshot.ref.getDownloadURL();
+      print(downloadUrl);
       return downloadUrl;
     } else {
       return 'picked file not valid';

@@ -16,7 +16,6 @@ Widget BottomWidgetBar(BuildContext context) {
   final widgetStateProvider =
       Provider.of<RenderedWidgetProvider>(context, listen: false);
 
-  String firebaseBackgroundImage = '';
   final List<Map<String, dynamic>> templates = [
     {
       'icon': Icons.local_attraction_sharp,
@@ -47,6 +46,7 @@ Widget BottomWidgetBar(BuildContext context) {
 //save all template values and countdown data to loacal and firebase
 
   Future<void> SaveImageOnLocalAndFirebase() async {
+    widgetStateProvider.isLoading = true;
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
 //save to specific path on local
@@ -58,10 +58,10 @@ Widget BottomWidgetBar(BuildContext context) {
       final File newImage = File('${directory.path}/$fileName');
       widgetStateProvider.isLoading = true;
       await File(pickedFile.path).copy(newImage.path);
-      //save img on firebase
-      firebaseBackgroundImage = await SaveImgOnFirebase(pickedFile);
+
+      widgetStateProvider.image = newImage.path;
       widgetStateProvider.isLoading = false;
-      widgetStateProvider.image = pickedFile.path;
+
       print("image path: ${pickedFile.path}");
     }
     //save to firebase
@@ -222,7 +222,6 @@ Widget BottomWidgetBar(BuildContext context) {
                     countDownDim: widgetStateProvider.dimCount,
                     countDownCreatedDate: DateTime.now(),
                     countDownImage: widgetStateProvider.image,
-                    countdownBackgroundImageUrl: firebaseBackgroundImage,
                   );
                   await saveCountDownData(countDownData);
                   widgetStateProvider.isLoading = false;

@@ -6,7 +6,6 @@ class CountDownData {
   final double countDownDim;
   final DateTime countDownCreatedDate;
   final String countDownImage;
-  final String countdownBackgroundImageUrl;
 
   CountDownData({
     // required this.countDownId,
@@ -16,6 +15,5 @@ class CountDownData {
     required this.countDownDim,
     required this.countDownCreatedDate,
     required this.countDownImage,
-    required this.countdownBackgroundImageUrl,
   });
 }
