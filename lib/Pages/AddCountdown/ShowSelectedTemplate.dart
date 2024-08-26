@@ -16,6 +16,7 @@ Widget ShowSelectedTemplate(
   switch (widgetStateProvider.templateId) {
     case 'template_1':
       return Template1(
+        createdDate: widgetStateProvider.countDownCreatedDate,
         image: widgetStateProvider.image,
         dimCount: widgetStateProvider.dimCount,
         countDownTitle: widgetStateProvider.countDownTitle,
@@ -23,6 +24,7 @@ Widget ShowSelectedTemplate(
       );
     case "template_2":
       return Template2(
+        createdDate: widgetStateProvider.countDownCreatedDate,
         image: widgetStateProvider.image,
         dimCount: widgetStateProvider.dimCount,
         countDownTitle: widgetStateProvider.countDownTitle,
@@ -31,6 +33,7 @@ Widget ShowSelectedTemplate(
 
     case "template_3":
       return Template3(
+        createdDate: widgetStateProvider.countDownCreatedDate,
         image: widgetStateProvider.image,
         dimCount: widgetStateProvider.dimCount,
         countDownTitle: widgetStateProvider.countDownTitle,
@@ -46,6 +49,7 @@ Widget ShowSelectedTemplate(
 
     default:
       return Template1(
+        createdDate: widgetStateProvider.countDownCreatedDate,
         image: widgetStateProvider.image,
         dimCount: widgetStateProvider.dimCount,
         countDownTitle: widgetStateProvider.countDownTitle,

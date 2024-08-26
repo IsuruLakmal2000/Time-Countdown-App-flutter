@@ -70,6 +70,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
     return countdowns.isEmpty
         ? Template1(
             //  index: index,.
+            createdDate: DateTime.now(),
             image: '',
             dimCount: 0.8,
             countDownTitle: 'No countdowns available',
@@ -104,6 +105,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
                 case 'template_1':
                   return Template1(
                     //  index: index,.
+                    createdDate: data.countDownCreatedDate,
                     image: data.countDownImage,
                     dimCount: data.countDownDim,
                     countDownTitle: data.countDownTitle,
@@ -111,6 +113,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
                   );
                 case 'template_2':
                   return Template2(
+                    createdDate: data.countDownCreatedDate,
                     image: data.countDownImage,
                     dimCount: data.countDownDim,
                     countDownTitle: data.countDownTitle,
@@ -118,6 +121,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
                   );
                 case 'template_3':
                   return Template3(
+                    createdDate: data.countDownCreatedDate,
                     image: data.countDownImage,
                     dimCount: data.countDownDim,
                     countDownTitle: data.countDownTitle,

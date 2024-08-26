@@ -10,6 +10,7 @@ class RenderedWidgetProvider extends ChangeNotifier {
   String _countDownTitle = "Template 1";
   String _image = '';
   DateTime _selectedDate = DateTime.now();
+  DateTime _createdDate = DateTime.now();
   bool _isLoading = false;
 
   String get renderedWidget => _renderedWidget;
@@ -20,6 +21,7 @@ class RenderedWidgetProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String get image => _image;
   String get countDownId => _countDownID;
+  DateTime get countDownCreatedDate => _createdDate;
 
   set renderedWidget(String value) {
     _renderedWidget = value;
@@ -58,6 +60,11 @@ class RenderedWidgetProvider extends ChangeNotifier {
 
   set countDownId(String value) {
     _countDownID = value;
+    notifyListeners(); // Notify listeners (widgets) of state change
+  }
+
+  set countDownCreatedDate(DateTime value) {
+    _createdDate = value;
     notifyListeners(); // Notify listeners (widgets) of state change
   }
 }

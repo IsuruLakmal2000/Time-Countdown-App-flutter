@@ -25,6 +25,13 @@ class _NewcountdownAddBottomSheetState
   String _textFieldValue = '';
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime = const TimeOfDay(hour: 0, minute: 0);
+  final FocusNode _textFieldFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _textFieldFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,15 +107,21 @@ class _NewcountdownAddBottomSheetState
           const SizedBox(
             height: 20,
           ),
-          Textfieldcomponent(
-            initialValue: null,
-            hintText: "Enter Title",
-            maxLength: 20,
-            onTextChanged: (Text) {
-              setState(() {
-                _textFieldValue = Text;
-              });
+          GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
             },
+            child: Textfieldcomponent(
+              focusNode: _textFieldFocusNode,
+              initialValue: null,
+              hintText: "Enter Title",
+              maxLength: 30,
+              onTextChanged: (Text) {
+                setState(() {
+                  _textFieldValue = Text;
+                });
+              },
+            ),
           ),
           SizedBox(
             height: 20,
@@ -188,19 +201,25 @@ class _NewcountdownAddBottomSheetState
     );
   }
 
-  //show datepicker
   void _presentDatePicker() {
+    FocusScope.of(context).requestFocus(FocusNode());
     showDatePicker(
       context: context,
-      initialDate: DateTime.now(), // Set initial date to today
-      firstDate: DateTime(2000), // Set minimum selectable date
+      initialDate: _selectedDate ?? DateTime.now(), // Set initial date to today
+      firstDate: DateTime.now(), // Set minimum selectable date to today
       lastDate: DateTime(2300), // Set maximum selectable date
     ).then((pickedDate) {
       // Check if a date was selected
       if (pickedDate == null) return;
 
+      // If the picked date is today, check if the selected time has already passed
+      if (pickedDate.isAtSameMomentAs(DateTime.now())) {
+        // If the picked date is today, we will check the time later when the time is picked
+        // Allow the selection of today's date
+      }
+
       setState(() {
-        _selectedDate = pickedDate;
+        _selectedDate = pickedDate; // Update the selected date
       });
     });
   }
@@ -208,15 +227,42 @@ class _NewcountdownAddBottomSheetState
   //show timepicker
 
   void _presentTimePicker() {
+    FocusScope.of(context).requestFocus(FocusNode());
+
+    TimeOfDay initialTime;
+    if (_selectedDate != null &&
+        _selectedDate!.day == DateTime.now().day &&
+        _selectedDate!.month == DateTime.now().month &&
+        _selectedDate!.year == DateTime.now().year) {
+      // If the selected date is today, set the initial time to the current time
+      initialTime = TimeOfDay.now();
+    } else {
+      // If the selected date is not today, use the previously selected time or midnight
+      initialTime = _selectedTime ?? const TimeOfDay(hour: 0, minute: 0);
+    }
+
     showTimePicker(
       context: context,
-      initialTime: _selectedTime ??
-          const TimeOfDay(hour: 0, minute: 0), // Use current value or midnight
+      initialTime: initialTime,
     ).then((pickedTime) {
       if (pickedTime == null) return;
 
+      // If the picked date is today, check if the time has already passed
+      if (_selectedDate != null &&
+          _selectedDate!.day == DateTime.now().day &&
+          _selectedDate!.month == DateTime.now().month &&
+          _selectedDate!.year == DateTime.now().year) {
+        if (pickedTime.hour < TimeOfDay.now().hour ||
+            (pickedTime.hour == TimeOfDay.now().hour &&
+                pickedTime.minute <= TimeOfDay.now().minute)) {
+          // Time has already passed, show an error message or handle it as per your requirement
+          print('Cannot select a time that has already passed today.');
+          return;
+        }
+      }
+
       setState(() {
-        _selectedTime = pickedTime;
+        _selectedTime = pickedTime; // Update the selected time
       });
     });
   }

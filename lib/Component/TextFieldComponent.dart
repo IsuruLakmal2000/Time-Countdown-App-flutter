@@ -5,6 +5,7 @@ class Textfieldcomponent extends StatefulWidget {
   final String? initialValue;
   final String hintText;
   final ValueChanged<String> onTextChanged;
+  final FocusNode focusNode;
 
   const Textfieldcomponent({
     Key? key,
@@ -12,6 +13,7 @@ class Textfieldcomponent extends StatefulWidget {
     required this.maxLength,
     required this.hintText,
     required this.onTextChanged,
+    required this.focusNode,
   }) : super(key: key);
 
   @override
@@ -42,6 +44,7 @@ class _TextfieldcomponentState extends State<Textfieldcomponent> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      focusNode: widget.focusNode,
       controller: _controller,
       style: const TextStyle(
         color: Colors.white,
