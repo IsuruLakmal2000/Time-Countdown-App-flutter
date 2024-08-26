@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/BottomBarItemComponent.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
+import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/main.dart';
 //import 'package:firebase_storage/firebase_storage.dart';
@@ -15,7 +16,8 @@ import 'package:timecountdown/main.dart';
 Widget BottomWidgetBar(BuildContext context) {
   final widgetStateProvider =
       Provider.of<RenderedWidgetProvider>(context, listen: false);
-
+  final editCountDownProvider =
+      Provider.of<Editcountdownprovider>(context, listen: false);
   final List<Map<String, dynamic>> templates = [
     {
       'icon': Icons.local_attraction_sharp,
@@ -49,7 +51,7 @@ Widget BottomWidgetBar(BuildContext context) {
     widgetStateProvider.isLoading = true;
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
-//save to specific path on local
+
     if (pickedFile != null) {
       String fileName =
           DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
@@ -99,33 +101,7 @@ Widget BottomWidgetBar(BuildContext context) {
           ),
         ],
       );
-    //setting bottom bar -----------------------------------------------------------------------
-    // case 'background':
 
-    // // return Column(
-    // //   mainAxisAlignment: MainAxisAlignment.end,
-    // //   children: [
-    // //     Row(
-    // //       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    // //       children: [
-    // //         IconButton(
-    // //             onPressed: () {},
-    // //             icon: const Icon(
-    // //               Icons.add_photo_alternate,
-    // //               color: Colors.white,
-    // //             )),
-    // //         IconButton(
-    // //             onPressed: () {
-    // //               widgetStateProvider.renderedWidget = "settings";
-    // //             },
-    // //             icon: const Icon(
-    // //               Icons.check,
-    // //               color: Colors.white,
-    // //             )),
-    // //       ],
-    // //     ),
-    // //   ],
-    // // );
     case 'settings':
       return Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -216,6 +192,7 @@ Widget BottomWidgetBar(BuildContext context) {
                 onPressed: () async {
                   widgetStateProvider.isLoading = true;
                   CountDownData countDownData = CountDownData(
+                    countDownId: widgetStateProvider.countDownId,
                     countDownTempId: widgetStateProvider.templateId,
                     countDownTitle: widgetStateProvider.countDownTitle,
                     countDownTargetDate: widgetStateProvider.selectedDate,
@@ -223,7 +200,12 @@ Widget BottomWidgetBar(BuildContext context) {
                     countDownCreatedDate: DateTime.now(),
                     countDownImage: widgetStateProvider.image,
                   );
-                  await saveCountDownData(countDownData);
+                  if (editCountDownProvider.isEditCountDown) {
+                    await updateCountDownData(countDownData);
+                  } else {
+                    await saveCountDownData(countDownData);
+                  }
+
                   widgetStateProvider.isLoading = false;
                   Navigator.pushReplacement(
                     context,

@@ -19,16 +19,15 @@ class Textfieldcomponent extends StatefulWidget {
 }
 
 class _TextfieldcomponentState extends State<Textfieldcomponent> {
-  final TextEditingController _controller = TextEditingController();
-  // int _remainingChars = 0;
+  //final TextEditingController _controller = TextEditingController();
+  late TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    //_remainingChars = widget.maxLength;
+    _controller = TextEditingController(text: widget.initialValue);
     _controller.addListener(() {
       setState(() {
-        // _remainingChars = widget.maxLength - _controller.text.length;
         widget.onTextChanged(_controller.text);
       });
     });

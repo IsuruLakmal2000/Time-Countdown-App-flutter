@@ -62,9 +62,6 @@ Future<UserCredential?> signInWithGoogle() async {
 //save countdown data
 Future<void> saveCountDownData(CountDownData countDownData) async {
   try {
-    // Generate a unique ID for the countdown (if needed)
-
-    // Create a map of the CountDownData object
     Map<String, dynamic> data = {
       'countDownTempId': countDownData.countDownTempId,
       'countDownTitle': countDownData.countDownTitle,
@@ -90,16 +87,41 @@ Future<void> saveCountDownData(CountDownData countDownData) async {
         .child(countdownKey)
         .set(data);
 
-    // Save the data to the Firebase Realtime Database
-    // if (_auth.currentUser?.uid != null) {
-    //   await database
-    //       .ref()
-    //       .child('countdowns')
-    //       .child(_auth.currentUser!.uid)
-    //       .set(data);
-    // }
-
     print('CountDownData saved successfully!');
+  } catch (e) {
+    print('Error saving CountDownData: ${e.toString()}');
+  }
+}
+
+Future<void> updateCountDownData(CountDownData countDownData) async {
+  try {
+    // Reference to the user's countdowns
+    DatabaseReference countdownRef =
+        database.ref().child('countdowns').child(_auth.currentUser!.uid);
+
+    // Check if the countdown ID already exists
+    // We assume countDownId is the unique identifier for the countdown
+    print("current countdown id -" + countDownData.countDownId);
+    DataSnapshot existingCountdownSnapshot =
+        await countdownRef.child(countDownData.countDownId).get();
+
+    // Create a map of the CountDownData object
+    Map<String, dynamic> data = {
+      'countDownTempId': countDownData.countDownTempId,
+      'countDownTitle': countDownData.countDownTitle,
+      'countDownTargetDate': countDownData
+          .countDownTargetDate.millisecondsSinceEpoch, // Store as timestamp
+      'countDownDim': countDownData.countDownDim,
+      'countDownCreatedDate':
+          countDownData.countDownCreatedDate.millisecondsSinceEpoch,
+      'countDownImage': countDownData.countDownImage,
+    };
+
+    if (existingCountdownSnapshot.exists) {
+      // Update existing countdown data
+      await countdownRef.child(countDownData.countDownId).update(data);
+      print('CountDownData updated successfully!');
+    }
   } catch (e) {
     print('Error saving CountDownData: ${e.toString()}');
   }
@@ -119,6 +141,7 @@ Future<List<CountDownData>> getCountdowns() async {
     countdownMap.forEach((key, value) {
       // Directly create CountDownData instance without fromMap
       countdowns.add(CountDownData(
+        countDownId: key as String,
         countDownImage: value['countDownImage'] as String,
         countDownTempId: value['countDownTempId'] as String,
         countDownTitle: value['countDownTitle'] as String,
@@ -134,34 +157,34 @@ Future<List<CountDownData>> getCountdowns() async {
   return countdowns;
 }
 
-Future<String> SaveImgOnFirebase(final pickedFile) async {
-  String uid = _auth.currentUser!.uid;
-  print('call save img');
-  try {
-    if (pickedFile != null) {
-      // Create a reference to the Firebase Storage
-      String fileName =
-          DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
-      Reference storageReference =
-          FirebaseStorage.instance.ref().child('CountdownImgs/$fileName');
+// Future<String> SaveImgOnFirebase(final pickedFile) async {
+//   String uid = _auth.currentUser!.uid;
+//   print('call save img');
+//   try {
+//     if (pickedFile != null) {
+//       // Create a reference to the Firebase Storage
+//       String fileName =
+//           DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
+//       Reference storageReference =
+//           FirebaseStorage.instance.ref().child('CountdownImgs/$fileName');
 
-      // Upload the image to Firebase Storage
-      UploadTask uploadTask = storageReference.putFile(File(pickedFile.path));
-      print('uploading');
-      // Wait for the upload to complete
-      TaskSnapshot snapshot = await uploadTask;
+//       // Upload the image to Firebase Storage
+//       UploadTask uploadTask = storageReference.putFile(File(pickedFile.path));
+//       print('uploading');
+//       // Wait for the upload to complete
+//       TaskSnapshot snapshot = await uploadTask;
 
-      // Get the download URL
-      String downloadUrl = await snapshot.ref.getDownloadURL();
-      print(downloadUrl);
-      return downloadUrl;
-    } else {
-      return 'picked file not valid';
-    }
-  } catch (e) {
-    return e.toString();
-  }
-}
+//       // Get the download URL
+//       String downloadUrl = await snapshot.ref.getDownloadURL();
+//       print(downloadUrl);
+//       return downloadUrl;
+//     } else {
+//       return 'picked file not valid';
+//     }
+//   } catch (e) {
+//     return e.toString();
+//   }
+// }
 
 // (Optional) Check if user is already signed in
 Stream<User?> authStateChanges() => _auth.authStateChanges();

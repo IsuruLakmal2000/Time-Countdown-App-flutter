@@ -8,11 +8,9 @@ import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template3.d
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template4.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
-import 'package:timecountdown/Model/TemplateData.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 
-// ignore: must_be_immutable
 class CountDownCardTemplate extends StatefulWidget {
   const CountDownCardTemplate({
     super.key,
@@ -31,7 +29,6 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
   @override
   void initState() {
     super.initState();
-    // Fetch countdowns when the widget is initialized
     fetchCountdowns();
   }
 
@@ -40,20 +37,29 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
       isLoading = true;
     });
     countdowns = await getCountdowns();
+    if (countdowns.isNotEmpty) {
+      final editCountDownProvider =
+          Provider.of<Editcountdownprovider>(context, listen: false);
+
+      editCountDownProvider.currentPage = 0; // Set initial page
+      editCountDownProvider.currentTitle = countdowns[0].countDownTitle;
+      editCountDownProvider.currentDate = countdowns[0].countDownTargetDate;
+      editCountDownProvider.currentImage = countdowns[0].countDownImage;
+      editCountDownProvider.currentDim = countdowns[0].countDownDim;
+      editCountDownProvider.currentCountDownId = countdowns[0].countDownId;
+      editCountDownProvider.currentCountDownTempId =
+          countdowns[0].countDownTempId;
+    }
 
     setState(() {
       isLoading = false;
     });
-    // Use the countdowns list to update your UI or perform other operations
   }
 
-//select date with picker--------------------------------------------
+  void setVlaues(int index) {}
 
   @override
   Widget build(BuildContext context) {
-    final widgetStateProvider =
-        Provider.of<RenderedWidgetProvider>(context, listen: false);
-
     final editCountDownProvider =
         Provider.of<Editcountdownprovider>(context, listen: false);
     if (isLoading) {
@@ -73,13 +79,27 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
             controller: _pageController,
             itemCount: countdowns.length,
             onPageChanged: (index) {
-              setState(() {
-                editCountDownProvider.currentPage =
-                    index; // Update the current index
-              });
+              setState(
+                () {
+                  editCountDownProvider.currentPage = index;
+                  editCountDownProvider.currentTitle =
+                      countdowns[index].countDownTitle;
+                  editCountDownProvider.currentDate =
+                      countdowns[index].countDownTargetDate;
+                  editCountDownProvider.currentImage =
+                      countdowns[index].countDownImage;
+                  editCountDownProvider.currentDim =
+                      countdowns[index].countDownDim;
+                  editCountDownProvider.currentCountDownId =
+                      countdowns[index].countDownId;
+                  editCountDownProvider.currentCountDownTempId =
+                      countdowns[index].countDownTempId;
+                },
+              );
             },
             itemBuilder: (context, index) {
               final data = countdowns[index];
+
               switch (data.countDownTempId) {
                 case 'template_1':
                   return Template1(
@@ -91,7 +111,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
                   );
                 case 'template_2':
                   return Template2(
-                    image: data.countDownImage?.toString() ?? '',
+                    image: data.countDownImage,
                     dimCount: data.countDownDim,
                     countDownTitle: data.countDownTitle,
                     templateDateTime: data.countDownTargetDate,

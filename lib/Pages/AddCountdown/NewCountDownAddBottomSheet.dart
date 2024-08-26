@@ -47,8 +47,7 @@ class _NewcountdownAddBottomSheetState
             );
           },
         );
-      }
-      if (_selectedDate == null) {
+      } else if (_selectedDate == null) {
         print('Please select a date');
         showDialog(
           context: context,

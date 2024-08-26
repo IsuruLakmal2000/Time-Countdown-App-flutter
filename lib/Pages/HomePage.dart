@@ -14,10 +14,6 @@ class HomePage extends StatelessWidget {
     final editCountDownProvider =
         Provider.of<Editcountdownprovider>(context, listen: false);
 
-    void _countDownEdit() {
-      print('Edit----' + editCountDownProvider.currentPage.toString());
-    }
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       floatingActionButton: FloatingActionButton(
@@ -40,7 +36,6 @@ class HomePage extends StatelessWidget {
           IconButton(
             color: Colors.white,
             onPressed: () {
-              // _countDownEdit();
               showEditCountdownBottomSheet(context);
             },
             icon: const Icon(Icons.edit),
@@ -52,6 +47,10 @@ class HomePage extends StatelessWidget {
   }
 
   void showNewcountdownAddpage(BuildContext context) {
+    final editCountDownProvider =
+        Provider.of<Editcountdownprovider>(context, listen: false);
+    editCountDownProvider.isEditCountDown = false;
+
     showModalBottomSheet(
       backgroundColor: Color.fromARGB(255, 0, 0, 0),
       context: context,
@@ -62,14 +61,17 @@ class HomePage extends StatelessWidget {
   }
 
   void showEditCountdownBottomSheet(BuildContext context) {
+    final editCountDownProvider =
+        Provider.of<Editcountdownprovider>(context, listen: false);
+    editCountDownProvider.isEditCountDown = true;
+
     showModalBottomSheet(
       backgroundColor: Color.fromARGB(255, 0, 0, 0),
       context: context,
       builder: (BuildContext context) {
         return EditCountDownBottomSheet(
-          initialTitle: 'Initial Title',
-          initialDate: DateTime.now(),
-          initialTime: TimeOfDay.now(),
+          initialTitle: editCountDownProvider.currentTitle,
+          initialDate: editCountDownProvider.currentDate,
         );
       },
     );

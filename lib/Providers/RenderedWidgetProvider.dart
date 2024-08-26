@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 class RenderedWidgetProvider extends ChangeNotifier {
+  String _countDownID = '';
   String _renderedWidget = "none";
   double _dimCount = 0.5;
   String _templateId = "template_1";
@@ -18,6 +19,7 @@ class RenderedWidgetProvider extends ChangeNotifier {
   String get countDownTitle => _countDownTitle;
   bool get isLoading => _isLoading;
   String get image => _image;
+  String get countDownId => _countDownID;
 
   set renderedWidget(String value) {
     _renderedWidget = value;
@@ -51,6 +53,11 @@ class RenderedWidgetProvider extends ChangeNotifier {
 
   set image(String value) {
     _image = value;
+    notifyListeners(); // Notify listeners (widgets) of state change
+  }
+
+  set countDownId(String value) {
+    _countDownID = value;
     notifyListeners(); // Notify listeners (widgets) of state change
   }
 }

@@ -1,13 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template1.dart';
-import 'package:timecountdown/Model/TemplateData.dart';
 import 'package:timecountdown/Pages/AddCountdown/RenderedWidget.dart';
 import 'package:timecountdown/Pages/AddCountdown/ShowSelectedTemplate.dart';
-import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 class TemplateSelectEditPage extends StatefulWidget {

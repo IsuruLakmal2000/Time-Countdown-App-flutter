@@ -5,21 +5,18 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/AlertPopupComponent.dart';
 import 'package:timecountdown/Component/ButtonComponent.dart';
 import 'package:timecountdown/Component/TextFieldComponent.dart';
-import 'package:timecountdown/Model/TemplateData.dart';
-import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/TemplateSelectEditPage.dart';
+import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 class EditCountDownBottomSheet extends StatefulWidget {
   EditCountDownBottomSheet({
     required this.initialTitle,
     required this.initialDate,
-    required this.initialTime,
     super.key,
   });
   final String initialTitle;
   final DateTime? initialDate;
-  final TimeOfDay? initialTime;
 
   @override
   State<EditCountDownBottomSheet> createState() =>
@@ -28,23 +25,27 @@ class EditCountDownBottomSheet extends StatefulWidget {
 
 class _EditCountDownBottomSheetState extends State<EditCountDownBottomSheet> {
   String _textFieldValue = '';
+
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime = const TimeOfDay(hour: 0, minute: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _textFieldValue = widget.initialTitle;
+      _selectedDate = widget.initialDate; // Set the selected date
+      _selectedTime =
+          TimeOfDay.fromDateTime(widget.initialDate!); // Set the selected time
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final widgetStateProvider =
         Provider.of<RenderedWidgetProvider>(context, listen: false);
-
-    @override
-    void initState() {
-      super.initState();
-      // setState(() {
-      //   _textFieldValue = widget.initialTitle; // Set the initial title
-      //   _selectedDate = widget.initialDate; // Set the initial date
-      //   _selectedTime = widget.initialTime;
-      // }); // Set the initial time
-    }
+    final editCountDownProvider =
+        Provider.of<Editcountdownprovider>(context, listen: false);
 
     void _SaveDateTimeTitle() {
       if (_textFieldValue.isEmpty) {
@@ -62,8 +63,7 @@ class _EditCountDownBottomSheetState extends State<EditCountDownBottomSheet> {
             );
           },
         );
-      }
-      if (_selectedDate == null) {
+      } else if (_selectedDate == null) {
         print('Please select a date');
         showDialog(
           context: context,
@@ -87,7 +87,12 @@ class _EditCountDownBottomSheetState extends State<EditCountDownBottomSheet> {
           _selectedTime!.minute,
         );
         widgetStateProvider.countDownTitle = _textFieldValue;
-        print("--------" + widgetStateProvider.selectedDate.toString());
+        widgetStateProvider.image = editCountDownProvider.currentImage;
+        widgetStateProvider.dimCount = editCountDownProvider.currentDim;
+        widgetStateProvider.templateId =
+            editCountDownProvider.currentCountDownTempId;
+        widgetStateProvider.countDownId =
+            editCountDownProvider.currentCountDownId;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -106,7 +111,7 @@ class _EditCountDownBottomSheetState extends State<EditCountDownBottomSheet> {
             height: 10,
           ),
           const Text(
-            'New Countdown',
+            'Edit Countdown',
             style: TextStyle(
               color: Color.fromARGB(255, 253, 253, 253),
               fontSize: 24,

@@ -1,5 +1,5 @@
 class CountDownData {
-  //final String countDownId;
+  final String countDownId;
   final String countDownTempId;
   final String countDownTitle;
   final DateTime countDownTargetDate;
@@ -8,7 +8,7 @@ class CountDownData {
   final String countDownImage;
 
   CountDownData({
-    // required this.countDownId,
+    required this.countDownId,
     required this.countDownTempId,
     required this.countDownTitle,
     required this.countDownTargetDate,
