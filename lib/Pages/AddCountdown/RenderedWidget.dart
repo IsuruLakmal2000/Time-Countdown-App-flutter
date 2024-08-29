@@ -42,23 +42,54 @@ Widget BottomWidgetBar(BuildContext context) {
     {
       'icon': Icons.home,
       'id': 'template_5',
-      'label': 'Template 5', // Replace with your actual widget name
+      'label': 'Template 5',
+      // Replace with your actual widget name
+    },
+    {
+      'icon': Icons.home,
+      'id': 'template_6',
+      'label': 'Template 6',
+      // Replace with your actual widget name
+    },
+    {
+      'icon': Icons.home,
+      'id': 'template_7',
+      'label': 'Template 7',
+      // Replace with your actual widget name
+    },
+    {
+      'icon': Icons.home,
+      'id': 'template_8',
+      'label': 'Template 8',
+      // Replace with your actual widget name
+    },
+    {
+      'icon': Icons.home,
+      'id': 'template_9',
+      'label': 'Template 9',
+      // Replace with your actual widget name
+    },
+    {
+      'icon': Icons.home,
+      'id': 'template_10',
+      'label': 'Template 10',
+      // Replace with your actual widget name
     },
   ];
 //save all template values and countdown data to loacal and firebase
 
   Future<void> SaveImageOnLocalAndFirebase() async {
-    widgetStateProvider.isLoading = true;
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       String fileName =
           DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
+      widgetStateProvider.isLoading = true;
       final directory = await getApplicationDocumentsDirectory();
       // Create a new file in the documents directory
       final File newImage = File('${directory.path}/$fileName');
-      widgetStateProvider.isLoading = true;
+
       await File(pickedFile.path).copy(newImage.path);
 
       widgetStateProvider.image = newImage.path;

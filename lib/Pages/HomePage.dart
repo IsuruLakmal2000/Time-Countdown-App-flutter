@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/AddCountdown/NewCountDownAddBottomSheet.dart';
 import 'package:timecountdown/Pages/EditCountdown/EditCountDownBottomSheet.dart';
@@ -9,6 +10,8 @@ import 'package:timecountdown/Pages/OnBoarding/OnBoardingPage.dart';
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingScreen.dart';
 import 'package:timecountdown/Pages/SideBar/SideBar.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
+import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
+import 'package:timecountdown/main.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -19,6 +22,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   User? currentUser;
+  bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -129,6 +134,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> showDeleteConfirmationDialog(
       BuildContext context, String countdownId) async {
+    final widgetStateProvider =
+        Provider.of<RenderedWidgetProvider>(context, listen: false);
+
     return showDialog<void>(
       context: context,
       barrierDismissible: false, // User must tap button to dismiss
@@ -146,12 +154,17 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               child: const Text('Delete'),
-              onPressed: () {
+              onPressed: () async {
                 // Call the delete function here
-
-                deleteCountdown(countdownId, context);
-
-                Navigator.of(context).pop(); // Close the dialog
+                widgetStateProvider.isLoading = true;
+                await deleteCountdown(countdownId, context);
+                widgetStateProvider.isLoading = false;
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyApp(),
+                  ),
+                );
               },
             ),
           ],

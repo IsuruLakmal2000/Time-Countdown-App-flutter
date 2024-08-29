@@ -19,9 +19,9 @@ Widget SideBar(User? user, Function() signOut) {
             gradient: LinearGradient(
               colors: [
                 Colors.black.withOpacity(1),
-                Colors.black.withOpacity(0.92),
-                Colors.black.withOpacity(0.91),
-                Colors.black.withOpacity(0.9),
+                Colors.black.withOpacity(0.96),
+                Colors.black.withOpacity(0.93),
+                Colors.black.withOpacity(0.94),
               ],
               begin: Alignment.centerRight,
               end: Alignment.centerLeft,

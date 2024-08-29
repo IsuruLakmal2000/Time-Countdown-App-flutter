@@ -3,9 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template1.dart';
+import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template10.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template2.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template3.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template4.dart';
+import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template5.dart';
+import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template6.dart';
+import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template7.dart';
+import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template8.dart';
+import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template9.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
@@ -26,6 +32,39 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
   bool isLoading = false;
   PageController _pageController = PageController();
 
+  Future<void> showDeleteConfirmationDialog(
+      BuildContext context, String countdownId) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button to dismiss
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Deletion'),
+          content:
+              const Text('Are you sure you want to delete this countdown?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                // Call the delete function here
+
+                deleteCountdown(countdownId, context);
+                setState(() {});
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -36,6 +75,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
     setState(() {
       isLoading = true;
     });
+
     countdowns = await getCountdowns();
     if (countdowns.isNotEmpty) {
       final editCountDownProvider =
@@ -71,7 +111,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
         ? Template1(
             //  index: index,.
             createdDate: DateTime.now(),
-            image: '',
+            image: 'assets/Images/office.jpg',
             dimCount: 0.8,
             countDownTitle: 'No countdowns available',
             templateDateTime: DateTime.now(),
@@ -129,6 +169,55 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
                   );
                 case 'template_4':
                   return Template4(
+                    createdDate: data.countDownCreatedDate,
+                    image: data.countDownImage,
+                    dimCount: data.countDownDim,
+                    countDownTitle: data.countDownTitle,
+                    templateDateTime: data.countDownTargetDate,
+                  );
+                case 'template_5':
+                  return Template5(
+                    createdDate: data.countDownCreatedDate,
+                    image: data.countDownImage,
+                    dimCount: data.countDownDim,
+                    countDownTitle: data.countDownTitle,
+                    templateDateTime: data.countDownTargetDate,
+                  );
+                case 'template_6':
+                  return Template6(
+                    createdDate: data.countDownCreatedDate,
+                    image: data.countDownImage,
+                    dimCount: data.countDownDim,
+                    countDownTitle: data.countDownTitle,
+                    templateDateTime: data.countDownTargetDate,
+                  );
+                case 'template_7':
+                  return Template7(
+                    createdDate: data.countDownCreatedDate,
+                    image: data.countDownImage,
+                    dimCount: data.countDownDim,
+                    countDownTitle: data.countDownTitle,
+                    templateDateTime: data.countDownTargetDate,
+                  );
+                case 'template_8':
+                  return Template8(
+                    createdDate: data.countDownCreatedDate,
+                    image: data.countDownImage,
+                    dimCount: data.countDownDim,
+                    countDownTitle: data.countDownTitle,
+                    templateDateTime: data.countDownTargetDate,
+                  );
+                case 'template_9':
+                  return Template9(
+                    createdDate: data.countDownCreatedDate,
+                    image: data.countDownImage,
+                    dimCount: data.countDownDim,
+                    countDownTitle: data.countDownTitle,
+                    templateDateTime: data.countDownTargetDate,
+                  );
+                case 'template_10':
+                  return Template10(
+                    createdDate: data.countDownCreatedDate,
                     image: data.countDownImage,
                     dimCount: data.countDownDim,
                     countDownTitle: data.countDownTitle,

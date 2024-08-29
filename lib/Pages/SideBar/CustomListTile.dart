@@ -17,7 +17,7 @@ class CustomListTile extends StatelessWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: Colors.white,
+        color: title == 'Buy Premium' ? Colors.amber : Colors.white,
         size: 30,
       ),
       title: Text(

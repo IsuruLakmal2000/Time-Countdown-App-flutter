@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
-class Template4 extends StatefulWidget {
-  Template4({
+class Template6 extends StatefulWidget {
+  Template6({
     super.key,
     // required this.index,
     required this.countDownTitle,
@@ -21,10 +22,10 @@ class Template4 extends StatefulWidget {
   String image;
 
   @override
-  State<Template4> createState() => _Template4State();
+  State<Template6> createState() => _Template6State();
 }
 
-class _Template4State extends State<Template4> {
+class _Template6State extends State<Template6> {
   Timer? timer;
   int years = 0;
   int days = 0;
@@ -173,7 +174,7 @@ class _Template4State extends State<Template4> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    years != 0
+                    years == 0
                         ? Column(
                             children: [
                               Text(
@@ -244,50 +245,62 @@ class _Template4State extends State<Template4> {
                 )
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      '$minutes',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 60,
+            Transform(
+              transform: Matrix4.translationValues(0, -50, 0),
+              child: Lottie.asset(
+                'assets/lottie/timeUp.json', // Path to your Lottie file
+                width: 130, // Adjust the width as needed
+                height: 100, // Adjust the height as needed
+                fit: BoxFit.fill,
+              ),
+            ),
+            Transform(
+              transform: Matrix4.translationValues(0, -75, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        '$minutes',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 60,
+                        ),
                       ),
-                    ),
-                    const Text(
-                      'Minutes',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 26,
+                      const Text(
+                        'Minutes',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 26,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      '$seconds',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 60,
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        '$seconds',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 60,
+                        ),
                       ),
-                    ),
-                    const Text(
-                      'Seconds',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 26,
+                      const Text(
+                        'Seconds',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 26,
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              ],
+                    ],
+                  )
+                ],
+              ),
             ),
             Transform(
               transform: Matrix4.translationValues(0, 50, 0),
@@ -317,7 +330,7 @@ class _Template4State extends State<Template4> {
   }
 
   @override
-  void didUpdateWidget(covariant Template4 oldWidget) {
+  void didUpdateWidget(covariant Template6 oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     setState(() {});

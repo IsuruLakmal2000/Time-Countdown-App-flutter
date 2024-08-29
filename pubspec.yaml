@@ -76,6 +76,14 @@ flutter:
     - assets/Images/office.jpg
     - assets/Images/office2.jpg
     - assets/lottie/warning.json
+    - assets/lottie/ancientTimer.json
+    - assets/lottie/clock.json
+    - assets/lottie/clock2.json
+    - assets/lottie/timeUp.json
+    - assets/lottie/heart.json
+    - assets/lottie/heart2.json
+    - assets/lottie/money.json
+    - assets/lottie/target.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

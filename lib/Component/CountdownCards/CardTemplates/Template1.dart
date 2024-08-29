@@ -128,7 +128,7 @@ class _Template1State extends State<Template1> {
       height: double.infinity,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
@@ -136,18 +136,21 @@ class _Template1State extends State<Template1> {
               Color.fromARGB(255, 13, 14, 14),
             ],
           ),
-          image: widget.image != ''
+          image: widget.countDownTitle != 'No countdowns available'
               ? DecorationImage(
-                  // image: NetworkImage(
-                  //     "https://images.unsplash.com/photo-1723653263152-f20aae931b99?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
                   image: FileImage(File(widget.image)),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
                       Colors.black.withOpacity(widget.dimCount),
-                      BlendMode
-                          .multiply), // here can use the double value for edition purpose
+                      BlendMode.multiply),
                 )
-              : null,
+              : DecorationImage(
+                  image: Image.asset('assets/Images/office.jpg').image,
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(widget.dimCount),
+                      BlendMode.multiply),
+                ),
         ),
         // Sample content for each page
         child: Center(
@@ -164,7 +167,7 @@ class _Template1State extends State<Template1> {
                 fontSize: 30,
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 50,
             ),
             Column(
@@ -228,9 +231,9 @@ class _Template1State extends State<Template1> {
                 isElapsed
                     ? Transform(
                         transform: Matrix4.translationValues(0, -50, 0),
-                        child: Text(
+                        child: const Text(
                           " (Since)",
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Color.fromARGB(255, 0, 255, 43),
                             fontWeight: FontWeight.normal,
                             fontSize: 20,
