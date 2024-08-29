@@ -3,7 +3,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Pages/HomePage.dart';
+import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -14,15 +17,24 @@ class SignInPage extends StatefulWidget {
 
 class _SignInPageState extends State<SignInPage> {
   Future<void>? _signInWithGoogle() async {
+    final widgetStateProvider =
+        Provider.of<RenderedWidgetProvider>(context, listen: false);
     try {
+      widgetStateProvider.isLoading = true;
       final userCredential = await signInWithGoogle();
       if (userCredential != null) {
-        // Handle successful sign-in (navigate to home screen, etc.)
-        // ...
+        widgetStateProvider.isLoading = false;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+              builder: (context) =>
+                  HomePage()), // Replace with your home page widget
+        );
       } else {
+        widgetStateProvider.isLoading = false;
         print("User not signed in");
       }
     } on FirebaseAuthException catch (e) {
+      widgetStateProvider.isLoading = false;
       // Handle errors (e.g., user canceled, network issues)
       print(e.code);
       print(e.message);
@@ -31,6 +43,7 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
+    final widgetStateProvider = Provider.of<RenderedWidgetProvider>(context);
     return Scaffold(
       body: Stack(
         children: [
@@ -162,6 +175,18 @@ class _SignInPageState extends State<SignInPage> {
               ],
             ),
           ),
+          widgetStateProvider.isLoading
+              ? Container(
+                  color: Color.fromARGB(97, 0, 0, 0),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          Color.fromARGB(174, 26, 0, 0)),
+                      backgroundColor: Color.fromARGB(230, 174, 2, 218),
+                    ),
+                  ),
+                )
+              : Container(),
         ],
       ),
     );

@@ -70,6 +70,11 @@ flutter:
     - assets/Images/googleBtn.png
     - assets/Images/googleRound.png
     - assets/Images/signPage.jpg
+    - assets/Images/girls.jpg
+    - assets/Images/dream.jpg
+    - assets/Images/jym.jpg
+    - assets/Images/office.jpg
+    - assets/Images/office2.jpg
     - assets/lottie/warning.json
 
   # An image asset can refer to one or more resolution-specific "variants", see

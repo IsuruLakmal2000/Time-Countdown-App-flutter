@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Pages/HomePage.dart';
+import 'package:timecountdown/Pages/OnBoarding/OnBoardingScreen.dart';
 import 'package:timecountdown/Pages/SignInPage.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
@@ -28,13 +29,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(brightness: Brightness.dark),
       // theme: lightMode,
       //   darkTheme: darkMode,
-      //  home: HomePage(),
+      //  home: OnboardingScreen(),
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -44,7 +42,7 @@ class MyApp extends StatelessWidget {
             return HomePage();
           } else {
             // User is not signed in
-            return SignInPage();
+            return OnboardingScreen();
           }
         },
       ),

@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -155,6 +151,25 @@ Future<List<CountDownData>> getCountdowns() async {
   }
 
   return countdowns;
+}
+
+Future<void> deleteCountdown(String countdownId, BuildContext context) async {
+  String uid = _auth.currentUser!.uid; // Get the current user's ID
+
+  try {
+    // Reference to the specific countdown entry
+    await database
+        .ref()
+        .child('countdowns')
+        .child(uid)
+        .child(countdownId)
+        .remove();
+  } catch (e) {
+    // Handle any errors that occur during deletion
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to delete countdown: $e')),
+    );
+  }
 }
 
 // Future<String> SaveImgOnFirebase(final pickedFile) async {

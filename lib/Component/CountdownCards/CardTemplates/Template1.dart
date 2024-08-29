@@ -258,11 +258,9 @@ class _Template1State extends State<Template1> {
   }
 
   String formatDate(DateTime dateTime) {
-    // Create a DateFormat instance for the desired format
-
-    int year = dateTime.year; // Get the year
-    int month = dateTime.month; // Get the month
-    int day = dateTime.day; // Get the day
+    int year = dateTime.year;
+    int month = dateTime.month;
+    int day = dateTime.day;
     String formattedDate =
         year.toString() + '-' + month.toString() + '-' + day.toString();
 
@@ -273,6 +271,6 @@ class _Template1State extends State<Template1> {
   void didUpdateWidget(covariant Template1 oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    setState(() {}); // Rebuild the widget to apply the new dimValue
+    setState(() {});
   }
 }
