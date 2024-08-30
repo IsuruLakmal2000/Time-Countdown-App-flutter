@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/BottomBarItemComponent.dart';
+import 'package:timecountdown/Component/TemplateSelectBarItem.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
@@ -18,64 +19,85 @@ Widget BottomWidgetBar(BuildContext context) {
       Provider.of<RenderedWidgetProvider>(context, listen: false);
   final editCountDownProvider =
       Provider.of<Editcountdownprovider>(context, listen: false);
+
   final List<Map<String, dynamic>> templates = [
     {
       'icon': Icons.local_attraction_sharp,
       'id': 'template_1',
-      'label': 'Template 1', // Replace with your actual widget name
+      'label': 'Template 1',
+      'isPro': false,
     },
     {
       'icon': Icons.local_offer,
       'id': 'template_2',
-      'label': 'Template 2', // Replace with your actual widget name
+      'label': 'Template 2',
+      'isPro': false,
     },
     {
       'icon': Icons.favorite,
       'id': 'template_3',
-      'label': 'Template 3', // Replace with your actual widget name
+      'label': 'Template 3',
+      'isPro': false,
     },
     {
       'icon': Icons.star,
       'id': 'template_4',
-      'label': 'Template 4', // Replace with your actual widget name
+      'label': 'Template 4',
+      'isPro': false,
     },
     {
       'icon': Icons.home,
       'id': 'template_5',
       'label': 'Template 5',
-      // Replace with your actual widget name
+      'isPro': true,
     },
     {
       'icon': Icons.home,
       'id': 'template_6',
       'label': 'Template 6',
-      // Replace with your actual widget name
+      'isPro': true,
     },
     {
       'icon': Icons.home,
       'id': 'template_7',
       'label': 'Template 7',
-      // Replace with your actual widget name
+      'isPro': true,
     },
     {
       'icon': Icons.home,
       'id': 'template_8',
       'label': 'Template 8',
-      // Replace with your actual widget name
+      'isPro': true,
     },
     {
       'icon': Icons.home,
       'id': 'template_9',
       'label': 'Template 9',
-      // Replace with your actual widget name
+      'isPro': true,
     },
     {
       'icon': Icons.home,
       'id': 'template_10',
       'label': 'Template 10',
-      // Replace with your actual widget name
+      'isPro': true,
     },
   ];
+
+  bool checkProTemplate(String templateId) {
+    if (templateId == 'template_5' ||
+        templateId == 'template_6' ||
+        templateId == 'template_7' ||
+        templateId == 'template_8' ||
+        templateId == 'template_9' ||
+        templateId == 'template_10') {
+      print('user selected pro template - ' + templateId);
+      //then check user buy the pro version or not
+      return true;
+    } else {
+      widgetStateProvider.templateId = templateId;
+      return false;
+    }
+  }
 //save all template values and countdown data to loacal and firebase
 
   Future<void> SaveImageOnLocalAndFirebase() async {
@@ -179,7 +201,7 @@ Widget BottomWidgetBar(BuildContext context) {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: templates.map((template) {
-                  return BottomBarItemComponent(
+                  return TemplateSelectBarItem(
                     context,
                     Icons.local_attraction_sharp,
                     template['label'],
@@ -187,6 +209,7 @@ Widget BottomWidgetBar(BuildContext context) {
                     () {
                       widgetStateProvider.templateId = template['id'];
                     },
+                    template['isPro'],
                   ); // Replace Container() with the desired widget for each template
                 }).toList(),
               ),
@@ -196,7 +219,14 @@ Widget BottomWidgetBar(BuildContext context) {
             padding: const EdgeInsets.all(20.0),
             child: IconButton(
                 onPressed: () {
-                  widgetStateProvider.renderedWidget = "none";
+                  if (checkProTemplate(widgetStateProvider.templateId)) {
+                    //show pro version dialog
+                    print('to use,you shoul buy pro version');
+                  } else {
+                    widgetStateProvider.renderedWidget = "none";
+                  }
+
+                  //  widgetStateProvider.renderedWidget = "none";
                 },
                 icon: Icon(
                   Icons.check,
@@ -220,6 +250,9 @@ Widget BottomWidgetBar(BuildContext context) {
             child: SizedBox(
               width: 200,
               child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                ),
                 onPressed: () async {
                   widgetStateProvider.isLoading = true;
                   CountDownData countDownData = CountDownData(
@@ -289,5 +322,5 @@ Widget BottomWidgetBar(BuildContext context) {
       );
   }
 
-  //pick image
+  //check selected template is pro or not
 }

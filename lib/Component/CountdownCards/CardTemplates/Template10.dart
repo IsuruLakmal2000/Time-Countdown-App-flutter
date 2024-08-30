@@ -312,7 +312,7 @@ class _Template10State extends State<Template10> {
               ),
             ),
             Transform(
-              transform: Matrix4.translationValues(0, 50, 0),
+              transform: Matrix4.translationValues(0, 0, 0),
               child: Text(
                 "Created on : " + formatDate(widget.createdDate!),
                 style: const TextStyle(

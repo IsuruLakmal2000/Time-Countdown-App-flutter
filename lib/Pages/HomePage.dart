@@ -97,7 +97,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: const CountDownCardTemplate(),
-      drawer: SideBar(currentUser, _signOut),
+      drawer: SideBar(context, currentUser, _signOut),
     );
   }
 

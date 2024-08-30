@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/SideBar/CustomListTile.dart';
 
-Widget SideBar(User? user, Function() signOut) {
+Widget SideBar(BuildContext context, User? user, Function() signOut) {
   return Drawer(
     child: Stack(
       children: [
@@ -73,7 +74,14 @@ Widget SideBar(User? user, Function() signOut) {
                     CustomListTile(
                       icon: Icons.workspace_premium,
                       title: 'Buy Premium',
-                      onTap: () => {},
+                      onTap: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PremiumPage(),
+                          ),
+                        ),
+                      },
                     ),
                     CustomListTile(
                       icon: Icons.star,

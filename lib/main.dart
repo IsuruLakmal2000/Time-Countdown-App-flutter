@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Pages/HomePage.dart';
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingScreen.dart';
+import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/SignInPage.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';

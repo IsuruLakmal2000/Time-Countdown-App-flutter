@@ -264,7 +264,7 @@ class _Template7State extends State<Template7> {
               ),
             ),
             Transform(
-              transform: Matrix4.translationValues(0, -75, 0),
+              transform: Matrix4.translationValues(0, -100, 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -312,7 +312,7 @@ class _Template7State extends State<Template7> {
               ),
             ),
             Transform(
-              transform: Matrix4.translationValues(0, 50, 0),
+              transform: Matrix4.translationValues(0, 0, 0),
               child: Text(
                 "Created on : " + formatDate(widget.createdDate!),
                 style: const TextStyle(

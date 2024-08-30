@@ -156,94 +156,103 @@ class _Template6State extends State<Template6> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              textAlign: TextAlign.center,
-              widget.countDownTitle,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 30,
+            Transform(
+              transform: Matrix4.translationValues(0, 50, 0),
+              child: Text(
+                textAlign: TextAlign.center,
+                widget.countDownTitle,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 30,
+                ),
               ),
             ),
             const SizedBox(
               height: 50,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    years == 0
-                        ? Column(
-                            children: [
-                              Text(
-                                '$years',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 60,
+            Transform(
+              transform: Matrix4.translationValues(0, 50, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      years == 0
+                          ? Column(
+                              children: [
+                                Text(
+                                  '$years',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 60,
+                                  ),
                                 ),
-                              ),
-                              const Text(
-                                'Years',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.normal,
-                                  fontSize: 26,
+                                const Text(
+                                  'Years',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 26,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          )
-                        : Container(),
-                  ],
-                )
-              ],
+                              ],
+                            )
+                          : Container(),
+                    ],
+                  )
+                ],
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      '$days',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 60,
+            Transform(
+              transform: Matrix4.translationValues(0, 50, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        '$days',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 60,
+                        ),
                       ),
-                    ),
-                    const Text(
-                      'Days',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 26,
+                      const Text(
+                        'Days',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 26,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      '$hours',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 60,
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        '$hours',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 60,
+                        ),
                       ),
-                    ),
-                    const Text(
-                      'Hours',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 26,
+                      const Text(
+                        'Hours',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.normal,
+                          fontSize: 26,
+                        ),
                       ),
-                    ),
-                  ],
-                )
-              ],
+                    ],
+                  )
+                ],
+              ),
             ),
             Transform(
               transform: Matrix4.translationValues(0, -50, 0),
@@ -303,7 +312,7 @@ class _Template6State extends State<Template6> {
               ),
             ),
             Transform(
-              transform: Matrix4.translationValues(0, 50, 0),
+              transform: Matrix4.translationValues(0, 0, 0),
               child: Text(
                 "Created on : " + formatDate(widget.createdDate!),
                 style: const TextStyle(
