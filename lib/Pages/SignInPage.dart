@@ -21,7 +21,7 @@ class _SignInPageState extends State<SignInPage> {
         Provider.of<RenderedWidgetProvider>(context, listen: false);
     try {
       widgetStateProvider.isLoading = true;
-      final userCredential = await signInWithGoogle();
+      final userCredential = await signInWithGoogle(context);
       if (userCredential != null) {
         widgetStateProvider.isLoading = false;
         Navigator.of(context).pushReplacement(

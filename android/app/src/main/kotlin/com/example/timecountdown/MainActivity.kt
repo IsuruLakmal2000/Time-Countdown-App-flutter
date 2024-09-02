@@ -1,4 +1,4 @@
-package com.example.timecountdown
+package com.circularx.timecountdown
 
 import io.flutter.embedding.android.FlutterActivity
 

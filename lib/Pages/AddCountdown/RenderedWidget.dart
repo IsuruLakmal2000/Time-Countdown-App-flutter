@@ -11,6 +11,7 @@ import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
+import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:timecountdown/main.dart';
 //import 'package:firebase_storage/firebase_storage.dart';
 
@@ -19,7 +20,7 @@ Widget BottomWidgetBar(BuildContext context) {
       Provider.of<RenderedWidgetProvider>(context, listen: false);
   final editCountDownProvider =
       Provider.of<Editcountdownprovider>(context, listen: false);
-
+  final userProvider = context.watch<UserProvider>();
   final List<Map<String, dynamic>> templates = [
     {
       'icon': Icons.local_attraction_sharp,
@@ -222,6 +223,7 @@ Widget BottomWidgetBar(BuildContext context) {
                   if (checkProTemplate(widgetStateProvider.templateId)) {
                     //show pro version dialog
                     print('to use,you shoul buy pro version');
+                    widgetStateProvider.renderedWidget = "none";
                   } else {
                     widgetStateProvider.renderedWidget = "none";
                   }
@@ -268,6 +270,9 @@ Widget BottomWidgetBar(BuildContext context) {
                     await updateCountDownData(countDownData);
                   } else {
                     await saveCountDownData(countDownData);
+                    await updateCountdownCount(
+                        userProvider.userData!.countdownCount + 1);
+                    context.read<UserProvider>().fetchUserData();
                   }
 
                   widgetStateProvider.isLoading = false;

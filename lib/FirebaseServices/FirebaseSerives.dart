@@ -3,33 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
+import 'package:timecountdown/Model/UserData.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = GoogleSignIn();
 final database = FirebaseDatabase.instance;
 
-Future<UserCredential?> signInWithGoogle() async {
-  // Trigger the authentication flow
-  final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+Future<UserCredential?> signInWithGoogle(BuildContext context) async {
+  try {
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
-  // Check if canceled
-  if (googleUser == null) {
-    return null;
-  }
+    // Check if canceled
+    if (googleUser == null) {
+      return null; // User canceled the sign-in
+    }
 
-  // Obtain the auth details from the Google Sign-In account
-  final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    // Obtain the auth details from the Google Sign-In account
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
 
-  // Create a new credential
-  final credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth.accessToken,
-    idToken: googleAuth.idToken,
-  );
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
 
-  // Sign in with Firebase
-  UserCredential userCredential = await _auth.signInWithCredential(credential);
-  //create database for this user
-  if (userCredential != null) {
+    // Sign in with Firebase
+    UserCredential userCredential =
+        await _auth.signInWithCredential(credential);
+
+    // Create database for this user
     final user = userCredential.user;
     if (user != null) {
       final uid = user.uid;
@@ -43,16 +47,59 @@ Future<UserCredential?> signInWithGoogle() async {
         'email': email,
         'account_created': DateTime.now().toString(),
         'last_app_opened': DateTime.now().toString(),
+        'isPurchased': false,
+        'countdownCount': 0,
         // ... other user data
       };
 
       await userRef.set(userData);
-
-      // Navigate to home screen or other relevant page
     }
+
+    // Return the user credential
+    return userCredential;
+  } on FirebaseAuthException catch (e) {
+    // Handle specific Firebase authentication errors
+    String errorMessage = 'An unknown error occurred.';
+    if (e.code == 'invalid-credential') {
+      errorMessage = 'The provided credential is invalid.';
+    } else if (e.code == 'operation-not-allowed') {
+      errorMessage = 'Google sign-in is not enabled.';
+    } else if (e.code == 'user-disabled') {
+      errorMessage = 'This user has been disabled.';
+    } else if (e.code == 'user-not-found') {
+      errorMessage = 'No user found for this email.';
+    } else if (e.code == 'email-already-in-use') {
+      errorMessage = 'This email is already in use.';
+    }
+
+    // Show alert dialog with the error message
+    _showErrorDialog(context, errorMessage);
+    return null;
+  } catch (e) {
+    // Handle any other exceptions
+    _showErrorDialog(context, e.toString());
+    return null;
   }
-  // Return the user credential
-  return userCredential;
+}
+
+void _showErrorDialog(BuildContext context, String message) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }
 
 //save countdown data
@@ -172,34 +219,95 @@ Future<void> deleteCountdown(String countdownId, BuildContext context) async {
   }
 }
 
-// Future<String> SaveImgOnFirebase(final pickedFile) async {
-//   String uid = _auth.currentUser!.uid;
-//   print('call save img');
-//   try {
-//     if (pickedFile != null) {
-//       // Create a reference to the Firebase Storage
-//       String fileName =
-//           DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
-//       Reference storageReference =
-//           FirebaseStorage.instance.ref().child('CountdownImgs/$fileName');
+Future<UserData?> getCurrentUserData() async {
+  // Get the current user
+  User? currentUser = _auth.currentUser;
 
-//       // Upload the image to Firebase Storage
-//       UploadTask uploadTask = storageReference.putFile(File(pickedFile.path));
-//       print('uploading');
-//       // Wait for the upload to complete
-//       TaskSnapshot snapshot = await uploadTask;
+  // Check if the user is signed in
+  if (currentUser == null) {
+    return null; // Return null if no user is signed in
+  }
 
-//       // Get the download URL
-//       String downloadUrl = await snapshot.ref.getDownloadURL();
-//       print(downloadUrl);
-//       return downloadUrl;
-//     } else {
-//       return 'picked file not valid';
-//     }
-//   } catch (e) {
-//     return e.toString();
-//   }
-// }
+  // Get the user's UID
+  final uid = currentUser.uid;
+
+  // Reference to the user's data in the database
+  final userRef = database.ref().child('users').child(uid);
+
+  // Fetch the user data from the database
+  DataSnapshot snapshot = await userRef.get();
+
+  if (snapshot.exists) {
+    // Convert the snapshot data to a UserData object
+    final data = snapshot.value as Map<dynamic, dynamic>;
+
+    return UserData(
+      uid: data['uid'] as String,
+      name: data['name'] as String,
+      email: data['email'] as String,
+      account_created: data['account_created'] as String,
+      last_app_opened: data['last_app_opened'] as String,
+      isPurchased: data['isPurchased'] as bool,
+      countdownCount: data['countdownCount'] as int,
+    );
+  } else {
+    return null; // Return null if no data is found
+  }
+}
+
+Future<void> updateCountdownCount(int newCount) async {
+  // Get the current user
+  User? currentUser = _auth.currentUser;
+
+  if (currentUser != null) {
+    final uid = currentUser.uid;
+    final userRef = database.ref().child('users').child(uid);
+
+    // Update the countdownCount field with the new value
+    await userRef.update({
+      'countdownCount': newCount,
+    });
+  }
+}
+
+Future<void> updateIsPurchased(bool newStatus) async {
+  // Get the current user
+  User? currentUser = _auth.currentUser;
+
+  if (currentUser != null) {
+    final uid = currentUser.uid;
+    final userRef = database.ref().child('users').child(uid);
+
+    // Update the isPurchased field with the new value
+    await userRef.update({
+      'isPurchased': newStatus,
+    });
+  }
+}
+
+Future<String> getRatingUrl() async {
+  try {
+    // Get the reference to the 'ratingUrl' property
+    final ratingUrlRef = database.ref().child('properties').child('ratingUrl');
+
+    // Fetch the value of 'ratingUrl'
+    final snapshot = await ratingUrlRef.get();
+
+    // Check if the snapshot has a value
+    if (snapshot.exists) {
+      // Get the value of 'ratingUrl'
+      final ratingUrl = snapshot.value as String;
+      print('Rating URL: $ratingUrl');
+      return ratingUrl;
+    } else {
+      print('No rating URL found in the database.');
+      return '';
+    }
+  } catch (e) {
+    print('Error getting rating URL: $e');
+    rethrow;
+  }
+}
 
 // (Optional) Check if user is already signed in
 Stream<User?> authStateChanges() => _auth.authStateChanges();

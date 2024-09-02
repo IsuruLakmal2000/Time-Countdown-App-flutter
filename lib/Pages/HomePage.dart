@@ -1,16 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/AddCountdown/NewCountDownAddBottomSheet.dart';
 import 'package:timecountdown/Pages/EditCountdown/EditCountDownBottomSheet.dart';
-import 'package:timecountdown/Pages/OnBoarding/OnBoardingPage.dart';
+
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingScreen.dart';
+
+import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/SideBar/SideBar.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
+import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:timecountdown/main.dart';
 
 class HomePage extends StatefulWidget {
@@ -28,9 +33,11 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getUserDetails();
+    context.read<UserProvider>().fetchUserData();
   }
 
   void _signOut() async {
+    await FirebaseAuth.instance.signOut();
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -40,7 +47,7 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
-    await FirebaseAuth.instance.signOut();
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
           builder: (context) =>
@@ -56,12 +63,73 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final editCountDownProvider =
         Provider.of<Editcountdownprovider>(context, listen: false);
-
+    final userProvider = context.watch<UserProvider>();
     return Scaffold(
       extendBodyBehindAppBar: true,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showNewcountdownAddpage(context);
+          if (userProvider.userData?.countdownCount == 3) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Color.fromARGB(255, 36, 36, 36),
+                content: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PremiumPage(),
+                      ),
+                    );
+                  },
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: const TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'You can only add ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text: '3 countdowns ',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' in the free version. ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Upgrade to premium ',
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 255, 0, 255),
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'to add unlimited.',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          } else {
+            showNewcountdownAddpage(context);
+          }
         },
         child: const Icon(Icons.add),
       ),
@@ -96,7 +164,9 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: const CountDownCardTemplate(),
+      body: userProvider.userData != null
+          ? const CountDownCardTemplate()
+          : Center(child: CircularProgressIndicator()),
       drawer: SideBar(context, currentUser, _signOut),
     );
   }
@@ -136,6 +206,7 @@ class _HomePageState extends State<HomePage> {
       BuildContext context, String countdownId) async {
     final widgetStateProvider =
         Provider.of<RenderedWidgetProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     return showDialog<void>(
       context: context,
@@ -158,6 +229,9 @@ class _HomePageState extends State<HomePage> {
                 // Call the delete function here
                 widgetStateProvider.isLoading = true;
                 await deleteCountdown(countdownId, context);
+                await updateCountdownCount(
+                    userProvider.userData!.countdownCount - 1);
+                context.read<UserProvider>().fetchUserData();
                 widgetStateProvider.isLoading = false;
                 Navigator.pushReplacement(
                   context,

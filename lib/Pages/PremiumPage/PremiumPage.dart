@@ -1,9 +1,36 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:timecountdown/Pages/PremiumPage/IAPService.dart';
 
-class PremiumPage extends StatelessWidget {
-  const PremiumPage({super.key});
+class PremiumPage extends StatefulWidget {
+  PremiumPage({super.key});
+
+  @override
+  State<PremiumPage> createState() => _PremiumPageState();
+}
+
+class _PremiumPageState extends State<PremiumPage> {
+  late IAPService _iapService;
+
+  List<ProductDetails> _products = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _iapService = IAPService();
+    _iapService.init();
+    _loadProducts();
+    _iapService.listenToPurchaseUpdates();
+  }
+
+  Future<void> _loadProducts() async {
+    _products = await _iapService.getProducts();
+    setState(() {});
+  }
+
+  //----------
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +47,7 @@ class PremiumPage extends StatelessWidget {
               child: Stack(
                 children: [
                   Image.asset(
-                    "assets/Images/cafe.jpg", // Replace with your image path
+                    "assets/Images/cafe.jpg",
                     fit: BoxFit.cover,
                     height: double.infinity,
                     width: double.infinity,
@@ -323,7 +350,11 @@ class PremiumPage extends StatelessWidget {
                     Colors.transparent, // Make the material color transparent
                 child: ElevatedButton(
                   onPressed: () {
-                    // Add your action here
+                    // Implement the purchase logic here
+                    // if (_products.isNotEmpty) {
+                    //   _iapService.buyProduct(_products.first);
+                    // }
+                    _iapService.buyProduct(_products.first);
                   },
                   child: const Text(
                     "Upgrade to Premium",

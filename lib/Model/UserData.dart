@@ -4,6 +4,8 @@ class UserData {
   final String email;
   final String account_created;
   final String last_app_opened;
+  final bool isPurchased;
+  final int countdownCount;
 
   UserData({
     required this.uid,
@@ -11,5 +13,7 @@ class UserData {
     required this.email,
     required this.account_created,
     required this.last_app_opened,
+    required this.isPurchased,
+    required this.countdownCount,
   });
 }

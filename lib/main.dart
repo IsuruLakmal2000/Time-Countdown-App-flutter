@@ -9,6 +9,7 @@ import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:timecountdown/Providers/UserProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,7 @@ void main() async {
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => RenderedWidgetProvider()),
       ChangeNotifierProvider(create: (context) => Editcountdownprovider()),
+      ChangeNotifierProvider(create: (context) => UserProvider()),
     ], child: MyApp()),
   );
 }
