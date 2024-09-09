@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
 import 'package:timecountdown/Pages/AddCountdown/RenderedWidget.dart';
 import 'package:timecountdown/Pages/AddCountdown/ShowSelectedTemplate.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
@@ -16,6 +17,13 @@ class TemplateSelectEditPage extends StatefulWidget {
 class _TemplateSelectEditPageState extends State<TemplateSelectEditPage> {
   // String renderedWidget = "none";
   // double dimCount = 0.8;
+  final Interstialadservice _interstitialAdService = Interstialadservice();
+
+  @override
+  void initState() {
+    _interstitialAdService.loadAd();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +57,7 @@ class _TemplateSelectEditPageState extends State<TemplateSelectEditPage> {
               ),
             ),
             alignment: Alignment.bottomCenter,
-            child: BottomWidgetBar(context),
+            child: BottomWidgetBar(context, _interstitialAdService),
           ),
           if (widgetStateProvider.isLoading)
             Container(

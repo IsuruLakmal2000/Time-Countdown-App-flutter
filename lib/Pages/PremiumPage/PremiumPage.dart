@@ -13,12 +13,14 @@ class PremiumPage extends StatefulWidget {
 
 class _PremiumPageState extends State<PremiumPage> {
   late IAPService _iapService;
+  bool _isPremium = false;
 
   List<ProductDetails> _products = [];
 
   @override
   void initState() {
     super.initState();
+
     _iapService = IAPService();
     _iapService.init();
     _loadProducts();
@@ -113,8 +115,7 @@ class _PremiumPageState extends State<PremiumPage> {
                               height: 20,
                             ),
                             Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 50, right: 50),
+                              padding: EdgeInsets.only(left: 50, right: 50),
                               child: Container(
                                 width: double.infinity,
                                 height: 50,
@@ -127,18 +128,19 @@ class _PremiumPageState extends State<PremiumPage> {
                                 ),
                                 child: Center(
                                   child: RichText(
-                                      text: const TextSpan(
+                                      text: TextSpan(
                                     children: [
-                                      WidgetSpan(
-                                        child: Icon(
-                                          Icons.attach_money_rounded,
-                                          color:
-                                              Color.fromARGB(255, 252, 6, 252),
-                                          size: 24,
-                                        ),
-                                      ),
+                                      // WidgetSpan(
+                                      //   child: Icon(
+                                      //     Icons.attach_money_rounded,
+                                      //     color:
+                                      //         Color.fromARGB(255, 252, 6, 252),
+                                      //     size: 24,
+                                      //   ),
+                                      // ),
                                       TextSpan(
-                                        text: "3.99",
+                                        text:
+                                            '${_products.isNotEmpty ? _products.first.price : 'USD 3.49'}',
                                         style: TextStyle(
                                           color:
                                               Color.fromARGB(255, 252, 6, 252),
@@ -354,10 +356,11 @@ class _PremiumPageState extends State<PremiumPage> {
                     // if (_products.isNotEmpty) {
                     //   _iapService.buyProduct(_products.first);
                     // }
-                    _iapService.buyProduct(_products.first);
+                   // _iapService.buyProduct(_products.first);
                   },
                   child: const Text(
-                    "Upgrade to Premium",
+                   // "Upgrade to Premium",
+                   'coming soon !',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,

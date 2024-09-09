@@ -10,6 +10,7 @@ class UserProvider extends ChangeNotifier {
   Future<void> fetchUserData() async {
     print("Fetching user data");
     _userData = await getCurrentUserData();
+
     notifyListeners();
   }
 

@@ -309,5 +309,47 @@ Future<String> getRatingUrl() async {
   }
 }
 
+Future<void> savePurchaseDetails() async {
+  // Get the current user
+  User? user = _auth.currentUser;
+
+  if (user != null) {
+    // Create a new entry for the user in the premiumusers collection
+    String userId = user.uid;
+    DatabaseReference userRef =
+        database.ref().child('premiumusers').child(userId);
+
+    await updateIsPurchased(true);
+
+    // Save the purchase details
+    await userRef.set({
+      'isPurchased': true,
+      'purchaseDate': DateTime.now().toIso8601String(),
+    });
+    print('Purchase details saved for user: $userId');
+  } else {
+    print('No user is logged in.');
+  }
+}
+
+Future<bool> hasPurchasedPremium() async {
+  User? user = _auth.currentUser;
+
+  if (user != null) {
+    String userId = user.uid;
+    DatabaseReference userRef =
+        database.ref().child('premiumusers').child(userId);
+
+    // Get the user's purchase status
+    DataSnapshot snapshot = await userRef.get();
+    if (snapshot.exists) {
+      // Check if the user has purchased the premium
+      final data = snapshot.value as Map<dynamic, dynamic>;
+      return data['isPurchased'] == true; // Return true if isPurchased is true
+    }
+  }
+  return false; // User is not logged in or does not have purchase data
+}
+
 // (Optional) Check if user is already signed in
 Stream<User?> authStateChanges() => _auth.authStateChanges();

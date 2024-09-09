@@ -4,7 +4,7 @@ class UserData {
   final String email;
   final String account_created;
   final String last_app_opened;
-  final bool isPurchased;
+  bool isPurchased = false;
   final int countdownCount;
 
   UserData({

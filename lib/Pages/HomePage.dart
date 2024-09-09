@@ -2,14 +2,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/AddCountdown/NewCountDownAddBottomSheet.dart';
 import 'package:timecountdown/Pages/EditCountdown/EditCountDownBottomSheet.dart';
 
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingScreen.dart';
+import 'package:timecountdown/Pages/PremiumPage/IAPService.dart';
 
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/SideBar/SideBar.dart';
@@ -28,12 +31,12 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   User? currentUser;
   bool isLoading = false;
-
+  final Interstialadservice _interstitialAdService = Interstialadservice();
   @override
   void initState() {
     super.initState();
     getUserDetails();
-    context.read<UserProvider>().fetchUserData();
+    _interstitialAdService.loadAd();
   }
 
   void _signOut() async {
@@ -55,8 +58,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void getUserDetails() {
-    currentUser = FirebaseAuth.instance.currentUser;
+  void getUserDetails() async {
+    isLoading = true;
+    await context.read<UserProvider>().fetchUserData();
+    currentUser = await FirebaseAuth.instance.currentUser;
+    isLoading = false;
   }
 
   @override
@@ -64,69 +70,74 @@ class _HomePageState extends State<HomePage> {
     final editCountDownProvider =
         Provider.of<Editcountdownprovider>(context, listen: false);
     final userProvider = context.watch<UserProvider>();
+    final isUserPurchased = userProvider.userData?.isPurchased == true;
     return Scaffold(
       extendBodyBehindAppBar: true,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (userProvider.userData?.countdownCount == 3) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: Color.fromARGB(255, 36, 36, 36),
-                content: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PremiumPage(),
+          if (!isUserPurchased) {
+            if ((userProvider.userData?.countdownCount ?? 0) >= 3) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: Color.fromARGB(255, 36, 36, 36),
+                  content: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PremiumPage(),
+                        ),
+                      );
+                    },
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: const TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'You can only add ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '3 countdowns ',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: ' in the free version. ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'Upgrade to premium ',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 255, 0, 255),
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'to add unlimited.',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: const TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'You can only add ',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: '3 countdowns ',
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: ' in the free version. ',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Upgrade to premium ',
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 255, 0, 255),
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'to add unlimited.',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
                     ),
                   ),
                 ),
-              ),
-            );
+              );
+            } else {
+              showNewcountdownAddpage(context);
+            }
           } else {
             showNewcountdownAddpage(context);
           }
@@ -226,6 +237,7 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               child: const Text('Delete'),
               onPressed: () async {
+                _interstitialAdService.showAd();
                 // Call the delete function here
                 widgetStateProvider.isLoading = true;
                 await deleteCountdown(countdownId, context);

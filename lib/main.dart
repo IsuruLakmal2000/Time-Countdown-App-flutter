@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Pages/HomePage.dart';
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingScreen.dart';
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
@@ -14,6 +18,7 @@ import 'package:timecountdown/Providers/UserProvider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  unawaited(MobileAds.instance.initialize());
   runApp(
     MultiProvider(providers: [
       ChangeNotifierProvider(create: (context) => RenderedWidgetProvider()),

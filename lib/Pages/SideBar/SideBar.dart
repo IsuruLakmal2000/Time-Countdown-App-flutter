@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
+import 'package:timecountdown/Pages/PrivacyPolicy.dart';
 import 'package:timecountdown/Pages/SideBar/CustomListTile.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -71,15 +72,24 @@ Widget SideBar(BuildContext context, User? user, Function() signOut) {
                                 fontSize: 16,
                               ),
                             ),
-                            Text(
-                              '${userProvider.userData?.countdownCount}/3 countdowns used',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.amber,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            userProvider.userData?.isPurchased == true
+                                ? Text(
+                                    'Unlimited countdowns !',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.green,
+                                      fontSize: 16,
+                                    ),
+                                  )
+                                : Text(
+                                    '${userProvider.userData?.countdownCount}/3 countdowns used',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.amber,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ],
                         ),
                       ),
@@ -89,18 +99,20 @@ Widget SideBar(BuildContext context, User? user, Function() signOut) {
                       title: 'Home',
                       onTap: () => {},
                     ),
-                    CustomListTile(
-                      icon: Icons.workspace_premium,
-                      title: 'Buy Premium',
-                      onTap: () => {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PremiumPage(),
+                    userProvider.userData?.isPurchased == true
+                        ? Container()
+                        : CustomListTile(
+                            icon: Icons.workspace_premium,
+                            title: 'Buy Premium',
+                            onTap: () => {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PremiumPage(),
+                                ),
+                              ),
+                            },
                           ),
-                        ),
-                      },
-                    ),
                     CustomListTile(
                       icon: Icons.star,
                       title: 'Rate Us!',
@@ -120,7 +132,13 @@ Widget SideBar(BuildContext context, User? user, Function() signOut) {
                     CustomListTile(
                       icon: Icons.privacy_tip,
                       title: 'Privacy Policy',
-                      onTap: () => {},
+                      onTap: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const PrivacyPolicyPage()),
+                        ),
+                      },
                     ),
                   ],
                 ),

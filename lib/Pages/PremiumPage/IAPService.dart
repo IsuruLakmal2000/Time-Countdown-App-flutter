@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 
 class IAPService {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
@@ -46,9 +47,12 @@ class IAPService {
     });
   }
 
-  void _grantAccess(String productID) {
+  void _grantAccess(String productID) async {
     if (productID == 'com.circularx.timecountdown.pro') {
       // Grant ad-free access
+      await savePurchaseDetails();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isBuyPremium', true);
     }
   }
 
@@ -58,4 +62,6 @@ class IAPService {
     final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
     await _inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
   }
+
+// Check if the user has already purchased the premium on locally
 }

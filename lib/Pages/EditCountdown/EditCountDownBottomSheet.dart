@@ -9,6 +9,8 @@ import 'package:timecountdown/Pages/TemplateSelectEditPage.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
+import '../../Mobile ads/InterstialAdService.dart';
+
 class EditCountDownBottomSheet extends StatefulWidget {
   EditCountDownBottomSheet({
     required this.initialTitle,
@@ -29,9 +31,10 @@ class _EditCountDownBottomSheetState extends State<EditCountDownBottomSheet> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime = const TimeOfDay(hour: 0, minute: 0);
   final FocusNode _textFieldFocusNode = FocusNode();
-
+  final Interstialadservice _interstitialAdService = Interstialadservice();
   @override
   void initState() {
+    _interstitialAdService.loadAd();
     super.initState();
     setState(() {
       _textFieldValue = widget.initialTitle;

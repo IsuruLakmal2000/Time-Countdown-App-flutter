@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/AlertPopupComponent.dart';
 import 'package:timecountdown/Component/ButtonComponent.dart';
 import 'package:timecountdown/Component/TextFieldComponent.dart';
+import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
 import 'package:timecountdown/Model/TemplateData.dart';
 import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/TemplateSelectEditPage.dart';
@@ -26,6 +27,11 @@ class _NewcountdownAddBottomSheetState
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime = const TimeOfDay(hour: 0, minute: 0);
   final FocusNode _textFieldFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {

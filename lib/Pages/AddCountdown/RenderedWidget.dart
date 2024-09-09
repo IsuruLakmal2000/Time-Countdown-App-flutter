@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/BottomBarItemComponent.dart';
 import 'package:timecountdown/Component/TemplateSelectBarItem.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
@@ -15,12 +16,14 @@ import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:timecountdown/main.dart';
 //import 'package:firebase_storage/firebase_storage.dart';
 
-Widget BottomWidgetBar(BuildContext context) {
+Widget BottomWidgetBar(
+    BuildContext context, Interstialadservice interstitialAdService) {
   final widgetStateProvider =
       Provider.of<RenderedWidgetProvider>(context, listen: false);
   final editCountDownProvider =
       Provider.of<Editcountdownprovider>(context, listen: false);
   final userProvider = context.watch<UserProvider>();
+
   final List<Map<String, dynamic>> templates = [
     {
       'icon': Icons.local_attraction_sharp,
@@ -99,7 +102,6 @@ Widget BottomWidgetBar(BuildContext context) {
       return false;
     }
   }
-//save all template values and countdown data to loacal and firebase
 
   Future<void> SaveImageOnLocalAndFirebase() async {
     final pickedFile =
@@ -256,6 +258,7 @@ Widget BottomWidgetBar(BuildContext context) {
                   backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
                 ),
                 onPressed: () async {
+                  interstitialAdService.showAd();
                   widgetStateProvider.isLoading = true;
                   CountDownData countDownData = CountDownData(
                     countDownId: widgetStateProvider.countDownId,
