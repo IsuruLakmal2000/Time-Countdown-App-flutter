@@ -10,8 +10,8 @@ class Interstialadservice {
 
   void loadAd() {
     InterstitialAd.load(
-        //  adUnitId: 'ca-app-pub-9764584713102923/3744425699',
-        adUnitId: 'ca-app-pub-3940256099942544/1033173712',
+        //  adUnitId: 'ca-app-pub-3940256099942544/1033173712', //test add
+        adUnitId: 'ca-app-pub-9764584713102923/3744425699',
         request: const AdRequest(),
         adLoadCallback: InterstitialAdLoadCallback(
           // Called when an ad is successfully received.

@@ -7,8 +7,8 @@ import 'package:timecountdown/Component/ButtonComponent.dart';
 import 'package:timecountdown/Component/TextFieldComponent.dart';
 import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
 import 'package:timecountdown/Model/TemplateData.dart';
-import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
-import 'package:timecountdown/Pages/TemplateSelectEditPage.dart';
+import 'package:timecountdown/Pages/MainPages/CountdownCardTemplate.dart';
+import 'package:timecountdown/Pages/MainPages/TemplateSelectEditPage.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 class NewcountdownAddBottomSheet extends StatefulWidget {
@@ -98,6 +98,7 @@ class _NewcountdownAddBottomSheetState
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(
             height: 10,

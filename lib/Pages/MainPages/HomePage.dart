@@ -1,19 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:timecountdown/Component/CustomSnackBar.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
-import 'package:timecountdown/Model/CountDownData.dart';
-import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
+import 'package:timecountdown/NotificationService/NotificationService.dart';
+import 'package:timecountdown/Pages/MainPages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/AddCountdown/NewCountDownAddBottomSheet.dart';
 import 'package:timecountdown/Pages/EditCountdown/EditCountDownBottomSheet.dart';
-
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingScreen.dart';
-import 'package:timecountdown/Pages/PremiumPage/IAPService.dart';
-
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/SideBar/SideBar.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
@@ -37,6 +32,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     getUserDetails();
     _interstitialAdService.loadAd();
+    requestPermissions();
+    initializeNotifications();
   }
 
   void _signOut() async {
@@ -76,63 +73,22 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           if (!isUserPurchased) {
-            if ((userProvider.userData?.countdownCount ?? 0) >= 3) {
+            if ((userProvider.userData?.countdownCount ?? 0) >= 5) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Color.fromARGB(255, 36, 36, 36),
-                  content: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PremiumPage(),
-                        ),
-                      );
-                    },
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: const TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'You can only add ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: '3 countdowns ',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' in the free version. ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'Upgrade to premium ',
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 255, 0, 255),
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                          TextSpan(
-                            text: 'to add unlimited.',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+                CustomSnackBar(
+                  message1: 'You can only add ',
+                  message2: '5 countdowns ',
+                  message3: 'in the free version. ',
+                  message4: 'Upgrade to premium ',
+                  message5: 'to add more.',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PremiumPage(),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               );
             } else {
@@ -190,8 +146,14 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
       backgroundColor: Color.fromARGB(255, 0, 0, 0),
       context: context,
+      isScrollControlled: true,
       builder: (BuildContext context) {
-        return NewcountdownAddBottomSheet();
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: NewcountdownAddBottomSheet(),
+        );
       },
     );
   }

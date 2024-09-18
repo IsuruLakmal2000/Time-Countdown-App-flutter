@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
-import 'package:timecountdown/Pages/AddCountdown/RenderedWidget.dart';
-import 'package:timecountdown/Pages/AddCountdown/ShowSelectedTemplate.dart';
+import 'package:timecountdown/Pages/MainPages/BottomWidgetBar.dart';
+import 'package:timecountdown/Pages/MainPages/ShowSelectedTemplate.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 class TemplateSelectEditPage extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timecountdown/Pages/HomePage.dart';
+import 'package:timecountdown/Pages/MainPages/HomePage.dart';
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingPage.dart';
 import 'package:timecountdown/Pages/SignInPage.dart';
 

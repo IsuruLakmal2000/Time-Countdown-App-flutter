@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Model/TemplateData.dart';
-import 'package:timecountdown/Pages/CountdownCardTemplate.dart';
+import 'package:timecountdown/Pages/MainPages/CountdownCardTemplate.dart';
 
 class Template2 extends StatefulWidget {
   Template2({

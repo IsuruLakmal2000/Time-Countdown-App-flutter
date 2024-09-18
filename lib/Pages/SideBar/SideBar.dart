@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
 
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
-import 'package:timecountdown/Pages/PrivacyPolicy.dart';
+import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
 import 'package:timecountdown/Pages/SideBar/CustomListTile.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -82,7 +82,7 @@ Widget SideBar(BuildContext context, User? user, Function() signOut) {
                                     ),
                                   )
                                 : Text(
-                                    '${userProvider.userData?.countdownCount}/3 countdowns used',
+                                    '${userProvider.userData?.countdownCount}/5 countdowns used',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.amber,
