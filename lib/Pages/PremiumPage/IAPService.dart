@@ -1,6 +1,6 @@
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Services/LocalStorageService.dart';
 
 class IAPService {
   final InAppPurchase _inAppPurchase = InAppPurchase.instance;
@@ -37,7 +37,7 @@ class IAPService {
         } else if (purchaseDetails.status == PurchaseStatus.error) {
           // Handle the error
         } else if (purchaseDetails.status == PurchaseStatus.purchased) {
-          // Grant the ad-free version or premium features
+          // Grant premium features
           _grantAccess(purchaseDetails.productID);
           if (purchaseDetails.pendingCompletePurchase) {
             _inAppPurchase.completePurchase(purchaseDetails);
@@ -49,8 +49,8 @@ class IAPService {
 
   void _grantAccess(String productID) async {
     if (productID == 'com.circularx.timecountdown.pro') {
-      // Grant ad-free access
-      await savePurchaseDetails();
+      // Grant premium access
+      await LocalStorageService.savePurchaseDetails();
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isBuyPremium', true);
     }

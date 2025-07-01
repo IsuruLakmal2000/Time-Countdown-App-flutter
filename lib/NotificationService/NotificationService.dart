@@ -11,8 +11,16 @@ Future<void> initializeNotifications() async {
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
 
+  const DarwinInitializationSettings initializationSettingsIOS =
+      DarwinInitializationSettings(
+    requestSoundPermission: true,
+    requestBadgePermission: true,
+    requestAlertPermission: true,
+  );
+
   const InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
+    iOS: initializationSettingsIOS,
   );
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
@@ -38,8 +46,8 @@ Future<void> requestPermissions() async {
   final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
       flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
-  final bool? grantedNotificationPermission =
-      await androidImplementation?.requestExactAlarmsPermission() ?? false;
+  await androidImplementation?.requestExactAlarmsPermission();
+  
   if (isGranted == true) {
     print("Notification permission is already granted.");
   } else {
@@ -64,6 +72,13 @@ Future<void> scheduleReminder(DateTime reminderTime) async {
         priority: Priority.high,
         playSound: true,
         sound: RawResourceAndroidNotificationSound('alarm'),
+      ),
+      iOS: DarwinNotificationDetails(
+        categoryIdentifier: 'countdown_reminder',
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'default',
       ),
     ),
     androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

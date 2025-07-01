@@ -226,45 +226,6 @@ class _PremiumPageState extends State<PremiumPage> {
                     SizedBox(
                       width: screenWidth * 0.2,
                       child: Image.asset(
-                        "assets/Images/block.png", // Replace with your image path
-                        fit: BoxFit.contain,
-                        height: 40,
-                        width: 40,
-                      ),
-                    ),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Ad-free Experience",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            height: 1,
-                          ),
-                        ),
-                        Text(
-                          "Enjoy app experience without any ads.",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                            height: 1,
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: screenWidth * 0.2,
-                      child: Image.asset(
                         "assets/Images/unlocked.png", // Replace with your image path
                         fit: BoxFit.contain,
                         height: 40,

@@ -6,7 +6,7 @@ class Editcountdownprovider extends ChangeNotifier {
   DateTime _currentDate = DateTime.now();
   String _currentImage = '';
   double _currentDim = 0.0;
-  String _currentCountDownId = 'firebaseID';
+  String _currentCountDownId = 'localID';
   String _currentCountDownTempId = 'template_1';
   bool _isEditCountDown = false;
 

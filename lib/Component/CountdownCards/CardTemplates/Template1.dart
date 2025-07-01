@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:timecountdown/Component/CountdownCards/TemplateFunctions.dart';
 
 class Template1 extends StatefulWidget {
   Template1({
@@ -137,15 +137,15 @@ class _Template1State extends State<Template1> {
             ],
           ),
           image: widget.countDownTitle != 'No countdowns available'
-              ? DecorationImage(
-                  image: FileImage(File(widget.image)),
-                  fit: BoxFit.cover,
+              ? TemplateFunctions.getSafeDecorationImage(
+                  imagePath: widget.image,
+                  fallbackAsset: 'assets/Images/office.jpg',
                   colorFilter: ColorFilter.mode(
                       Colors.black.withOpacity(widget.dimCount),
                       BlendMode.multiply),
                 )
               : DecorationImage(
-                  image: Image.asset('assets/Images/office.jpg').image,
+                  image: AssetImage('assets/Images/office.jpg'),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
                       Colors.black.withOpacity(widget.dimCount),
@@ -197,36 +197,42 @@ class _Template1State extends State<Template1> {
                     : Container(),
                 Transform(
                   transform: Matrix4.translationValues(0, -35, 0),
-                  child: Text(
-                    '$hours' + " Hours",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 40,
-                    ),
-                  ),
+                  child: hours != 0
+                      ? Text(
+                          '$hours' + " Hours",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 40,
+                          ),
+                        )
+                      : Container(),
                 ),
                 Transform(
                   transform: Matrix4.translationValues(0, -47, 0),
-                  child: Text(
-                    '$minutes' + " Minutes",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 28,
-                    ),
-                  ),
+                  child: minutes != 0
+                      ? Text(
+                          '$minutes' + " Minutes",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 28,
+                          ),
+                        )
+                      : Container(),
                 ),
                 Transform(
                   transform: Matrix4.translationValues(0, -50, 0),
-                  child: Text(
-                    '$seconds' + " Seconds",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 20,
-                    ),
-                  ),
+                  child: seconds != 0
+                      ? Text(
+                          '$seconds' + " Seconds",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 20,
+                          ),
+                        )
+                      : Container(),
                 ),
                 isElapsed
                     ? Transform(

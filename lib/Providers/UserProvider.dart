@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/Model/UserData.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -9,8 +9,7 @@ class UserProvider extends ChangeNotifier {
 
   Future<void> fetchUserData() async {
     print("Fetching user data");
-    _userData = await getCurrentUserData();
-
+    _userData = await LocalStorageService.getCurrentUserData();
     notifyListeners();
   }
 

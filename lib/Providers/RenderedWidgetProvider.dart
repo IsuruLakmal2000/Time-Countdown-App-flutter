@@ -67,4 +67,18 @@ class RenderedWidgetProvider extends ChangeNotifier {
     _createdDate = value;
     notifyListeners(); // Notify listeners (widgets) of state change
   }
+
+  /// Reset provider to default values for creating a new countdown
+  void resetForNewCountdown() {
+    _countDownID = '';
+    _renderedWidget = "none";
+    _dimCount = 0.5;
+    _templateId = "template_1";
+    _countDownTitle = "Template 1";
+    _image = 'assets/Images/office.jpg'; // Set default image
+    _selectedDate = DateTime.now();
+    _createdDate = DateTime.now();
+    _isLoading = false;
+    notifyListeners();
+  }
 }

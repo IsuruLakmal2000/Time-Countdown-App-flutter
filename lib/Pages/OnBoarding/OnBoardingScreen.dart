@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Pages/MainPages/HomePage.dart';
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingPage.dart';
-import 'package:timecountdown/Pages/SignInPage.dart';
 
 class OnboardingScreen extends StatefulWidget {
   @override
@@ -27,7 +26,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
     } else {
       await Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const SignInPage()),
+        MaterialPageRoute(builder: (context) => HomePage()),
       );
     }
   }

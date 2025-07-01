@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:timecountdown/Component/BottomBarComponents/ReminderSettingSheet.dart';
 import 'package:timecountdown/Component/BottomBarItemComponent.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
@@ -18,26 +17,32 @@ class SettingsBar extends StatelessWidget {
     final widgetStateProvider =
         Provider.of<RenderedWidgetProvider>(context, listen: false);
 
-    Future<void> SaveImageOnLocalAndFirebase() async {
-      final pickedFile =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
+    Future<void> SaveImageOnLocal() async {
+      try {
+        final pickedFile =
+            await ImagePicker().pickImage(source: ImageSource.gallery);
 
-      if (pickedFile != null) {
-        String fileName =
-            DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
-        widgetStateProvider.isLoading = true;
-        final directory = await getApplicationDocumentsDirectory();
-        // Create a new file in the documents directory
-        final File newImage = File('${directory.path}/$fileName');
+        if (pickedFile != null) {
+          String fileName =
+              DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
+          widgetStateProvider.isLoading = true;
+          final directory = await getApplicationDocumentsDirectory();
+          // Create a new file in the documents directory
+          final File newImage = File('${directory.path}/$fileName');
 
-        await File(pickedFile.path).copy(newImage.path);
+          await File(pickedFile.path).copy(newImage.path);
 
-        widgetStateProvider.image = newImage.path;
+          widgetStateProvider.image = newImage.path;
+          widgetStateProvider.isLoading = false;
+
+          print("image path: ${pickedFile.path}");
+        }
+      } catch (e) {
+        // Handle errors gracefully
+        print("Error selecting image: $e");
         widgetStateProvider.isLoading = false;
-
-        print("image path: ${pickedFile.path}");
+        // You could show a snackbar or dialog here to inform the user
       }
-      //save to firebase
     }
 
     return Row(
@@ -64,7 +69,7 @@ class SettingsBar extends StatelessWidget {
                   'Background',
                   "background",
                   () async {
-                    SaveImageOnLocalAndFirebase();
+                    SaveImageOnLocal();
                   },
                 ),
                 BottomBarItemComponent(

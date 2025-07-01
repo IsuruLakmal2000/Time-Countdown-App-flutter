@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/BottomBarItemComponent.dart';
-import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
-import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
+import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
@@ -10,11 +9,7 @@ import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:timecountdown/main.dart';
 
 class BottomBar extends StatelessWidget {
-  final Interstialadservice interstitialAdService;
 
-  BottomBar({
-    required this.interstitialAdService,
-  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +44,12 @@ class BottomBar extends StatelessWidget {
               ),
               onPressed: () async {
                 widgetStateProvider.isLoading = true;
+                // Ensure we have a valid image path
+                String imagePath = widgetStateProvider.image;
+                if (imagePath.isEmpty) {
+                  imagePath = 'assets/Images/office.jpg';
+                }
+                
                 CountDownData countDownData = CountDownData(
                   countDownId: widgetStateProvider.countDownId,
                   countDownTempId: widgetStateProvider.templateId,
@@ -56,13 +57,13 @@ class BottomBar extends StatelessWidget {
                   countDownTargetDate: widgetStateProvider.selectedDate,
                   countDownDim: widgetStateProvider.dimCount,
                   countDownCreatedDate: DateTime.now(),
-                  countDownImage: widgetStateProvider.image,
+                  countDownImage: imagePath,
                 );
                 if (editCountDownProvider.isEditCountDown) {
-                  await updateCountDownData(countDownData);
+                  await LocalStorageService.updateCountDownData(countDownData);
                 } else {
-                  await saveCountDownData(countDownData);
-                  await updateCountdownCount(
+                  await LocalStorageService.saveCountDownData(countDownData);
+                  await LocalStorageService.updateCountdownCount(
                       userProvider.userData!.countdownCount + 1);
                   context.read<UserProvider>().fetchUserData();
                 }
@@ -74,9 +75,6 @@ class BottomBar extends StatelessWidget {
                     builder: (context) => MyApp(),
                   ),
                 );
-                Future.delayed(Duration(seconds: 2), () {
-                  interstitialAdService.showAd();
-                });
               },
               child: const Text('Save', style: TextStyle(color: Colors.black)),
             ),

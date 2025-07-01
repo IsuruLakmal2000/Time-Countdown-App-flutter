@@ -12,7 +12,7 @@ import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template6.d
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template7.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template8.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template9.dart';
-import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
@@ -54,7 +54,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
               onPressed: () {
                 // Call the delete function here
 
-                deleteCountdown(countdownId, context);
+                LocalStorageService.deleteCountdown(countdownId, context);
                 setState(() {});
                 Navigator.of(context).pop(); // Close the dialog
               },
@@ -76,7 +76,7 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
       isLoading = true;
     });
 
-    countdowns = await getCountdowns();
+    countdowns = await LocalStorageService.getCountdowns();
     if (countdowns.isNotEmpty) {
       final editCountDownProvider =
           Provider.of<Editcountdownprovider>(context, listen: false);

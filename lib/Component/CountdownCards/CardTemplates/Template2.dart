@@ -1,11 +1,8 @@
 // ignore_for_file: prefer_const_constructors, prefer_adjacent_string_concatenation, prefer_const_literals_to_create_immutables
 
 import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:timecountdown/Model/TemplateData.dart';
-import 'package:timecountdown/Pages/MainPages/CountdownCardTemplate.dart';
+import 'package:timecountdown/Component/CountdownCards/TemplateFunctions.dart';
 
 class Template2 extends StatefulWidget {
   Template2({
@@ -142,15 +139,12 @@ class _Template1State extends State<Template2> {
             ],
           ),
           image: widget.image != ''
-              ? DecorationImage(
-                  // image: NetworkImage(
-                  //     "https://images.unsplash.com/photo-1723653263152-f20aae931b99?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
-                  image: FileImage(File(widget.image)),
-                  fit: BoxFit.cover,
+              ? TemplateFunctions.getSafeDecorationImage(
+                  imagePath: widget.image,
+                  fallbackAsset: 'assets/Images/office.jpg',
                   colorFilter: ColorFilter.mode(
                       Colors.black.withOpacity(widget.dimCount),
-                      BlendMode
-                          .multiply), // here can use the double value for edition purpose
+                      BlendMode.multiply),
                 )
               : null,
         ),
@@ -220,66 +214,72 @@ class _Template1State extends State<Template2> {
                           ],
                         )
                       : Container(),
-                  Column(
-                    children: [
-                      Text(
-                        '$hours',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 54,
-                        ),
-                      ),
-                      Text(
-                        'Hours',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        '$minutes',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 54,
-                        ),
-                      ),
-                      Text(
-                        'Minutes',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        '$seconds',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 54,
-                        ),
-                      ),
-                      Text(
-                        'Seconds',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  )
+                  hours != 0
+                      ? Column(
+                          children: [
+                            Text(
+                              '$hours',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 54,
+                              ),
+                            ),
+                            Text(
+                              'Hours',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(),
+                  minutes != 0
+                      ? Column(
+                          children: [
+                            Text(
+                              '$minutes',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 54,
+                              ),
+                            ),
+                            Text(
+                              'Minutes',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(),
+                  seconds != 0
+                      ? Column(
+                          children: [
+                            Text(
+                              '$seconds',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 54,
+                              ),
+                            ),
+                            Text(
+                              'Seconds',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container()
                 ],
               ),
               isElapsed

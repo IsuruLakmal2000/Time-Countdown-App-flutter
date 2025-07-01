@@ -1,14 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/CustomSnackBar.dart';
-import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
-import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
+import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/NotificationService/NotificationService.dart';
 import 'package:timecountdown/Pages/MainPages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/AddCountdown/NewCountDownAddBottomSheet.dart';
 import 'package:timecountdown/Pages/EditCountdown/EditCountDownBottomSheet.dart';
-import 'package:timecountdown/Pages/OnBoarding/OnBoardingScreen.dart';
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/SideBar/SideBar.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
@@ -24,20 +21,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  User? currentUser;
   bool isLoading = false;
-  final Interstialadservice _interstitialAdService = Interstialadservice();
   @override
   void initState() {
     super.initState();
     getUserDetails();
-    _interstitialAdService.loadAd();
     requestPermissions();
     initializeNotifications();
   }
 
   void _signOut() async {
-    await FirebaseAuth.instance.signOut();
+    await LocalStorageService.signOut();
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -48,17 +42,17 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    Navigator.of(context).pushReplacement(
+    Navigator.pushReplacement(
+      context,
       MaterialPageRoute(
-          builder: (context) =>
-              OnboardingScreen()), // Replace with your home page widget
+        builder: (context) => MyApp(),
+      ),
     );
   }
 
   void getUserDetails() async {
     isLoading = true;
     await context.read<UserProvider>().fetchUserData();
-    currentUser = await FirebaseAuth.instance.currentUser;
     isLoading = false;
   }
 
@@ -134,14 +128,19 @@ class _HomePageState extends State<HomePage> {
       body: userProvider.userData != null
           ? const CountDownCardTemplate()
           : Center(child: CircularProgressIndicator()),
-      drawer: SideBar(context, currentUser, _signOut),
+      drawer: SideBar(context, null, _signOut),
     );
   }
 
   void showNewcountdownAddpage(BuildContext context) {
     final editCountDownProvider =
         Provider.of<Editcountdownprovider>(context, listen: false);
+    final widgetStateProvider =
+        Provider.of<RenderedWidgetProvider>(context, listen: false);
+    
     editCountDownProvider.isEditCountDown = false;
+    // Reset provider to default values for new countdown
+    widgetStateProvider.resetForNewCountdown();
 
     showModalBottomSheet(
       backgroundColor: Color.fromARGB(255, 0, 0, 0),
@@ -199,11 +198,10 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               child: const Text('Delete'),
               onPressed: () async {
-                _interstitialAdService.showAd();
                 // Call the delete function here
                 widgetStateProvider.isLoading = true;
-                await deleteCountdown(countdownId, context);
-                await updateCountdownCount(
+                await LocalStorageService.deleteCountdown(countdownId, context);
+                await LocalStorageService.updateCountdownCount(
                     userProvider.userData!.countdownCount - 1);
                 context.read<UserProvider>().fetchUserData();
                 widgetStateProvider.isLoading = false;

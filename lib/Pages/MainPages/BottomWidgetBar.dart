@@ -9,13 +9,13 @@ import 'package:timecountdown/Component/BottomBarComponents/BottomBar.dart';
 import 'package:timecountdown/Component/BottomBarComponents/DimControl.dart';
 import 'package:timecountdown/Component/BottomBarComponents/SettingBar.dart';
 import 'package:timecountdown/Component/BottomBarComponents/TemplateSelecter.dart';
-import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 
+// ignore: non_constant_identifier_names
 Widget BottomWidgetBar(
-    BuildContext context, Interstialadservice interstitialAdService) {
+    BuildContext context ) {
   final widgetStateProvider =
       Provider.of<RenderedWidgetProvider>(context, listen: false);
   final editCountDownProvider =
@@ -37,8 +37,7 @@ Widget BottomWidgetBar(
     case 'template':
       return TemplateSelector();
     case 'none':
-      return BottomBar(interstitialAdService: interstitialAdService);
     default:
-      return BottomBar(interstitialAdService: interstitialAdService);
+      return BottomBar();
   }
 }

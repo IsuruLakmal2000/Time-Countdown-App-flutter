@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:timecountdown/Component/CountdownCards/TemplateFunctions.dart';
 
 class Template5 extends StatefulWidget {
   Template5({
@@ -138,15 +138,12 @@ class _Template5State extends State<Template5> {
             ],
           ),
           image: widget.image != ''
-              ? DecorationImage(
-                  // image: NetworkImage(
-                  //     "https://images.unsplash.com/photo-1723653263152-f20aae931b99?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
-                  image: FileImage(File(widget.image)),
-                  fit: BoxFit.cover,
+              ? TemplateFunctions.getSafeDecorationImage(
+                  imagePath: widget.image,
+                  fallbackAsset: 'assets/Images/office.jpg',
                   colorFilter: ColorFilter.mode(
                       Colors.black.withOpacity(widget.dimCount),
-                      BlendMode
-                          .multiply), // here can use the double value for edition purpose
+                      BlendMode.multiply),
                 )
               : null,
         ),
@@ -203,46 +200,50 @@ class _Template5State extends State<Template5> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Column(
-                  children: [
-                    Text(
-                      '$days',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 60,
-                      ),
-                    ),
-                    const Text(
-                      'Days',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 26,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      '$hours',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 60,
-                      ),
-                    ),
-                    const Text(
-                      'Hours',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 26,
-                      ),
-                    ),
-                  ],
-                )
+                days != 0
+                    ? Column(
+                        children: [
+                          Text(
+                            '$days',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 60,
+                            ),
+                          ),
+                          const Text(
+                            'Days',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.normal,
+                              fontSize: 26,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(),
+                hours != 0
+                    ? Column(
+                        children: [
+                          Text(
+                            '$hours',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 60,
+                            ),
+                          ),
+                          const Text(
+                            'Hours',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.normal,
+                              fontSize: 26,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container()
               ],
             ),
             Transform(
@@ -259,46 +260,50 @@ class _Template5State extends State<Template5> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Column(
-                    children: [
-                      Text(
-                        '$minutes',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 60,
-                        ),
-                      ),
-                      const Text(
-                        'Minutes',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 26,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        '$seconds',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 60,
-                        ),
-                      ),
-                      const Text(
-                        'Seconds',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 26,
-                        ),
-                      ),
-                    ],
-                  )
+                  minutes != 0
+                      ? Column(
+                          children: [
+                            Text(
+                              '$minutes',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 60,
+                              ),
+                            ),
+                            const Text(
+                              'Minutes',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 26,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(),
+                  seconds != 0
+                      ? Column(
+                          children: [
+                            Text(
+                              '$seconds',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 60,
+                              ),
+                            ),
+                            const Text(
+                              'Seconds',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: 26,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container()
                 ],
               ),
             ),

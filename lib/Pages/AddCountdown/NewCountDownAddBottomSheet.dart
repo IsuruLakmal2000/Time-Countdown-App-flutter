@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/AlertPopupComponent.dart';
 import 'package:timecountdown/Component/ButtonComponent.dart';
 import 'package:timecountdown/Component/TextFieldComponent.dart';
-import 'package:timecountdown/Mobile%20ads/InterstialAdService.dart';
 import 'package:timecountdown/Model/TemplateData.dart';
 import 'package:timecountdown/Pages/MainPages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/MainPages/TemplateSelectEditPage.dart';
@@ -84,6 +83,10 @@ class _NewcountdownAddBottomSheetState
           _selectedTime!.minute,
         );
         widgetStateProvider.countDownTitle = _textFieldValue;
+        // Initialize with default image if no image is set
+        if (widgetStateProvider.image.isEmpty) {
+          widgetStateProvider.image = 'assets/Images/office.jpg';
+        }
         print("--------" + widgetStateProvider.selectedDate.toString());
         Navigator.push(
           context,

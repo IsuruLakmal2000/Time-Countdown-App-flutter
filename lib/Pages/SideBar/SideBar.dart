@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:timecountdown/FirebaseServices/FirebaseSerives.dart';
+import 'package:timecountdown/Services/LocalStorageService.dart';
 
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
@@ -9,7 +8,7 @@ import 'package:timecountdown/Pages/SideBar/CustomListTile.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-Widget SideBar(BuildContext context, User? user, Function() signOut) {
+Widget SideBar(BuildContext context, dynamic user, Function() signOut) {
   final userProvider = context.watch<UserProvider>();
   return Drawer(
     child: Stack(
@@ -117,7 +116,7 @@ Widget SideBar(BuildContext context, User? user, Function() signOut) {
                       icon: Icons.star,
                       title: 'Rate Us!',
                       onTap: () async {
-                        String url = await getRatingUrl();
+                        String url = await LocalStorageService.getRatingUrl();
                         print('Rating URL: $url');
                         final Uri uri = Uri.parse(url);
                         if (await canLaunchUrl(uri)) {
