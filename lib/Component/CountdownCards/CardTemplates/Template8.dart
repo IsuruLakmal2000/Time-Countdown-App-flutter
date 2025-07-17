@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:timecountdown/Component/CountdownCards/TemplateFunctions.dart';
@@ -14,12 +15,12 @@ class Template8 extends StatefulWidget {
     required this.image,
   });
 
-  String countDownTitle;
+  final String countDownTitle;
 //  int index = 0;
-  DateTime? createdDate;
-  DateTime? templateDateTime;
-  double dimCount = 8;
-  String image;
+  final DateTime? createdDate;
+  final DateTime? templateDateTime;
+  final double dimCount;
+  final String image;
 
   @override
   State<Template8> createState() => _Template8State();
@@ -122,213 +123,198 @@ class _Template8State extends State<Template8> {
     return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
   }
 
+  Widget _buildCountdownElement(int value, String label) {
+    // Use cascading logic instead of simple value == 0 check
+    String unit = label.toLowerCase();
+    if (unit.contains('year')) {
+      unit = 'years';
+    } else if (unit.contains('day')) {
+      unit = 'days'; 
+    } else if (unit.contains('hour')) {
+      unit = 'hours';
+    } else if (unit.contains('minute')) {
+      unit = 'minutes';
+    } else if (unit.contains('second')) {
+      unit = 'seconds';
+    }
+    
+    if (!TemplateFunctions.shouldShowTimeUnit(
+      unit: unit,
+      years: years,
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+    )) {
+      return Container();
+    }
+    
+    return Column(
+      children: [
+        Text(
+          '$value',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 60,
+          ),
+        ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.normal,
+            fontSize: 26,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResponsiveTopRow() {
+    List<Widget> elements = [
+      _buildCountdownElement(days, 'Days'),
+      _buildCountdownElement(hours, 'Hours'),
+    ];
+
+    if (elements.isEmpty) {
+      return Container();
+    }
+
+    return Row(
+      mainAxisAlignment: elements.length == 1 
+          ? MainAxisAlignment.center 
+          : MainAxisAlignment.spaceAround,
+      children: elements,
+    );
+  }
+
+  Widget _buildResponsiveBottomRow() {
+    List<Widget> elements = [
+      _buildCountdownElement(minutes, 'Minutes'),
+      _buildCountdownElement(seconds, 'Seconds'),
+    ];
+
+    if (elements.isEmpty) {
+      return Container();
+    }
+
+    return Row(
+      mainAxisAlignment: elements.length == 1 
+          ? MainAxisAlignment.center 
+          : MainAxisAlignment.spaceAround,
+      children: elements,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(255, 41, 41, 41),
-              Color.fromARGB(255, 13, 14, 14),
-            ],
+      child: widget.image != ''
+          ? Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromARGB(255, 41, 41, 41),
+                    Color.fromARGB(255, 13, 14, 14),
+                  ],
+                ),
+                image: widget.image.isNotEmpty
+                    ? DecorationImage(
+                        image: widget.image.startsWith('assets/')
+                            ? AssetImage(widget.image)
+                            : FileImage(File(widget.image)) as ImageProvider,
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withOpacity(widget.dimCount),
+                          BlendMode.multiply,
+                        ),
+                      )
+                    : null,
+              ),
+              child: _buildTemplateContent(),
+            )
+          : Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromARGB(255, 41, 41, 41),
+                    Color.fromARGB(255, 13, 14, 14),
+                  ],
+                ),
+              ),
+              child: _buildTemplateContent(),
+            ),
+    );
+  }
+
+  Widget _buildTemplateContent() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Transform(
+            transform: Matrix4.translationValues(0, 50, 0),
+            child: Text(
+              widget.countDownTitle,
+              style: const TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-          image: widget.image != ''
-              ? TemplateFunctions.getSafeDecorationImage(
-                  imagePath: widget.image,
-                  fallbackAsset: 'assets/Images/office.jpg',
-                  colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(widget.dimCount),
-                      BlendMode.multiply),
+          const SizedBox(
+            height: 50,
+          ),
+          years != 0
+              ? Transform(
+                  transform: Matrix4.translationValues(0, 50, 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildCountdownElement(years, 'Years'),
+                    ],
+                  ),
                 )
-              : null,
-        ),
-        // Sample content for each page
-        child: Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Transform(
-              transform: Matrix4.translationValues(0, 50, 0),
-              child: Text(
-                textAlign: TextAlign.center,
-                widget.countDownTitle,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 30,
-                ),
+              : Container(),
+          Transform(
+            transform: Matrix4.translationValues(0, 50, 0),
+            child: _buildResponsiveTopRow(),
+          ),
+          Transform(
+            transform: Matrix4.translationValues(0, 0, 0),
+            child: Lottie.asset(
+              'assets/lottie/heart2.json', // Path to your Lottie file
+              width: 200, // Adjust the width as needed
+              height: 150, // Adjust the height as needed
+              fit: BoxFit.fill,
+            ),
+          ),
+          Transform(
+            transform: Matrix4.translationValues(0, -100, 0),
+            child: _buildResponsiveBottomRow(),
+          ),
+          Transform(
+            transform: Matrix4.translationValues(0, 0, 0),
+            child: Text(
+              "Created on : " + formatDate(widget.createdDate!),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.normal,
+                fontSize: 15,
               ),
             ),
-            const SizedBox(
-              height: 50,
-            ),
-            years != 0
-                ? Transform(
-                    transform: Matrix4.translationValues(0, 50, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  '$years',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 60,
-                                  ),
-                                ),
-                                const Text(
-                                  'Years',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.normal,
-                                    fontSize: 26,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  )
-                : Container(),
-            Transform(
-              transform: Matrix4.translationValues(0, 50, 0),
-              child:            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                days != 0
-                    ? Column(
-                        children: [
-                          Text(
-                            '$days',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 60,
-                            ),
-                          ),
-                          const Text(
-                            'Days',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.normal,
-                              fontSize: 26,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Container(),
-                hours != 0
-                    ? Column(
-                        children: [
-                          Text(
-                            '$hours',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 60,
-                            ),
-                          ),
-                          const Text(
-                            'Hours',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.normal,
-                              fontSize: 26,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Container(),
-              ],
-            ),
-            ),
-            Transform(
-              transform: Matrix4.translationValues(0, 0, 0),
-              child: Lottie.asset(
-                'assets/lottie/heart2.json', // Path to your Lottie file
-                width: 200, // Adjust the width as needed
-                height: 150, // Adjust the height as needed
-                fit: BoxFit.fill,
-              ),
-            ),
-            Transform(
-              transform: Matrix4.translationValues(0, -100, 0),
-              child:              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  minutes != 0
-                      ? Column(
-                          children: [
-                            Text(
-                              '$minutes',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 60,
-                              ),
-                            ),
-                            const Text(
-                              'Minutes',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal,
-                                fontSize: 26,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Container(),
-                  seconds != 0
-                      ? Column(
-                          children: [
-                            Text(
-                              '$seconds',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 60,
-                              ),
-                            ),
-                            const Text(
-                              'Seconds',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal,
-                                fontSize: 26,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Container(),
-                ],
-              ),
-            ),
-            Transform(
-              transform: Matrix4.translationValues(0, 0, 0),
-              child: Text(
-                "Created on : " + formatDate(widget.createdDate!),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.normal,
-                  fontSize: 15,
-                ),
-              ),
-            ),
-          ],
-        )),
+          ),
+        ],
       ),
     );
   }

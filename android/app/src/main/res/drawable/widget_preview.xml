@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#1A1A2E" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+    
+    <!-- Border -->
+    <item android:left="2dp" android:top="2dp" android:right="2dp" android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <stroke android:width="1dp" android:color="#FFFFFF" />
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+    
+    <!-- Content placeholder for title -->
+    <item android:left="16dp" android:top="16dp" android:right="16dp" android:bottom="120dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#74B9FF" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    
+    <!-- Days counter placeholder -->
+    <item android:left="16dp" android:top="60dp" android:right="120dp" android:bottom="60dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00B894" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    
+    <!-- Hours counter placeholder -->
+    <item android:left="60dp" android:top="60dp" android:right="76dp" android:bottom="60dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00B894" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    
+    <!-- Minutes counter placeholder -->
+    <item android:left="104dp" android:top="60dp" android:right="32dp" android:bottom="60dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00B894" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+    
+    <!-- Seconds counter placeholder -->
+    <item android:left="148dp" android:top="60dp" android:right="16dp" android:bottom="60dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#00B894" />
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+</layer-list>

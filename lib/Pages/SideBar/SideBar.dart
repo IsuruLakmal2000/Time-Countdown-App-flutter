@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Services/LocalStorageService.dart';
+import 'package:timecountdown/Services/BackupService.dart';
 
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
 import 'package:timecountdown/Pages/SideBar/CustomListTile.dart';
+import 'package:timecountdown/Pages/WidgetPages/WidgetStyleSelectionPage.dart';
+import 'package:timecountdown/Providers/PremiumProvider.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-Widget SideBar(BuildContext context, dynamic user, Function() signOut) {
+Widget SideBar(BuildContext context, dynamic user) {
   final userProvider = context.watch<UserProvider>();
+  final isPremium = context.watch<PremiumProvider>().isPremium;
+
   return Drawer(
     child: Stack(
       children: [
@@ -71,17 +76,18 @@ Widget SideBar(BuildContext context, dynamic user, Function() signOut) {
                                 fontSize: 16,
                               ),
                             ),
-                            userProvider.userData?.isPurchased == true
+                            isPremium
                                 ? Text(
-                                    'Unlimited countdowns !',
+                                    'Premium User',
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       color: Colors.green,
                                       fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   )
                                 : Text(
-                                    '${userProvider.userData?.countdownCount}/5 countdowns used',
+                                    '${userProvider.userData?.countdownCount ?? 0}/5 countdowns used',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.amber,
@@ -98,36 +104,51 @@ Widget SideBar(BuildContext context, dynamic user, Function() signOut) {
                       title: 'Home',
                       onTap: () => {},
                     ),
-                    userProvider.userData?.isPurchased == true
-                        ? Container()
-                        : CustomListTile(
-                            icon: Icons.workspace_premium,
-                            title: 'Buy Premium',
-                            onTap: () => {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => PremiumPage(),
-                                ),
-                              ),
-                            },
+                    CustomListTile(
+                      icon: Icons.widgets,
+                      title: 'Widget Style',
+                      onTap: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WidgetStyleSelectionPage(),
                           ),
+                        ),
+                      },
+                    ),
+                    if (!isPremium)
+                      CustomListTile(
+                        icon: Icons.workspace_premium,
+                        title: 'Buy Premium',
+                        onTap: () => {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PremiumPage(),
+                            ),
+                          ),
+                        },
+                      ),
                     CustomListTile(
                       icon: Icons.star,
                       title: 'Rate Us!',
-                      onTap: () async {
-                        String url = await LocalStorageService.getRatingUrl();
-                        print('Rating URL: $url');
+                        onTap: () async {
+                        String url;
+                        if (Theme.of(context).platform == TargetPlatform.android) {
+                          url = 'https://play.google.com/store/apps/details?id=com.example.app'; // Example Play Store link
+                        } else if (Theme.of(context).platform == TargetPlatform.iOS) {
+                          url = 'https://apps.apple.com/app/id123456789'; // Example App Store link
+                        } else {
+                          url = 'https://example.com'; // Fallback link
+                        }
                         final Uri uri = Uri.parse(url);
                         if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri,
-                              mode: LaunchMode
-                                  .externalApplication); // Opens in the default browser
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
                         } else {
                           throw 'Could not launch $url';
                         }
-                      },
-                    ),
+                        },
+                      ),
                     CustomListTile(
                       icon: Icons.privacy_tip,
                       title: 'Privacy Policy',
@@ -139,20 +160,47 @@ Widget SideBar(BuildContext context, dynamic user, Function() signOut) {
                         ),
                       },
                     ),
+                    // Backup Data - always visible, premium check inside
+                    CustomListTile(
+                      icon: Icons.backup,
+                      title: 'Backup Data',
+                      isPremiumFeature: !isPremium,
+                      onTap: () async {
+                        try {
+                          await BackupService.createBackup(context);
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Backup failed: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    // Import Backup - always visible, premium check inside
+                    CustomListTile(
+                      icon: Icons.restore,
+                      title: 'Import Backup',
+                      isPremiumFeature: !isPremium,
+                      onTap: () async {
+                        try {
+                          await BackupService.importBackup(context);
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Import failed: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
-              Column(
-                children: [
-                  CustomListTile(
-                    icon: Icons.logout,
-                    title: 'Sign Out',
-                    onTap: () => {signOut()},
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                ],
+              SizedBox(
+                height: 20,
               ),
             ],
           ),

@@ -40,8 +40,26 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- Widget Provider -->
+        <receiver android:name=".CountdownWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.circularx.timecountdown.WIDGET_CLICK" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/countdown_widget_info" />
+        </receiver>
 
-            
+        <!-- Widget Configuration Activity -->
+        <activity android:name=".CountdownWidgetConfigureActivity"
+            android:exported="true"
+            android:theme="@style/LaunchTheme">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

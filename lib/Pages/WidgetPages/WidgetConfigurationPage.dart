@@ -1,0 +1,399 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:timecountdown/Model/CountDownData.dart';
+import 'package:timecountdown/Services/CountdownWidgetService.dart';
+import 'package:timecountdown/Pages/WidgetPages/WidgetStyleSelectionPage.dart';
+
+class WidgetConfigurationPage extends StatefulWidget {
+  const WidgetConfigurationPage({Key? key}) : super(key: key);
+
+  @override
+  State<WidgetConfigurationPage> createState() => _WidgetConfigurationPageState();
+}
+
+class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
+  List<CountDownData> _countdowns = [];
+  bool _isLoading = true;
+  String? _selectedCountdownId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCountdowns();
+    
+    // Fallback timeout to prevent infinite loading
+    Timer(const Duration(seconds: 10), () {
+      if (_isLoading && mounted) {
+        print('Loading timeout reached, setting loading to false');
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    });
+  }
+
+  Future<void> _loadCountdowns() async {
+    try {
+      print('Loading countdowns for widget configuration...');
+      final countdowns = await CountdownWidgetService.getAvailableCountdowns();
+      print('Loaded ${countdowns.length} countdowns');
+      setState(() {
+        _countdowns = countdowns;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading countdowns: $e');
+      setState(() {
+        _countdowns = [];
+        _isLoading = false;
+      });
+      // Show error message to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load countdowns: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _configureWidget() async {
+    if (_selectedCountdownId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a countdown'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      await CountdownWidgetService.configureWidget(_selectedCountdownId!);
+      // Widget configuration handled by native side
+    } catch (e) {
+      print('Error configuring widget: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to configure widget: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _cancelConfiguration() async {
+    try {
+      await CountdownWidgetService.cancelConfiguration();
+    } catch (e) {
+      print('Error canceling configuration: $e');
+    }
+  }
+
+  String _formatTimeRemaining(DateTime targetDate) {
+    final timeRemaining = CountdownWidgetService.calculateTimeRemaining(targetDate);
+    return '${timeRemaining['days']}d ${timeRemaining['hours']}h ${timeRemaining['minutes']}m';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A1A2E),
+      appBar: AppBar(
+        title: const Text(
+          'Select Countdown for Widget',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: const Color(0xFF16213E),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Colors.white),
+          onPressed: _cancelConfiguration,
+        ),
+      ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : _countdowns.isEmpty
+              ? _buildEmptyState()
+              : _buildCountdownList(),
+      bottomNavigationBar: _buildBottomBar(),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.timer_off,
+              size: 80,
+              color: Colors.white.withOpacity(0.5),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'No Countdowns Available',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Create a countdown in the main app first, then come back to add it as a widget.',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.6),
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              label: const Text(
+                'Go Back to Main App',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountdownList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: _countdowns.length,
+      itemBuilder: (context, index) {
+        final countdown = _countdowns[index];
+        final isSelected = _selectedCountdownId == countdown.countDownId;
+        
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? Colors.blue : Colors.white.withOpacity(0.2),
+              width: 2,
+            ),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isSelected
+                  ? [
+                      Colors.blue.withOpacity(0.3),
+                      Colors.blue.withOpacity(0.1),
+                    ]
+                  : [
+                      const Color(0xFF16213E),
+                      const Color(0xFF0F172A),
+                    ],
+            ),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            onTap: () {
+              setState(() {
+                _selectedCountdownId = countdown.countDownId;
+              });
+            },
+            leading: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.blue.withOpacity(0.8),
+                    Colors.purple.withOpacity(0.8),
+                  ],
+                ),
+              ),
+              child: const Icon(
+                Icons.timer,
+                color: Colors.white,
+                size: 24,
+              ),
+            ),
+            title: Text(
+              countdown.countDownTitle,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                Text(
+                  'Target: ${_formatDate(countdown.countDownTargetDate)}',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Remaining: ${_formatTimeRemaining(countdown.countDownTargetDate)}',
+                  style: TextStyle(
+                    color: Colors.green.withOpacity(0.8),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            trailing: isSelected
+                ? const Icon(
+                    Icons.check_circle,
+                    color: Colors.blue,
+                    size: 28,
+                  )
+                : Icon(
+                    Icons.radio_button_unchecked,
+                    color: Colors.white.withOpacity(0.4),
+                    size: 28,
+                  ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF16213E),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Style Selection Button
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 12),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const WidgetStyleSelectionPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple.withOpacity(0.8),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              icon: const Icon(
+                Icons.palette,
+                color: Colors.white,
+                size: 20,
+              ),
+              label: const Text(
+                'Widget Style',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          // Main Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _cancelConfiguration,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.withOpacity(0.3),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _selectedCountdownId != null ? _configureWidget : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _selectedCountdownId != null 
+                        ? Colors.blue 
+                        : Colors.grey.withOpacity(0.3),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    'Add Widget',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+}

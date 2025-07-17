@@ -5,7 +5,7 @@ class Editcountdownprovider extends ChangeNotifier {
   String _currentTitle = '';
   DateTime _currentDate = DateTime.now();
   String _currentImage = '';
-  double _currentDim = 0.0;
+  double _currentDim = 0.5; // Default dim value should be 0.5, not 0.0
   String _currentCountDownId = 'localID';
   String _currentCountDownTempId = 'template_1';
   bool _isEditCountDown = false;

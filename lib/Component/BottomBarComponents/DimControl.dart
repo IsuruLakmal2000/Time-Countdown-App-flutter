@@ -10,7 +10,7 @@ class DimControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final widgetStateProvider =
-        Provider.of<RenderedWidgetProvider>(context, listen: false);
+        Provider.of<RenderedWidgetProvider>(context, listen: true);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [

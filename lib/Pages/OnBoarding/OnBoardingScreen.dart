@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Pages/MainPages/HomePage.dart';
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingPage.dart';
+import 'package:timecountdown/Services/LocalStorageService.dart';
 
 class OnboardingScreen extends StatefulWidget {
   @override
@@ -16,8 +17,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.initState();
   }
 
-  void _preloadImages() async {}
-
   Future<void> _nextPage() async {
     if (_currentPage < 2) {
       await _pageController.nextPage(
@@ -25,17 +24,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
+      // Mark onboarding as completed before navigating to main app
+      await LocalStorageService.setOnboardingCompleted();
+      
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => HomePage()),
-      );
-    }
-  }
-
-  void _previousPage() {
-    if (_currentPage > 0) {
-      _pageController.previousPage(
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeIn,
       );
     }
   }

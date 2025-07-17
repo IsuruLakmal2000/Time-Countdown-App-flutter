@@ -9,8 +9,8 @@ Widget TemplateSelectBarItem(BuildContext context, IconData icon, String title,
 
   return InkWell(
     onTap: () async {
+      // Allow selection of all templates - premium check will happen at save time
       onTap();
-      // widgetStateProvider.renderedWidget = renderedWidgetName,
     },
     child: Padding(
       padding: EdgeInsets.all(10.0),
@@ -20,33 +20,62 @@ Widget TemplateSelectBarItem(BuildContext context, IconData icon, String title,
           Stack(
             alignment: Alignment.topCenter,
             children: [
-              Icon(
-                icon,
-                color: Color.fromARGB(255, 184, 54, 244),
-                size: 40, // Adjust size as needed
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isPro 
+                    ? Colors.amber.withOpacity(0.1)
+                    : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  border: isPro 
+                    ? Border.all(color: Colors.amber.withOpacity(0.3), width: 1)
+                    : null,
+                ),
+                child: Icon(
+                  icon,
+                  color: isPro 
+                    ? Colors.amber
+                    : Color.fromARGB(255, 184, 54, 244),
+                  size: 40,
+                ),
               ),
               if (isPro)
                 Positioned(
                   top: 0,
                   right: 0,
                   child: Container(
-                    padding: EdgeInsets.all(2),
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    constraints: BoxConstraints(
-                      minWidth: 20,
-                      minHeight: 8,
-                    ),
-                    child: Text(
-                      'Pro',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 8,
-                        fontWeight: FontWeight.bold,
+                      gradient: LinearGradient(
+                        colors: [Colors.amber, Colors.orange],
                       ),
-                      textAlign: TextAlign.center,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.amber.withOpacity(0.3),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                        )
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white,
+                          size: 10,
+                        ),
+                        SizedBox(width: 2),
+                        Text(
+                          'PRO',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -55,8 +84,8 @@ Widget TemplateSelectBarItem(BuildContext context, IconData icon, String title,
           Text(
             title,
             style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.normal,
+              color: isPro ? Colors.amber : Colors.white,
+              fontWeight: isPro ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ],

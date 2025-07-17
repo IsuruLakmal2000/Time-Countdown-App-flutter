@@ -13,22 +13,6 @@ class TemplateSelector extends StatelessWidget {
     final widgetStateProvider =
         Provider.of<RenderedWidgetProvider>(context, listen: false);
 
-    bool checkProTemplate(String templateId) {
-      if (templateId == 'template_5' ||
-          templateId == 'template_6' ||
-          templateId == 'template_7' ||
-          templateId == 'template_8' ||
-          templateId == 'template_9' ||
-          templateId == 'template_10') {
-        print('user selected pro template - ' + templateId);
-        //then check user buy the pro version or not
-        return true;
-      } else {
-        widgetStateProvider.templateId = templateId;
-        return false;
-      }
-    }
-
     final List<Map<String, dynamic>> templates = [
       {
         'icon': Icons.local_attraction_sharp,
@@ -56,18 +40,6 @@ class TemplateSelector extends StatelessWidget {
       },
       {
         'icon': Icons.home,
-        'id': 'template_5',
-        'label': 'Template 5',
-        'isPro': true,
-      },
-      {
-        'icon': Icons.home,
-        'id': 'template_6',
-        'label': 'Template 6',
-        'isPro': true,
-      },
-      {
-        'icon': Icons.home,
         'id': 'template_7',
         'label': 'Template 7',
         'isPro': true,
@@ -82,12 +54,6 @@ class TemplateSelector extends StatelessWidget {
         'icon': Icons.home,
         'id': 'template_9',
         'label': 'Template 9',
-        'isPro': true,
-      },
-      {
-        'icon': Icons.home,
-        'id': 'template_10',
-        'label': 'Template 10',
         'isPro': true,
       },
     ];
@@ -107,6 +73,7 @@ class TemplateSelector extends StatelessWidget {
                   template['label'],
                   template['id'],
                   () {
+                    // Allow selection of all templates - premium check will happen at save time
                     widgetStateProvider.templateId = template['id'];
                   },
                   template['isPro'],
@@ -118,14 +85,9 @@ class TemplateSelector extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(20.0),
           child: IconButton(
-            onPressed: () {
-              if (checkProTemplate(widgetStateProvider.templateId)) {
-                // Show pro version dialog
-                print('To use, you should buy the pro version');
-                widgetStateProvider.renderedWidget = "none";
-              } else {
-                widgetStateProvider.renderedWidget = "none";
-              }
+            onPressed: () async {
+              // Allow selection of any template - premium check will happen at save time
+              widgetStateProvider.renderedWidget = "none";
             },
             icon: const Icon(
               Icons.check,

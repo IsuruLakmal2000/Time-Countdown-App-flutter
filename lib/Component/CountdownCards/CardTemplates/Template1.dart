@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Component/CountdownCards/TemplateFunctions.dart';
 
@@ -13,12 +14,12 @@ class Template1 extends StatefulWidget {
     required this.image,
   });
 
-  String countDownTitle;
+  final String countDownTitle;
 //  int index = 0;
-  DateTime? createdDate;
-  DateTime? templateDateTime;
-  double dimCount = 8;
-  String image;
+  final DateTime? createdDate;
+  final DateTime? templateDateTime;
+  final double dimCount;
+  final String image;
 
   @override
   State<Template1> createState() => _Template1State();
@@ -126,143 +127,201 @@ class _Template1State extends State<Template1> {
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(255, 41, 41, 41),
-              Color.fromARGB(255, 13, 14, 14),
-            ],
-          ),
-          image: widget.countDownTitle != 'No countdowns available'
-              ? TemplateFunctions.getSafeDecorationImage(
-                  imagePath: widget.image,
-                  fallbackAsset: 'assets/Images/office.jpg',
-                  colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(widget.dimCount),
-                      BlendMode.multiply),
-                )
-              : DecorationImage(
-                  image: AssetImage('assets/Images/office.jpg'),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(widget.dimCount),
-                      BlendMode.multiply),
+      child: widget.countDownTitle != 'No countdowns available'
+          ? Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromARGB(255, 41, 41, 41),
+                    Color.fromARGB(255, 13, 14, 14),
+                  ],
                 ),
-        ),
-        // Sample content for each page
-        child: Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              textAlign: TextAlign.center,
-              widget.countDownTitle,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 30,
+                image: widget.image.isNotEmpty
+                    ? DecorationImage(
+                        image: widget.image.startsWith('assets/')
+                            ? AssetImage(widget.image)
+                            : FileImage(File(widget.image)) as ImageProvider,
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withOpacity(widget.dimCount),
+                          BlendMode.multiply,
+                        ),
+                      )
+                    : null,
               ),
-            ),
-            const SizedBox(
-              height: 50,
-            ),
-            Column(
-              children: [
-                years != 0
-                    ? Text(
-                        '$years' + " Years",
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      textAlign: TextAlign.center,
+                      widget.countDownTitle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                      ),
+                    ),
+                    const SizedBox(height: 50),
+                    // ...existing countdown code...
+                    _buildCountdownDisplay(),
+                    Transform(
+                      transform: Matrix4.translationValues(0, 50, 0),
+                      child: Text(
+                        "Created on : " + formatDate(widget.createdDate!),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.normal,
-                          fontSize: 40,
+                          fontSize: 15,
                         ),
-                      )
-                    : Container(),
-                days != 0
-                    ? Transform(
-                        transform: Matrix4.translationValues(0, -20, 0),
-                        child: Text(
-                          '$days' + " Days",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal,
-                            fontSize: 50,
-                          ),
-                        ),
-                      )
-                    : Container(),
-                Transform(
-                  transform: Matrix4.translationValues(0, -35, 0),
-                  child: hours != 0
-                      ? Text(
-                          '$hours' + " Hours",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal,
-                            fontSize: 40,
-                          ),
-                        )
-                      : Container(),
+                      ),
+                    ),
+                  ],
                 ),
-                Transform(
-                  transform: Matrix4.translationValues(0, -47, 0),
-                  child: minutes != 0
-                      ? Text(
-                          '$minutes' + " Minutes",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal,
-                            fontSize: 28,
-                          ),
-                        )
-                      : Container(),
+              ),
+            )
+          : Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.fromARGB(255, 41, 41, 41),
+                    Color.fromARGB(255, 13, 14, 14),
+                  ],
                 ),
-                Transform(
-                  transform: Matrix4.translationValues(0, -50, 0),
-                  child: seconds != 0
-                      ? Text(
-                          '$seconds' + " Seconds",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.normal,
-                            fontSize: 20,
-                          ),
-                        )
-                      : Container(),
-                ),
-                isElapsed
-                    ? Transform(
-                        transform: Matrix4.translationValues(0, -50, 0),
-                        child: const Text(
-                          " (Since)",
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 0, 255, 43),
-                            fontWeight: FontWeight.normal,
-                            fontSize: 20,
-                          ),
-                        ),
-                      )
-                    : Container(),
-              ],
-            ),
-            Transform(
-              transform: Matrix4.translationValues(0, 50, 0),
-              child: Text(
-                "Created on : " + formatDate(widget.createdDate!),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.normal,
-                  fontSize: 15,
+              ),
+              child: Center(
+                child: Text(
+                  widget.countDownTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                  ),
                 ),
               ),
             ),
-          ],
-        )),
-      ),
+    );
+  }
+
+  Widget _buildCountdownDisplay() {
+    return Column(
+      children: [
+        TemplateFunctions.shouldShowTimeUnit(
+          unit: 'years',
+          years: years,
+          days: days,
+          hours: hours,
+          minutes: minutes,
+          seconds: seconds,
+        )
+            ? Text(
+                '$years' + " Years",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.normal,
+                  fontSize: 40,
+                ),
+              )
+            : Container(),
+        TemplateFunctions.shouldShowTimeUnit(
+          unit: 'days',
+          years: years,
+          days: days,
+          hours: hours,
+          minutes: minutes,
+          seconds: seconds,
+        )
+            ? Transform(
+                transform: Matrix4.translationValues(0, -20, 0),
+                child: Text(
+                  '$days' + " Days",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 50,
+                  ),
+                ),
+              )
+            : Container(),
+        Transform(
+          transform: Matrix4.translationValues(0, -35, 0),
+          child: TemplateFunctions.shouldShowTimeUnit(
+            unit: 'hours',
+            years: years,
+            days: days,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds,
+          )
+              ? Text(
+                  '$hours' + " Hours",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 40,
+                  ),
+                )
+              : Container(),
+        ),
+        Transform(
+          transform: Matrix4.translationValues(0, -47, 0),
+          child: TemplateFunctions.shouldShowTimeUnit(
+            unit: 'minutes',
+            years: years,
+            days: days,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds,
+          )
+              ? Text(
+                  '$minutes' + " Minutes",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 28,
+                  ),
+                )
+              : Container(),
+        ),
+        Transform(
+          transform: Matrix4.translationValues(0, -50, 0),
+          child: TemplateFunctions.shouldShowTimeUnit(
+            unit: 'seconds',
+            years: years,
+            days: days,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds,
+          )
+              ? Text(
+                  '$seconds' + " Seconds",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 20,
+                  ),
+                )
+              : Container(),
+        ),
+        isElapsed
+            ? Transform(
+                transform: Matrix4.translationValues(0, -50, 0),
+                child: const Text(
+                  " (Since)",
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 0, 255, 43),
+                    fontWeight: FontWeight.normal,
+                    fontSize: 20,
+                  ),
+                ),
+              )
+            : Container(),
+      ],
     );
   }
 

@@ -75,7 +75,7 @@ class RenderedWidgetProvider extends ChangeNotifier {
     _dimCount = 0.5;
     _templateId = "template_1";
     _countDownTitle = "Template 1";
-    _image = 'assets/Images/office.jpg'; // Set default image
+    _image = 'assets/Images/cafe.jpg'; // Set default image
     _selectedDate = DateTime.now();
     _createdDate = DateTime.now();
     _isLoading = false;

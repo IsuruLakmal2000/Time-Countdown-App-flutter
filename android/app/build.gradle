@@ -34,12 +34,17 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.circularx.timecountdown"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+        coreLibraryDesugaringEnabled true
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
     }
 
     defaultConfig {
@@ -48,7 +53,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
          minSdkVersion 23 
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 35
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
     }
@@ -73,4 +78,12 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    
+    // Explicit Google Play Billing Library 7.x to meet Google's requirements
+    implementation 'com.android.billingclient:billing:7.1.1'
+    implementation 'com.android.billingclient:billing-ktx:7.1.1'
 }

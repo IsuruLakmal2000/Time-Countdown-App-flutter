@@ -4,12 +4,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Model/UserData.dart';
 
+// Import widget service for updates
+// Note: This will be dynamically imported to avoid circular dependency
+// import 'package:timecountdown/Services/CountdownWidgetService.dart';
+
 class LocalStorageService {
   static const String _countdownsKey = 'countdowns';
   static const String _userDataKey = 'userData';
   static const String _isPurchasedKey = 'isPurchased';
   static const String _countdownCountKey = 'countdownCount';
   static const String _ratingUrlKey = 'ratingUrl';
+  static const String _onboardingCompletedKey = 'onboarding_completed';
 
   // Initialize user data if it doesn't exist
   static Future<void> initializeUserData() async {
@@ -116,6 +121,10 @@ class LocalStorageService {
       
       countdowns.add(newCountdown);
       await _saveCountdowns(countdowns);
+      
+      // Update widget data for home screen widgets
+      await _updateWidgetData();
+      
       print('CountDownData saved successfully!');
     } catch (e) {
       print('Error saving CountDownData: ${e.toString()}');
@@ -130,6 +139,10 @@ class LocalStorageService {
       if (index != -1) {
         countdowns[index] = countDownData;
         await _saveCountdowns(countdowns);
+        
+        // Update widget data for home screen widgets
+        await _updateWidgetData();
+        
         print('CountDownData updated successfully!');
       }
     } catch (e) {
@@ -183,6 +196,9 @@ class LocalStorageService {
       countdowns.removeWhere((countdown) => countdown.countDownId == countdownId);
       await _saveCountdowns(countdowns);
       
+      // Update widget data for home screen widgets
+      await _updateWidgetData();
+      
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Countdown deleted successfully')),
       );
@@ -190,6 +206,67 @@ class LocalStorageService {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to delete countdown: $e')),
       );
+    }
+  }
+
+  // Clear all countdowns (for backup import)
+  static Future<void> clearAllCountdowns() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_countdownsKey);
+    print('All countdowns cleared');
+  }
+
+  // Add countdown without generating new ID (for backup import)
+  static Future<void> addCountdown(CountDownData countdown) async {
+    try {
+      final countdowns = await getCountdowns();
+      countdowns.add(countdown);
+      await _saveCountdowns(countdowns);
+      print('Countdown added successfully: ${countdown.countDownId}');
+    } catch (e) {
+      print('Error adding countdown: ${e.toString()}');
+    }
+  }
+
+  // Update current user data (for backup import)
+  static Future<void> updateCurrentUserData(UserData userData) async {
+    await _saveUserData(userData);
+    print('User data updated successfully');
+  }
+
+  // Template migration - converts removed templates to template_1
+  static Future<void> migrateRemovedTemplates() async {
+    try {
+      final countdowns = await getCountdowns();
+      bool hasChanges = false;
+      
+      for (int i = 0; i < countdowns.length; i++) {
+        final countdown = countdowns[i];
+        if (countdown.countDownTempId == 'template_5' ||
+            countdown.countDownTempId == 'template_6' ||
+            countdown.countDownTempId == 'template_10') {
+          
+          // Create a new countdown with template_1 instead
+          countdowns[i] = CountDownData(
+            countDownId: countdown.countDownId,
+            countDownTempId: 'template_1', // Migrate to template_1
+            countDownTitle: countdown.countDownTitle,
+            countDownTargetDate: countdown.countDownTargetDate,
+            countDownDim: countdown.countDownDim,
+            countDownCreatedDate: countdown.countDownCreatedDate,
+            countDownImage: countdown.countDownImage,
+          );
+          hasChanges = true;
+          print('Migrated countdown ${countdown.countDownId} from ${countdown.countDownTempId} to template_1');
+        }
+      }
+      
+      if (hasChanges) {
+        await _saveCountdowns(countdowns);
+        print('Template migration completed successfully');
+      }
+    } catch (e) {
+      print('Error during template migration: ${e.toString()}');
     }
   }
 
@@ -220,5 +297,46 @@ class LocalStorageService {
   // Auth state changes equivalent (always returns true for local user)
   static Stream<bool> authStateChanges() {
     return Stream.value(true);
+  }
+
+  // Onboarding Operations
+  static Future<bool> isOnboardingCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_onboardingCompletedKey) ?? false;
+  }
+
+  static Future<void> setOnboardingCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingCompletedKey, true);
+    print('Onboarding marked as completed');
+  }
+
+  static Future<void> resetOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingCompletedKey, false);
+    print('Onboarding reset - will show again on next app start');
+  }
+
+  // Update widget data for home screen widgets
+  static Future<void> _updateWidgetData() async {
+    try {
+      final countdowns = await getCountdowns();
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Convert countdown data to a format native Android can easily parse
+      final List<Map<String, dynamic>> widgetData = countdowns.map((countdown) => {
+        'id': countdown.countDownId,
+        'title': countdown.countDownTitle,
+        'targetDate': countdown.countDownTargetDate.millisecondsSinceEpoch,
+        'createdDate': countdown.countDownCreatedDate.millisecondsSinceEpoch,
+      }).toList();
+      
+      // Save to shared preferences with a key the native side can access
+      await prefs.setString('widget_countdowns', json.encode(widgetData));
+      
+      print('Widget data updated: ${widgetData.length} countdowns');
+    } catch (e) {
+      print('Error updating widget data: $e');
+    }
   }
 }

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template1.dart';
-import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template10.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template2.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template3.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template4.dart';
-import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template5.dart';
-import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template6.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template7.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template8.dart';
 import 'package:timecountdown/Component/CountdownCards/CardTemplates/Template9.dart';
-import 'package:timecountdown/Model/TemplateData.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 Widget ShowSelectedTemplate(
@@ -54,24 +50,6 @@ Widget ShowSelectedTemplate(
         templateDateTime: widgetStateProvider.selectedDate,
       );
 
-    case "template_5":
-      return Template5(
-        createdDate: widgetStateProvider.countDownCreatedDate,
-        image: widgetStateProvider.image,
-        dimCount: widgetStateProvider.dimCount,
-        countDownTitle: widgetStateProvider.countDownTitle,
-        templateDateTime: widgetStateProvider.selectedDate,
-      );
-
-    case "template_6":
-      return Template6(
-        createdDate: widgetStateProvider.countDownCreatedDate,
-        image: widgetStateProvider.image,
-        dimCount: widgetStateProvider.dimCount,
-        countDownTitle: widgetStateProvider.countDownTitle,
-        templateDateTime: widgetStateProvider.selectedDate,
-      );
-
     case "template_7":
       return Template7(
         createdDate: widgetStateProvider.countDownCreatedDate,
@@ -98,16 +76,12 @@ Widget ShowSelectedTemplate(
         countDownTitle: widgetStateProvider.countDownTitle,
         templateDateTime: widgetStateProvider.selectedDate,
       );
-    case "template_10":
-      return Template10(
-        createdDate: widgetStateProvider.countDownCreatedDate,
-        image: widgetStateProvider.image,
-        dimCount: widgetStateProvider.dimCount,
-        countDownTitle: widgetStateProvider.countDownTitle,
-        templateDateTime: widgetStateProvider.selectedDate,
-      );
 
+    case "template_5":
+    case "template_6":
+    case "template_10":
     default:
+      // Fallback to Template1 for removed templates or invalid template types
       return Template1(
         createdDate: widgetStateProvider.countDownCreatedDate,
         image: widgetStateProvider.image,

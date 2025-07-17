@@ -39,5 +39,30 @@ class TemplateFunctions {
       colorFilter: colorFilter,
     );
   }
+
+  /// Determines whether a time unit should be shown based on the countdown values
+  static bool shouldShowTimeUnit({
+    required String unit,
+    required int years,
+    required int days,
+    required int hours,
+    required int minutes,
+    required int seconds,
+  }) {
+    switch (unit.toLowerCase()) {
+      case 'years':
+        return years > 0;
+      case 'days':
+        return days > 0 || years > 0;
+      case 'hours':
+        return hours > 0 || days > 0 || years > 0;
+      case 'minutes':
+        return minutes > 0 || hours > 0 || days > 0 || years > 0;
+      case 'seconds':
+        return seconds > 0 || minutes > 0 || hours > 0 || days > 0 || years > 0;
+      default:
+        return true;
+    }
+  }
 }
 

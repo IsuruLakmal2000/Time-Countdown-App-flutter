@@ -87,7 +87,12 @@ class _NewcountdownAddBottomSheetState
         if (widgetStateProvider.image.isEmpty) {
           widgetStateProvider.image = 'assets/Images/office.jpg';
         }
+        // Set default dimCount for new countdown
+        if (widgetStateProvider.dimCount == 0.0) {
+          widgetStateProvider.dimCount = 0.5;
+        }
         print("--------" + widgetStateProvider.selectedDate.toString());
+        print("DimCount set to: ${widgetStateProvider.dimCount}");
         Navigator.push(
           context,
           MaterialPageRoute(
