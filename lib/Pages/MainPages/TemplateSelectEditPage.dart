@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timecountdown/Component/BottomBarComponents/SettingBar.dart';
 import 'package:timecountdown/Pages/MainPages/BottomWidgetBar.dart';
 import 'package:timecountdown/Pages/MainPages/ShowSelectedTemplate.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
@@ -59,6 +60,9 @@ class _TemplateSelectEditPageState extends State<TemplateSelectEditPage> {
               child: BottomWidgetBar(context),
             ),
           ),
+          // Show vertical settings bar when settings is active
+          if (widgetStateProvider.renderedWidget == "settings")
+            SettingsBar(),
           if (widgetStateProvider.isLoading)
             Container(
               color: Color.fromARGB(97, 0, 0, 0),
