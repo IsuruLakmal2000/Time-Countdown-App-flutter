@@ -36,14 +36,18 @@ class BottomBar extends StatelessWidget {
           () {
             widgetStateProvider.renderedWidget = "template";
           },
+          iconSize: 36.0,
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 20.0, bottom: 20),
+          padding: const EdgeInsets.only(top: 8.0, bottom: 16),
           child: SizedBox(
             width: 200,
             child: ElevatedButton(
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                padding: MaterialStateProperty.all<EdgeInsets>(
+                  EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                ),
               ),
               onPressed: () async {
                 // Check if template is premium and user has access
@@ -60,7 +64,13 @@ class BottomBar extends StatelessWidget {
                 // Proceed with saving
                 _saveCountdown(context, widgetStateProvider, editCountDownProvider, userProvider);
               },
-              child: const Text('Save', style: TextStyle(color: Colors.black)),
+              child: const Text(
+                'Save', 
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                ),
+              ),
             ),
           ),
         ),
@@ -72,6 +82,7 @@ class BottomBar extends StatelessWidget {
           () {
             widgetStateProvider.renderedWidget = "settings";
           },
+          iconSize: 36.0,
         ),
       ],
     );

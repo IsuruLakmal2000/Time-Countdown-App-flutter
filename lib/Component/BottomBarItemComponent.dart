@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:provider/provider.dart';
-import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
-
 Widget BottomBarItemComponent(BuildContext context, IconData icon, String title,
-    String renderedWidgetName, Function onTap) {
-  final widgetStateProvider =
-      Provider.of<RenderedWidgetProvider>(context, listen: false);
+    String renderedWidgetName, Function onTap, {double iconSize = 32.0}) {
   return InkWell(
     onTap: () async {
       onTap();
@@ -21,6 +16,7 @@ Widget BottomBarItemComponent(BuildContext context, IconData icon, String title,
           Icon(
             icon,
             color: Color.fromARGB(255, 184, 54, 244),
+            size: iconSize,
           ),
           Text(
             title,

@@ -54,7 +54,10 @@ class _TemplateSelectEditPageState extends State<TemplateSelectEditPage> {
               ),
             ),
             alignment: Alignment.bottomCenter,
-            child: BottomWidgetBar(context),
+            child: Container(
+              margin: EdgeInsets.only(bottom: 50), // Move the bar up by 50px
+              child: BottomWidgetBar(context),
+            ),
           ),
           if (widgetStateProvider.isLoading)
             Container(
