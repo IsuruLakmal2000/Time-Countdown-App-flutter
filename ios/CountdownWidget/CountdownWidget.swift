@@ -24,10 +24,10 @@ struct CountdownWidgetEntryView: View {
                 // Background based on style
                 backgroundView
                 
-                VStack(spacing: 4) {
+                VStack(spacing: 12) {
                     // Title
                     Text(entry.title)
-                        .font(.system(size: min(geometry.size.width * 0.1, 14), weight: .medium))
+                        .font(.system(size: min(geometry.size.width * 0.15, 18), weight: .bold))
                         .foregroundColor(textColor)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -102,10 +102,10 @@ struct CountdownWidgetEntryView: View {
     private func timeUnit(value: Int, label: String, geometry: GeometryProxy) -> some View {
         VStack(spacing: 1) {
             Text("\(value)")
-                .font(.system(size: min(geometry.size.width * 0.12, 18), weight: .bold, design: .rounded))
+                .font(.system(size: min(geometry.size.width * 0.15, 20), weight: .bold, design: .rounded))
                 .foregroundColor(textColor)
             Text(label)
-                .font(.system(size: min(geometry.size.width * 0.06, 8), weight: .medium))
+                .font(.system(size: min(geometry.size.width * 0.08, 12), weight: .medium))
                 .foregroundColor(textColor.opacity(0.7))
         }
         .frame(maxWidth: .infinity)
