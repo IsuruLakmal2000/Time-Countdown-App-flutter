@@ -77,7 +77,8 @@ class CountdownWidgetProvider : AppWidgetProvider() {
             "neomorphism" -> R.layout.countdown_widget_neomorphism
             "gradient" -> R.layout.countdown_widget_gradient
             "sunset" -> R.layout.countdown_widget_sunset
-            else -> R.layout.countdown_widget // Default to glass effect
+            "glass" -> R.layout.countdown_widget
+            else -> R.layout.countdown_widget_neomorphism // Default to neomorphism (free style)
         }
         
         val views = RemoteViews(context.packageName, layoutId)
@@ -157,7 +158,7 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         try {
             // Access Flutter's shared preferences for widget style
             val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            return flutterPrefs.getString("flutter.widget_style", "glass") ?: "glass"
+            return flutterPrefs.getString("flutter.widget_style", "neomorphism") ?: "neomorphism"
         } catch (e: Exception) {
             e.printStackTrace()
             return "neomorphism" // Default to neomorphism (free style)

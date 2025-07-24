@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Model/UserData.dart';
-
-// Import widget service for updates
-// Note: This will be dynamically imported to avoid circular dependency
-// import 'package:timecountdown/Services/CountdownWidgetService.dart';
+import 'package:timecountdown/Services/CountdownWidgetService.dart';
 
 class LocalStorageService {
   static const String _countdownsKey = 'countdowns';
@@ -318,23 +315,11 @@ class LocalStorageService {
   }
 
   // Update widget data for home screen widgets
+  // Update widget data helper method
   static Future<void> _updateWidgetData() async {
     try {
-      final countdowns = await getCountdowns();
-      final prefs = await SharedPreferences.getInstance();
-      
-      // Convert countdown data to a format native Android can easily parse
-      final List<Map<String, dynamic>> widgetData = countdowns.map((countdown) => {
-        'id': countdown.countDownId,
-        'title': countdown.countDownTitle,
-        'targetDate': countdown.countDownTargetDate.millisecondsSinceEpoch,
-        'createdDate': countdown.countDownCreatedDate.millisecondsSinceEpoch,
-      }).toList();
-      
-      // Save to shared preferences with a key the native side can access
-      await prefs.setString('widget_countdowns', json.encode(widgetData));
-      
-      print('Widget data updated: ${widgetData.length} countdowns');
+      // Use the CountdownWidgetService to handle both Android and iOS
+      await CountdownWidgetService.updateWidgetData();
     } catch (e) {
       print('Error updating widget data: $e');
     }

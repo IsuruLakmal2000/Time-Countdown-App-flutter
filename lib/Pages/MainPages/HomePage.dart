@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/CustomSnackBar.dart';
@@ -80,13 +81,24 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             content: Text(
-              'To add a countdown widget to your home screen:\n\n'
-              '1. Go to your home screen\n'
-              '2. Long press on empty space\n'
-              '3. Tap "Widgets"\n'
-              '4. Find "Time CountDown" widget\n'
-              '5. Drag it to your home screen\n'
-              '6. Select which countdown to display',
+              Platform.isAndroid 
+                ? 'To add a countdown widget to your home screen:\n\n'
+                  '1. Go to your home screen\n'
+                  '2. Long press on empty space\n'
+                  '3. Tap "Widgets"\n'
+                  '4. Find "Time CountDown" widget\n'
+                  '5. Drag it to your home screen\n'
+                  '6. Select which countdown to display'
+                : Platform.isIOS 
+                ? 'To add a countdown widget to your home screen:\n\n'
+                  '1. Go to your home screen\n'
+                  '2. Long press on empty space\n'
+                  '3. Tap the "+" button (top left)\n'
+                  '4. Search for "Time CountDown"\n'
+                  '5. Select your preferred size\n'
+                  '6. Tap "Add Widget"\n'
+                  '7. Choose which countdown to display'
+                : 'Home screen widgets are not supported on this platform.',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.8),
                 fontSize: 14,

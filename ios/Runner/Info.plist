@@ -43,5 +43,16 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>timecountdown.widget.config</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>timecountdown</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
