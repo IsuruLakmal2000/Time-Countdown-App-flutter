@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Services/CountdownWidgetService.dart';
 import 'package:timecountdown/Providers/PremiumProvider.dart';
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
+import 'package:timecountdown/Model/CountDownData.dart';
 
 class WidgetStyleSelectionPage extends StatefulWidget {
   const WidgetStyleSelectionPage({Key? key}) : super(key: key);
@@ -14,11 +16,22 @@ class WidgetStyleSelectionPage extends StatefulWidget {
 class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
   String _selectedStyle = CountdownWidgetService.STYLE_GLASS;
   bool _isLoading = true;
+  
+  // Android widget configuration
+  List<CountDownData> _countdowns = [];
+  Map<int, String> _widgetConfiguration = {};
+  Map<int, String> _widgetFrequencyConfiguration = {};
+  int? _configuringWidgetIndex;
+  String? _selectedCountdownId;
+  String _selectedFrequency = CountdownWidgetService.FREQUENCY_15_MIN;
 
   @override
   void initState() {
     super.initState();
     _loadCurrentStyle();
+    if (Platform.isAndroid) {
+      _loadAndroidWidgetData();
+    }
   }
 
   Future<void> _loadCurrentStyle() async {
@@ -46,6 +59,467 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _loadAndroidWidgetData() async {
+    if (!Platform.isAndroid) return;
+    
+    try {
+      print('Loading countdowns and Android widget configuration...');
+      
+      // Load available countdowns
+      final countdowns = await CountdownWidgetService.getAvailableCountdowns();
+      
+      // Load current Android widget configuration
+      final widgetConfig = await CountdownWidgetService.getAndroidWidgetConfiguration();
+      
+      // Load current frequency configuration
+      final frequencyConfig = await CountdownWidgetService.getAndroidWidgetFrequencyConfiguration();
+      
+      print('Loaded ${countdowns.length} countdowns');
+      print('Current Android widget configuration: $widgetConfig');
+      print('Current Android frequency configuration: $frequencyConfig');
+      
+      setState(() {
+        _countdowns = countdowns;
+        _widgetConfiguration = widgetConfig;
+        _widgetFrequencyConfiguration = frequencyConfig;
+      });
+    } catch (e) {
+      print('Error loading Android widget data: $e');
+      setState(() {
+        _countdowns = [];
+        _widgetConfiguration = {};
+        _widgetFrequencyConfiguration = {};
+      });
+    }
+  }
+
+  Future<void> _configureAndroidWidget(int widgetIndex, String countdownId) async {
+    try {
+      await CountdownWidgetService.configureAndroidWidgetWithFrequency(widgetIndex, countdownId, _selectedFrequency);
+      
+      setState(() {
+        _widgetConfiguration[widgetIndex] = countdownId;
+        _widgetFrequencyConfiguration[widgetIndex] = _selectedFrequency;
+        _configuringWidgetIndex = null;
+        _selectedCountdownId = null;
+        _selectedFrequency = CountdownWidgetService.FREQUENCY_15_MIN;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Android Widget $widgetIndex configured successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error configuring Android widget: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to configure Android widget: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  String _formatTimeRemaining(DateTime targetDate) {
+    final timeRemaining = CountdownWidgetService.calculateTimeRemaining(targetDate);
+    return '${timeRemaining['days']}d ${timeRemaining['hours']}h ${timeRemaining['minutes']}m';
+  }
+
+  String _getCountdownTitle(String countdownId) {
+    final countdown = _countdowns.firstWhere(
+      (c) => c.countDownId == countdownId,
+      orElse: () => CountDownData(
+        countDownId: countdownId,
+        countDownTempId: '',
+        countDownTitle: 'Unknown Countdown',
+        countDownTargetDate: DateTime.now(),
+        countDownDim: 0.0,
+        countDownCreatedDate: DateTime.now(),
+        countDownImage: '',
+      ),
+    );
+    return countdown.countDownTitle;
+  }
+
+  String _getFrequencyDisplayName(String frequency) {
+    switch (frequency) {
+      case CountdownWidgetService.FREQUENCY_1_MIN:
+        return 'Every 1 minute';
+      case CountdownWidgetService.FREQUENCY_5_MIN:
+        return 'Every 5 minutes';
+      case CountdownWidgetService.FREQUENCY_15_MIN:
+        return 'Every 15 minutes';
+      case CountdownWidgetService.FREQUENCY_1_HOUR:
+        return 'Every 1 hour';
+      default:
+        return 'Every 15 minutes';
+    }
+  }
+
+  Widget _buildAndroidWidgetConfigurationSection() {
+    if (_configuringWidgetIndex != null) {
+      return _buildAndroidCountdownSelector();
+    } else {
+      return _buildAndroidWidgetList();
+    }
+  }
+
+  Widget _buildAndroidWidgetList() {
+    // Show configured widgets and option to add more
+    List<int> allWidgetIndices = [];
+    
+    // Add all configured widget indices
+    allWidgetIndices.addAll(_widgetConfiguration.keys);
+    
+    // Add next available index for new widget
+    if (allWidgetIndices.isEmpty) {
+      allWidgetIndices.add(1);
+    } else {
+      final maxIndex = allWidgetIndices.reduce((a, b) => a > b ? a : b);
+      allWidgetIndices.add(maxIndex + 1);
+    }
+    allWidgetIndices.sort();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Android Widget Configuration',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Configure each Android widget individually. Each widget can display a different countdown with custom update frequency.',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 20),
+        
+        if (_countdowns.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2C2C2E),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Column(
+              children: [
+                Icon(
+                  Icons.timer_off,
+                  size: 48,
+                  color: Colors.grey,
+                ),
+                SizedBox(height: 12),
+                Text(
+                  'No Active Countdowns',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Create a countdown to display in widgets',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+        else
+          ...allWidgetIndices.map((widgetIndex) {
+            final isConfigured = _widgetConfiguration.containsKey(widgetIndex);
+            final countdownId = _widgetConfiguration[widgetIndex];
+            final frequency = _widgetFrequencyConfiguration[widgetIndex] ?? 'Not set';
+            
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(12),
+                border: isConfigured
+                    ? Border.all(color: Colors.green, width: 1)
+                    : Border.all(color: Colors.grey, width: 1),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(16),
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isConfigured ? Colors.green : Colors.grey,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$widgetIndex',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                title: Text(
+                  'Android Widget $widgetIndex',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isConfigured 
+                          ? 'Showing: ${_getCountdownTitle(countdownId!)}'
+                          : 'Tap to configure',
+                      style: TextStyle(
+                        color: isConfigured ? Colors.white70 : Colors.grey,
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (isConfigured) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Updates: ${_getFrequencyDisplayName(frequency)}',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                trailing: Icon(
+                  isConfigured ? Icons.edit : Icons.add,
+                  color: isConfigured ? Colors.green : Colors.grey,
+                ),
+                onTap: () {
+                  setState(() {
+                    _configuringWidgetIndex = widgetIndex;
+                    _selectedCountdownId = countdownId;
+                    _selectedFrequency = _widgetFrequencyConfiguration[widgetIndex] ?? CountdownWidgetService.FREQUENCY_15_MIN;
+                  });
+                },
+              ),
+            );
+          }).toList(),
+      ],
+    );
+  }
+
+  Widget _buildAndroidCountdownSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () {
+                setState(() {
+                  _configuringWidgetIndex = null;
+                  _selectedCountdownId = null;
+                  _selectedFrequency = CountdownWidgetService.FREQUENCY_15_MIN;
+                });
+              },
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Configure Android Widget $_configuringWidgetIndex',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        
+        // Countdown selection
+        const Text(
+          'Select Countdown',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        
+        ..._countdowns.map((countdown) {
+          final isSelected = _selectedCountdownId == countdown.countDownId;
+          
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            decoration: BoxDecoration(
+              color: isSelected 
+                  ? const Color(0xFF3a3a3a)
+                  : const Color(0xFF2C2C2E),
+              borderRadius: BorderRadius.circular(12),
+              border: isSelected
+                  ? Border.all(color: Colors.green, width: 2)
+                  : null,
+            ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(12),
+              title: Text(
+                countdown.countDownTitle,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 2),
+                  Text(
+                    _formatTimeRemaining(countdown.countDownTargetDate),
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Target: ${countdown.countDownTargetDate.day}/${countdown.countDownTargetDate.month}/${countdown.countDownTargetDate.year}',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+              trailing: isSelected
+                  ? const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 20,
+                    )
+                  : const Icon(
+                      Icons.radio_button_unchecked,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+              onTap: () {
+                setState(() {
+                  _selectedCountdownId = countdown.countDownId;
+                });
+              },
+            ),
+          );
+        }).toList(),
+        
+        const SizedBox(height: 20),
+        
+        // Frequency selector
+        const Text(
+          'Update Frequency',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            _buildFrequencyOption(CountdownWidgetService.FREQUENCY_1_MIN, '1 min'),
+            const SizedBox(width: 8),
+            _buildFrequencyOption(CountdownWidgetService.FREQUENCY_5_MIN, '5 min'),
+            const SizedBox(width: 8),
+            _buildFrequencyOption(CountdownWidgetService.FREQUENCY_15_MIN, '15 min'),
+            const SizedBox(width: 8),
+            _buildFrequencyOption(CountdownWidgetService.FREQUENCY_1_HOUR, '1 hour'),
+          ],
+        ),
+        
+        const SizedBox(height: 20),
+        
+        // Configure button
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _selectedCountdownId != null && _configuringWidgetIndex != null
+                ? () => _configureAndroidWidget(_configuringWidgetIndex!, _selectedCountdownId!)
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              disabledBackgroundColor: Colors.grey.shade600,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Text(
+              'Configure Android Widget $_configuringWidgetIndex',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFrequencyOption(String frequency, String label) {
+    final isSelected = _selectedFrequency == frequency;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedFrequency = frequency;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.green : const Color(0xFF3a3a3a),
+            borderRadius: BorderRadius.circular(8),
+            border: isSelected
+                ? Border.all(color: Colors.green, width: 2)
+                : Border.all(color: Colors.grey, width: 1),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.white70,
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _updateStyle(String style) async {
@@ -392,6 +866,12 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                           previewColor: const Color(0xFF2C2C2E),
                           borderColor: Colors.grey.withOpacity(0.3),
                         ),
+                        
+                        // Android Widget Configuration Section
+                        if (Platform.isAndroid) ...[
+                          const SizedBox(height: 40),
+                          _buildAndroidWidgetConfigurationSection(),
+                        ],
                         
                         const SizedBox(height: 30),
                       ],

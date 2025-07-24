@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Pages/AppWrapper.dart';
 import 'package:timecountdown/Pages/WidgetPages/WidgetConfigurationPage.dart';
-import 'package:timecountdown/Pages/WidgetPages/IOSMultiWidgetConfigurationPage.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/PremiumProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
@@ -63,30 +62,17 @@ class MyApp extends StatelessWidget {
       home: AppWrapper(),
       routes: {
         '/widget_config': (context) => WidgetConfigurationPage(),
-        '/ios_widget_config': (context) => IOSMultiWidgetConfigurationPage(),
       },
       onGenerateRoute: (settings) {
         // Handle deep links
         if (settings.name?.contains('widget-config') == true) {
-          if (Platform.isIOS) {
-            return MaterialPageRoute(
-              builder: (context) => IOSMultiWidgetConfigurationPage(),
-              settings: settings,
-            );
-          } else {
-            return MaterialPageRoute(
-              builder: (context) => WidgetConfigurationPage(),
-              settings: settings,
-            );
-          }
-        } else if (settings.name == '/widget_config') {
           return MaterialPageRoute(
             builder: (context) => WidgetConfigurationPage(),
             settings: settings,
           );
-        } else if (settings.name == '/ios_widget_config') {
+        } else if (settings.name == '/widget_config') {
           return MaterialPageRoute(
-            builder: (context) => IOSMultiWidgetConfigurationPage(),
+            builder: (context) => WidgetConfigurationPage(),
             settings: settings,
           );
         }

@@ -1,11 +1,13 @@
 package com.circularx.timecountdown
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.SystemClock
 import android.widget.RemoteViews
 import java.util.*
 import java.text.SimpleDateFormat
@@ -39,6 +41,8 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         // Update all widgets
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
+            // Schedule next update based on widget frequency
+            scheduleNextUpdate(context, appWidgetId)
         }
     }
 
@@ -48,6 +52,9 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         val editor = prefs.edit()
         for (appWidgetId in appWidgetIds) {
             editor.remove(PREF_PREFIX_KEY + appWidgetId)
+            editor.remove("frequency_$appWidgetId")
+            // Cancel scheduled updates for deleted widgets
+            cancelScheduledUpdate(context, appWidgetId)
         }
         editor.apply()
     }
@@ -239,3 +246,61 @@ fun saveSelectedCountdownId(context: Context, appWidgetId: Int, countdownId: Str
     editor.putString(CountdownWidgetProvider.PREF_PREFIX_KEY + appWidgetId, countdownId)
     editor.apply()
 }
+
+// Extension function to save widget frequency
+fun saveWidgetFrequency(context: Context, appWidgetId: Int, frequency: String) {
+    val prefs = context.getSharedPreferences(CountdownWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+    val editor = prefs.edit()
+    editor.putString("frequency_$appWidgetId", frequency)
+    editor.apply()
+}
+
+// Extension function to get widget frequency
+fun getWidgetFrequency(context: Context, appWidgetId: Int): String {
+    val prefs = context.getSharedPreferences(CountdownWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
+    return prefs.getString("frequency_$appWidgetId", "15min") ?: "15min"
+}
+
+private fun scheduleNextUpdate(context: Context, appWidgetId: Int) {
+        val frequency = getWidgetFrequency(context, appWidgetId)
+        val updateIntervalMs = when (frequency) {
+            "1min" -> 60 * 1000L
+            "5min" -> 5 * 60 * 1000L
+            "15min" -> 15 * 60 * 1000L
+            "1hour" -> 60 * 60 * 1000L
+            else -> 15 * 60 * 1000L // Default to 15 minutes
+        }
+        
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, CountdownWidgetProvider::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+        }
+        
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            appWidgetId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        
+        val nextUpdateTime = SystemClock.elapsedRealtime() + updateIntervalMs
+        alarmManager.setExact(AlarmManager.ELAPSED_REALTIME, nextUpdateTime, pendingIntent)
+    }
+    
+    private fun cancelScheduledUpdate(context: Context, appWidgetId: Int) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, CountdownWidgetProvider::class.java).apply {
+            action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(appWidgetId))
+        }
+        
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            appWidgetId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        
+        alarmManager.cancel(pendingIntent)
+    }

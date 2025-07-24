@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Services/CountdownWidgetService.dart';
@@ -15,6 +16,10 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
   List<CountDownData> _countdowns = [];
   bool _isLoading = true;
   String? _selectedCountdownId;
+  String _selectedFrequency = CountdownWidgetService.FREQUENCY_15_MIN;
+  
+  // Initialize platform detection directly in the variable declaration
+  late final bool _isAndroid = Platform.isAndroid;
 
   @override
   void initState() {
@@ -24,7 +29,6 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
     // Fallback timeout to prevent infinite loading
     Timer(const Duration(seconds: 10), () {
       if (_isLoading && mounted) {
-        print('Loading timeout reached, setting loading to false');
         setState(() {
           _isLoading = false;
         });
@@ -34,15 +38,15 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
 
   Future<void> _loadCountdowns() async {
     try {
-      print('Loading countdowns for widget configuration...');
       final countdowns = await CountdownWidgetService.getAvailableCountdowns();
-      print('Loaded ${countdowns.length} countdowns');
-      setState(() {
-        _countdowns = countdowns;
-        _isLoading = false;
-      });
+      
+      if (mounted) {
+        setState(() {
+          _countdowns = countdowns;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      print('Error loading countdowns: $e');
       setState(() {
         _countdowns = [];
         _isLoading = false;
@@ -71,10 +75,31 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
     }
 
     try {
-      await CountdownWidgetService.configureWidget(_selectedCountdownId!);
-      // Widget configuration handled by native side
+      // Use platform-specific configuration with frequency
+      if (_isAndroid || Platform.isAndroid) {
+        // For Android, we need a widget ID - get it from the platform
+        final widgetId = await CountdownWidgetService.getWidgetId();
+        if (widgetId != -1) {
+          await CountdownWidgetService.configureAndroidWidgetWithFrequency(widgetId, _selectedCountdownId!, _selectedFrequency);
+        } else {
+          // Fallback to basic configuration
+          await CountdownWidgetService.configureWidget(_selectedCountdownId!);
+        }
+      } else {
+        // For iOS, use the basic configuration (frequency is handled internally)
+        await CountdownWidgetService.configureIOSWidget(_selectedCountdownId!);
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Widget configured successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
     } catch (e) {
-      print('Error configuring widget: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to configure widget: $e'),
@@ -88,7 +113,7 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
     try {
       await CountdownWidgetService.cancelConfiguration();
     } catch (e) {
-      print('Error canceling configuration: $e');
+      // Handle error silently or show user-friendly message if needed
     }
   }
 
@@ -121,7 +146,13 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
             )
           : _countdowns.isEmpty
               ? _buildEmptyState()
-              : _buildCountdownList(),
+              : Column(
+                  children: [
+                    Expanded(child: _buildCountdownList()),
+                    // Show frequency selector for Android devices only
+                    if (_isAndroid) _buildFrequencySelector(),
+                  ],
+                ),
       bottomNavigationBar: _buildBottomBar(),
     );
   }
@@ -389,6 +420,78 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFrequencySelector() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF16213E),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.1),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Update Frequency',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildFrequencyOption(CountdownWidgetService.FREQUENCY_1_MIN, '1 min'),
+              const SizedBox(width: 8),
+              _buildFrequencyOption(CountdownWidgetService.FREQUENCY_5_MIN, '5 min'),
+              const SizedBox(width: 8),
+              _buildFrequencyOption(CountdownWidgetService.FREQUENCY_15_MIN, '15 min'),
+              const SizedBox(width: 8),
+              _buildFrequencyOption(CountdownWidgetService.FREQUENCY_1_HOUR, '1 hour'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFrequencyOption(String frequency, String label) {
+    final isSelected = _selectedFrequency == frequency;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedFrequency = frequency;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.blue : const Color(0xFF0F172A),
+            borderRadius: BorderRadius.circular(8),
+            border: isSelected
+                ? Border.all(color: Colors.blue, width: 2)
+                : Border.all(color: Colors.grey.withOpacity(0.3), width: 1),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
       ),
     );
   }

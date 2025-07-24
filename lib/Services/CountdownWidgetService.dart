@@ -298,4 +298,67 @@ class CountdownWidgetService {
       return STYLE_NEOMORPHISM;
     }
   }
+
+  // Configure Android widget with frequency
+  static Future<void> configureAndroidWidgetWithFrequency(int widgetId, String countdownId, String frequency) async {
+    try {
+      await platform.invokeMethod('configureWidget', {
+        'countdownId': countdownId,
+        'frequency': frequency,
+        'widgetId': widgetId,
+      });
+      print('Android widget $widgetId configured with countdown: $countdownId and frequency: $frequency');
+    } on PlatformException catch (e) {
+      print("Failed to configure Android widget with frequency: '${e.message}'.");
+      throw e;
+    }
+  }
+  
+  // Get Android widget frequency configuration
+  static Future<Map<int, String>> getAndroidWidgetFrequencyConfiguration() async {
+    try {
+      final result = await platform.invokeMethod('getAndroidWidgetFrequencyConfiguration');
+      final Map<int, String> config = {};
+      if (result is Map) {
+        result.forEach((key, value) {
+          if (key is int && value is String) {
+            config[key] = value;
+          } else if (key is String && value is String) {
+            final index = int.tryParse(key);
+            if (index != null) {
+              config[index] = value;
+            }
+          }
+        });
+      }
+      return config;
+    } catch (e) {
+      print('Error getting Android widget frequency configuration: $e');
+      return {};
+    }
+  }
+
+  // Get Android widget configuration
+  static Future<Map<int, String>> getAndroidWidgetConfiguration() async {
+    try {
+      final result = await platform.invokeMethod('getAndroidWidgetConfiguration');
+      final Map<int, String> config = {};
+      if (result is Map) {
+        result.forEach((key, value) {
+          if (key is int && value is String) {
+            config[key] = value;
+          } else if (key is String && value is String) {
+            final index = int.tryParse(key);
+            if (index != null) {
+              config[index] = value;
+            }
+          }
+        });
+      }
+      return config;
+    } catch (e) {
+      print('Error getting Android widget configuration: $e');
+      return {};
+    }
+  }
 }

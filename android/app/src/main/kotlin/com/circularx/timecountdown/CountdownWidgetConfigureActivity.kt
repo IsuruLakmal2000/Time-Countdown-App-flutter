@@ -53,8 +53,10 @@ class CountdownWidgetConfigureActivity : FlutterActivity() {
                 }
                 "configureWidget" -> {
                     val countdownId = call.argument<String>("countdownId")
+                    val frequency = call.argument<String>("frequency") ?: "15min" // Default to 15 minutes
+                    val widgetId = call.argument<Int>("widgetId") ?: appWidgetId
                     if (countdownId != null) {
-                        configureWidget(countdownId)
+                        configureWidget(countdownId, frequency, widgetId)
                         result.success(true)
                     } else {
                         result.error("INVALID_ARGUMENT", "Countdown ID is required", null)
@@ -64,6 +66,14 @@ class CountdownWidgetConfigureActivity : FlutterActivity() {
                     cancelConfiguration()
                     result.success(true)
                 }
+                "getAndroidWidgetFrequencyConfiguration" -> {
+                    val frequencyConfig = getWidgetFrequencyConfiguration()
+                    result.success(frequencyConfig)
+                }
+                "getAndroidWidgetConfiguration" -> {
+                    val widgetConfig = getWidgetConfiguration()
+                    result.success(widgetConfig)
+                }
                 else -> {
                     result.notImplemented()
                 }
@@ -71,17 +81,18 @@ class CountdownWidgetConfigureActivity : FlutterActivity() {
         }
     }
 
-    private fun configureWidget(countdownId: String) {
-        // Save the selected countdown ID
-        saveSelectedCountdownId(this, appWidgetId, countdownId)
+    private fun configureWidget(countdownId: String, frequency: String = "15min", widgetId: Int = appWidgetId) {
+        // Save the selected countdown ID and frequency
+        saveSelectedCountdownId(this, widgetId, countdownId)
+        saveWidgetFrequency(this, widgetId, frequency)
         
         // Update the widget
         val appWidgetManager = AppWidgetManager.getInstance(this)
-        CountdownWidgetProvider().onUpdate(this, appWidgetManager, intArrayOf(appWidgetId))
+        CountdownWidgetProvider().onUpdate(this, appWidgetManager, intArrayOf(widgetId))
         
         // Return success result
         val resultValue = Intent()
-        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
         setResult(Activity.RESULT_OK, resultValue)
         finish()
     }
@@ -89,6 +100,44 @@ class CountdownWidgetConfigureActivity : FlutterActivity() {
     private fun cancelConfiguration() {
         setResult(Activity.RESULT_CANCELED)
         finish()
+    }
+    
+    // Save widget frequency preference
+    private fun saveWidgetFrequency(context: android.content.Context, appWidgetId: Int, frequency: String) {
+        val prefs = context.getSharedPreferences("countdown_widget_prefs", android.content.Context.MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.putString("frequency_$appWidgetId", frequency)
+        editor.apply()
+    }
+
+    // Get widget frequency configuration
+    private fun getWidgetFrequencyConfiguration(): Map<String, String> {
+        val prefs = getSharedPreferences("countdown_widget_prefs", android.content.Context.MODE_PRIVATE)
+        val frequencyConfig = mutableMapOf<String, String>()
+        
+        for ((key, value) in prefs.all) {
+            if (key.startsWith("frequency_") && value is String) {
+                val widgetId = key.removePrefix("frequency_")
+                frequencyConfig[widgetId] = value
+            }
+        }
+        
+        return frequencyConfig
+    }
+
+    // Get widget configuration
+    private fun getWidgetConfiguration(): Map<String, String> {
+        val prefs = getSharedPreferences("countdown_widget_prefs", android.content.Context.MODE_PRIVATE)
+        val widgetConfig = mutableMapOf<String, String>()
+        
+        for ((key, value) in prefs.all) {
+            if (key.startsWith("appwidget_") && value is String) {
+                val widgetId = key.removePrefix("appwidget_")
+                widgetConfig[widgetId] = value
+            }
+        }
+        
+        return widgetConfig
     }
 
     override fun getInitialRoute(): String {
