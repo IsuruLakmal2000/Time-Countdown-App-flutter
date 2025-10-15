@@ -5,8 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/AlertPopupComponent.dart';
 import 'package:timecountdown/Component/ButtonComponent.dart';
 import 'package:timecountdown/Component/TextFieldComponent.dart';
-import 'package:timecountdown/Model/TemplateData.dart';
-import 'package:timecountdown/Pages/MainPages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/MainPages/TemplateSelectEditPage.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 

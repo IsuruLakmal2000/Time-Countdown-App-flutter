@@ -5,7 +5,6 @@ import 'package:timecountdown/Services/BackupService.dart';
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
 import 'package:timecountdown/Pages/SideBar/CustomListTile.dart';
-import 'package:timecountdown/Pages/WidgetPages/WidgetStyleSelectionPage.dart';
 import 'package:timecountdown/Providers/PremiumProvider.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -102,18 +101,6 @@ Widget SideBar(BuildContext context, dynamic user) {
                       icon: Icons.home,
                       title: 'Home',
                       onTap: () => {},
-                    ),
-                    CustomListTile(
-                      icon: Icons.widgets,
-                      title: 'Widget Style',
-                      onTap: () => {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => WidgetStyleSelectionPage(),
-                          ),
-                        ),
-                      },
                     ),
                     if (!isPremium)
                       CustomListTile(

@@ -35,7 +35,7 @@ Widget TemplateSelectBarItem(BuildContext context, IconData icon, String title,
                   icon,
                   color: isPro 
                     ? Colors.amber
-                    : Color.fromARGB(255, 184, 54, 244),
+                    : Colors.white,
                   size: 40,
                 ),
               ),

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Pages/AppWrapper.dart';
-import 'package:timecountdown/Pages/WidgetPages/WidgetConfigurationPage.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/PremiumProvider.dart';
-import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
+import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/Theme/Theme.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -22,10 +21,10 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => Editcountdownprovider()),
-        ChangeNotifierProvider(create: (context) => RenderedWidgetProvider()),
         ChangeNotifierProvider(
             create: (context) => PremiumProvider()..checkPremiumStatus()),
         ChangeNotifierProvider(create: (context) => UserProvider()..fetchUserData()),
+        ChangeNotifierProvider(create: (context) => RenderedWidgetProvider()),
       ],
       child: const MyApp(),
     ),
@@ -60,24 +59,6 @@ class MyApp extends StatelessWidget {
       title: 'Time Countdown',
       theme: darkMode,
       home: AppWrapper(),
-      routes: {
-        '/widget_config': (context) => WidgetConfigurationPage(),
-      },
-      onGenerateRoute: (settings) {
-        // Handle deep links
-        if (settings.name?.contains('widget-config') == true) {
-          return MaterialPageRoute(
-            builder: (context) => WidgetConfigurationPage(),
-            settings: settings,
-          );
-        } else if (settings.name == '/widget_config') {
-          return MaterialPageRoute(
-            builder: (context) => WidgetConfigurationPage(),
-            settings: settings,
-          );
-        }
-        return null;
-      },
     );
   }
 }

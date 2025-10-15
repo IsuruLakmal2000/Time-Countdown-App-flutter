@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Model/UserData.dart';
-import 'package:timecountdown/Services/CountdownWidgetService.dart';
 
 class LocalStorageService {
   static const String _countdownsKey = 'countdowns';
   static const String _userDataKey = 'userData';
-  static const String _isPurchasedKey = 'isPurchased';
-  static const String _countdownCountKey = 'countdownCount';
-  static const String _ratingUrlKey = 'ratingUrl';
   static const String _onboardingCompletedKey = 'onboarding_completed';
 
   // Initialize user data if it doesn't exist
@@ -119,9 +115,6 @@ class LocalStorageService {
       countdowns.add(newCountdown);
       await _saveCountdowns(countdowns);
       
-      // Update widget data for home screen widgets
-      await _updateWidgetData();
-      
       print('CountDownData saved successfully!');
     } catch (e) {
       print('Error saving CountDownData: ${e.toString()}');
@@ -136,9 +129,6 @@ class LocalStorageService {
       if (index != -1) {
         countdowns[index] = countDownData;
         await _saveCountdowns(countdowns);
-        
-        // Update widget data for home screen widgets
-        await _updateWidgetData();
         
         print('CountDownData updated successfully!');
       }
@@ -192,9 +182,6 @@ class LocalStorageService {
       final countdowns = await getCountdowns();
       countdowns.removeWhere((countdown) => countdown.countDownId == countdownId);
       await _saveCountdowns(countdowns);
-      
-      // Update widget data for home screen widgets
-      await _updateWidgetData();
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Countdown deleted successfully')),
@@ -312,16 +299,5 @@ class LocalStorageService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_onboardingCompletedKey, false);
     print('Onboarding reset - will show again on next app start');
-  }
-
-  // Update widget data for home screen widgets
-  // Update widget data helper method
-  static Future<void> _updateWidgetData() async {
-    try {
-      // Use the CountdownWidgetService to handle both Android and iOS
-      await CountdownWidgetService.updateWidgetData();
-    } catch (e) {
-      print('Error updating widget data: $e');
-    }
   }
 }

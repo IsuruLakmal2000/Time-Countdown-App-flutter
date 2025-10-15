@@ -146,13 +146,13 @@ class _SettingsBarState extends State<SettingsBar> with SingleTickerProviderStat
               color: Colors.black.withOpacity(0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Color.fromARGB(255, 184, 54, 244).withOpacity(0.3),
+                color: Colors.white.withOpacity(0.3),
                 width: 1,
               ),
             ),
             child: Icon(
               icon,
-              color: Color.fromARGB(255, 184, 54, 244),
+              color: Colors.white,
               size: 34,
             ),
           ),

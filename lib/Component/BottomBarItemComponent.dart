@@ -15,7 +15,7 @@ Widget BottomBarItemComponent(BuildContext context, IconData icon, String title,
         children: [
           Icon(
             icon,
-            color: Color.fromARGB(255, 184, 54, 244),
+            color: Colors.white,
             size: iconSize,
           ),
           Text(

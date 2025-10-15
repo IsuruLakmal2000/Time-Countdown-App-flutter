@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/CustomSnackBar.dart';
 import 'package:timecountdown/Services/LocalStorageService.dart';
-import 'package:timecountdown/Services/CountdownWidgetService.dart';
 import 'package:timecountdown/NotificationService/NotificationService.dart';
 import 'package:timecountdown/Pages/MainPages/CountdownCardTemplate.dart';
 import 'package:timecountdown/Pages/AddCountdown/NewCountDownAddBottomSheet.dart';
@@ -11,7 +9,6 @@ import 'package:timecountdown/Pages/EditCountdown/EditCountDownBottomSheet.dart'
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/SideBar/SideBar.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
-import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:timecountdown/main.dart';
 
@@ -49,83 +46,6 @@ class _HomePageState extends State<HomePage> {
         });
       }
     });
-  }
-
-  void _showWidgetConfigurationDialog() async {
-    try {
-      // Update widget data first
-      await CountdownWidgetService.updateWidgetData();
-      
-      final countdowns = await LocalStorageService.getCountdowns();
-      
-      if (countdowns.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Create a countdown first to add it as a widget'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        return;
-      }
-      
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFF1A1A2E),
-            title: Text(
-              'Add Home Screen Widget',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: Text(
-              Platform.isAndroid 
-                ? 'To add a countdown widget to your home screen:\n\n'
-                  '1. Go to your home screen\n'
-                  '2. Long press on empty space\n'
-                  '3. Tap "Widgets"\n'
-                  '4. Find "Time CountDown" widget\n'
-                  '5. Drag it to your home screen\n'
-                  '6. Select which countdown to display'
-                : Platform.isIOS 
-                ? 'To add a countdown widget to your home screen:\n\n'
-                  '1. Go to your home screen\n'
-                  '2. Long press on empty space\n'
-                  '3. Tap the "+" button (top left)\n'
-                  '4. Search for "Time CountDown"\n'
-                  '5. Select your preferred size\n'
-                  '6. Tap "Add Widget"\n'
-                  '7. Choose which countdown to display'
-                : 'Home screen widgets are not supported on this platform.',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 14,
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text(
-                  'Got it!',
-                  style: TextStyle(color: Colors.blue),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error preparing widget data: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   void getUserDetails() async {
@@ -232,14 +152,6 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             color: Colors.white,
-            onPressed: _showWidgetConfigurationDialog,
-            icon: const Icon(
-              Icons.widgets,
-              color: Colors.blue,
-            ),
-          ),
-          IconButton(
-            color: Colors.white,
             onPressed: () {
               showDeleteConfirmationDialog(
                   context, editCountDownProvider.currentCountDownId);
@@ -312,12 +224,8 @@ class _HomePageState extends State<HomePage> {
   void showNewcountdownAddpage(BuildContext context) {
     final editCountDownProvider =
         Provider.of<Editcountdownprovider>(context, listen: false);
-    final widgetStateProvider =
-        Provider.of<RenderedWidgetProvider>(context, listen: false);
-    
+
     editCountDownProvider.isEditCountDown = false;
-    // Reset provider to default values for new countdown
-    widgetStateProvider.resetForNewCountdown();
 
     showModalBottomSheet(
       backgroundColor: Color.fromARGB(255, 0, 0, 0),
@@ -353,8 +261,6 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> showDeleteConfirmationDialog(
       BuildContext context, String countdownId) async {
-    final widgetStateProvider =
-        Provider.of<RenderedWidgetProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     return showDialog<void>(
@@ -376,7 +282,6 @@ class _HomePageState extends State<HomePage> {
               child: const Text('Delete'),
               onPressed: () async {
                 // Call the delete function here
-                widgetStateProvider.isLoading = true;
                 await LocalStorageService.deleteCountdown(countdownId, context);
                 
                 // Ensure user data is available before updating countdown count
@@ -392,7 +297,6 @@ class _HomePageState extends State<HomePage> {
                 }
                 
                 context.read<UserProvider>().fetchUserData();
-                widgetStateProvider.isLoading = false;
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
