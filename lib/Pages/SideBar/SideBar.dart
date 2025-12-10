@@ -5,6 +5,7 @@ import 'package:timecountdown/Services/BackupService.dart';
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
 import 'package:timecountdown/Pages/SideBar/CustomListTile.dart';
+import 'package:timecountdown/Pages/WidgetPages/WidgetSettingsPage.dart';
 import 'package:timecountdown/Providers/PremiumProvider.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -118,23 +119,28 @@ Widget SideBar(BuildContext context, dynamic user) {
                     CustomListTile(
                       icon: Icons.star,
                       title: 'Rate Us!',
-                        onTap: () async {
+                      onTap: () async {
                         String url;
-                        if (Theme.of(context).platform == TargetPlatform.android) {
-                          url = 'https://play.google.com/store/apps/details?id=com.example.app'; // Example Play Store link
-                        } else if (Theme.of(context).platform == TargetPlatform.iOS) {
-                          url = 'https://apps.apple.com/app/id123456789'; // Example App Store link
+                        if (Theme.of(context).platform ==
+                            TargetPlatform.android) {
+                          url =
+                              'https://play.google.com/store/apps/details?id=com.example.app'; // Example Play Store link
+                        } else if (Theme.of(context).platform ==
+                            TargetPlatform.iOS) {
+                          url =
+                              'https://apps.apple.com/app/id123456789'; // Example App Store link
                         } else {
                           url = 'https://example.com'; // Fallback link
                         }
                         final Uri uri = Uri.parse(url);
                         if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          await launchUrl(uri,
+                              mode: LaunchMode.externalApplication);
                         } else {
                           throw 'Could not launch $url';
                         }
-                        },
-                      ),
+                      },
+                    ),
                     CustomListTile(
                       icon: Icons.privacy_tip,
                       title: 'Privacy Policy',
@@ -162,6 +168,19 @@ Widget SideBar(BuildContext context, dynamic user) {
                             ),
                           );
                         }
+                      },
+                    ),
+                    // Widget Settings
+                    CustomListTile(
+                      icon: Icons.settings_applications,
+                      title: 'Widget Settings',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WidgetSettingsPage(),
+                          ),
+                        );
                       },
                     ),
                     // Import Backup - always visible, premium check inside

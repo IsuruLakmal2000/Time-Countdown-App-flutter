@@ -15,7 +15,7 @@ import java.io.File
 import java.util.*
 import java.text.SimpleDateFormat
 
-class CountdownWidgetProvider : AppWidgetProvider() {
+open class CountdownWidgetProvider : AppWidgetProvider() {
 
     companion object {
         const val WIDGET_CLICK_ACTION = "com.circularx.timecountdown.WIDGET_CLICK"
@@ -29,11 +29,27 @@ class CountdownWidgetProvider : AppWidgetProvider() {
             val thisWidget = android.content.ComponentName(context, CountdownWidgetProvider::class.java)
             val allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
             
+            // Also notify the small widget provider if it exists
+            val smallWidget = android.content.ComponentName(context, CountdownWidgetProviderSmall::class.java)
+            val smallWidgetIds = appWidgetManager.getAppWidgetIds(smallWidget)
+
+            // Update standard widgets
             val intent = Intent(context, CountdownWidgetProvider::class.java)
             intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds)
             context.sendBroadcast(intent)
+            
+            // Update small widgets
+            val intentSmall = Intent(context, CountdownWidgetProviderSmall::class.java)
+            intentSmall.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            intentSmall.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, smallWidgetIds)
+            context.sendBroadcast(intentSmall)
         }
+    }
+    
+    // Allow subclasses to define their own layout
+    open fun getLayoutId(): Int {
+        return R.layout.countdown_widget
     }
 
     override fun onUpdate(
@@ -83,15 +99,8 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         appWidgetId: Int
     ) {
         android.util.Log.d("WidgetDebug", "updateAppWidget called for ID: $appWidgetId")
-        // Get widget style preference to determine which layout to use
-        val widgetStyle = getWidgetStyle(context)
-        val layoutId = when (widgetStyle) {
-            "neomorphism" -> R.layout.countdown_widget_neomorphism
-            "gradient" -> R.layout.countdown_widget_gradient
-            "sunset" -> R.layout.countdown_widget_sunset
-            "glass" -> R.layout.countdown_widget
-            else -> R.layout.countdown_widget_neomorphism // Default to neomorphism (free style)
-        }
+        // Use the layout defined by this provider (or subclass)
+        val layoutId = getLayoutId()
         
         val views = RemoteViews(context.packageName, layoutId)
         
@@ -177,25 +186,63 @@ class CountdownWidgetProvider : AppWidgetProvider() {
 
     private fun loadBitmap(context: Context, imagePath: String): Bitmap? {
         return try {
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+
+            // First pass: Decode bounds only
             if (imagePath.startsWith("assets/")) {
-                // Load from assets
-                // Flutter assets are stored in the "flutter_assets" directory within Android assets
                 val assetPath = "flutter_assets/" + imagePath
-                val inputStream = context.assets.open(assetPath)
-                BitmapFactory.decodeStream(inputStream)
+                context.assets.open(assetPath).use { 
+                    BitmapFactory.decodeStream(it, null, options) 
+                }
             } else {
-                // Load from file system
                 val file = File(imagePath)
                 if (file.exists()) {
-                    BitmapFactory.decodeFile(file.absolutePath)
+                    BitmapFactory.decodeFile(file.absolutePath, options)
                 } else {
-                    null
+                    return null
                 }
+            }
+
+            // Calculate inSampleSize
+            // Target roughly 800x480 for widget background (balance between quality and memory)
+            options.inSampleSize = calculateInSampleSize(options, 800, 480)
+
+            // Second pass: Decode with inSampleSize
+            options.inJustDecodeBounds = false
+            
+            if (imagePath.startsWith("assets/")) {
+                val assetPath = "flutter_assets/" + imagePath
+                context.assets.open(assetPath).use { 
+                    BitmapFactory.decodeStream(it, null, options) 
+                }
+            } else {
+                BitmapFactory.decodeFile(File(imagePath).absolutePath, options)
             }
         } catch (e: Exception) {
             e.printStackTrace()
             null
+        } catch (e: OutOfMemoryError) {
+            e.printStackTrace()
+            null
         }
+    }
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
     }
     
     private fun calculateTimeRemaining(targetDate: Long): TimeRemaining {
@@ -219,16 +266,7 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         return prefs.getString(PREF_PREFIX_KEY + appWidgetId, "") ?: ""
     }
 
-    private fun getWidgetStyle(context: Context): String {
-        try {
-            // Access Flutter's shared preferences for widget style
-            val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-            return flutterPrefs.getString("flutter.widget_style", "neomorphism") ?: "neomorphism"
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return "neomorphism" // Default to neomorphism (free style)
-        }
-    }
+
 
     private fun getCountdownData(context: Context, countdownId: String): CountdownData? {
         try {
@@ -304,6 +342,20 @@ fun saveWidgetFrequency(context: Context, appWidgetId: Int, frequency: String) {
 
 // Extension function to get widget frequency
 fun getWidgetFrequency(context: Context, appWidgetId: Int): String {
+    try {
+        // Try to get global frequency first
+        val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        val globalFreq = flutterPrefs.getString("flutter.global_widget_frequency", null)
+        
+        if (globalFreq != null && globalFreq.isNotEmpty()) {
+            android.util.Log.d("WidgetDebug", "Using global frequency: $globalFreq")
+            return globalFreq
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
+    // Fallback to widget specific or default
     val prefs = context.getSharedPreferences(CountdownWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
     return prefs.getString("frequency_$appWidgetId", "15min") ?: "15min"
 }

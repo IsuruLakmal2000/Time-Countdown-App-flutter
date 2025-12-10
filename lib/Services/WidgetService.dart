@@ -32,26 +32,46 @@ class WidgetService {
 
       final prefs = await SharedPreferences.getInstance();
 
-      // Store countdown data as JSON in the format expected by native code
-      final countdownJson = jsonEncode({
+      // Retrieve existing countdowns list
+      String? existingJson = prefs.getString('widget_countdowns');
+      List<dynamic> countdownsList = [];
+
+      if (existingJson != null) {
+        try {
+          countdownsList = jsonDecode(existingJson);
+        } catch (e) {
+          print('Error parsing existing widget countdowns: $e');
+          countdownsList = [];
+        }
+      }
+
+      // Create JSON for current countdown
+      final countdownMap = {
         'id': countdown.countDownId,
         'title': countdown.countDownTitle,
         'targetDate': countdown.countDownTargetDate.millisecondsSinceEpoch,
         'image': countdown.countDownImage,
         'createdDate': countdown.countDownCreatedDate.millisecondsSinceEpoch,
         'templateId': countdown.countDownTempId,
-      });
-      print('WidgetDebug: Converted JSON: $countdownJson');
+      };
 
-      // Store as a list of countdowns (the native code expects an array)
-      await prefs.setString('widget_countdowns', '[$countdownJson]');
+      // Check if this countdown already exists in the list and update it
+      int index = countdownsList
+          .indexWhere((item) => item['id'] == countdown.countDownId);
+      if (index != -1) {
+        countdownsList[index] = countdownMap;
+      } else {
+        countdownsList.add(countdownMap);
+      }
+
+      // Store updated list
+      final updatedJson = jsonEncode(countdownsList);
+      await prefs.setString('widget_countdowns', updatedJson);
       print(
-          'WidgetDebug: Saving widget_countdowns to SharedPreferences: [$countdownJson]');
+          'WidgetDebug: Updated widget_countdowns list. Total items: ${countdownsList.length}');
 
-      // Store the countdown ID for the widget (this is critical!)
+      // Store the countdown ID for the widget (Legacy/Single widget support)
       await prefs.setString('widget_countdown_id', countdown.countDownId);
-      print(
-          'WidgetDebug: Saving widget_countdown_id to SharedPreferences: ${countdown.countDownId}');
 
       // Also save using home_widget for consistency
       await HomeWidget.saveWidgetData<String>(
@@ -68,8 +88,6 @@ class WidgetService {
 
       print(
           'Widget updated successfully with countdown: ${countdown.countDownTitle}');
-      print('Countdown ID: ${countdown.countDownId}');
-      print('Target date: ${countdown.countDownTargetDate}');
     } catch (e) {
       print('Error updating widget: $e');
     }

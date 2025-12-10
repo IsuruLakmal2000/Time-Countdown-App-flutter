@@ -32,6 +32,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="8dp"
+        android:paddingTop="40dp"
         android:gravity="center">
 
         <!-- Countdown Title Text - Main widget title -->

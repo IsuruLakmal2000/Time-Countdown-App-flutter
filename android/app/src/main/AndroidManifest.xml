@@ -51,6 +51,17 @@
                 android:resource="@xml/countdown_widget_info" />
         </receiver>
 
+        <!-- Small Widget Provider (2x2) -->
+        <receiver android:name=".CountdownWidgetProviderSmall"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.circularx.timecountdown.WIDGET_CLICK" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/countdown_widget_info_small" />
+        </receiver>
+
         <!-- Widget Configuration Activity -->
         <activity android:name=".CountdownWidgetConfigureActivity"
             android:exported="true"
