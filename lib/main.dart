@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Pages/AppWrapper.dart';
+import 'package:timecountdown/Pages/WidgetConfigPage.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
 import 'package:timecountdown/Providers/PremiumProvider.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
+import 'package:timecountdown/Providers/WidgetProvider.dart';
 import 'package:timecountdown/Services/LocalStorageService.dart';
+import 'package:timecountdown/Services/WidgetService.dart';
 import 'package:timecountdown/Theme/Theme.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'dart:io';
@@ -16,6 +19,17 @@ void main() async {
   // Initialize local storage user data if needed
   await LocalStorageService.initializeUserData();
   
+  // Initialize widget service
+  await WidgetService.initialize();
+  
+  // Load all countdowns for widget
+  try {
+    final countdowns = await LocalStorageService.getCountdowns();
+    await WidgetService.updateAllCountdowns(countdowns);
+  } catch (e) {
+    print('Error loading countdowns for widget: $e');
+  }
+  
   await _initializeRevenueCat();
   runApp(
     MultiProvider(
@@ -25,6 +39,7 @@ void main() async {
             create: (context) => PremiumProvider()..checkPremiumStatus()),
         ChangeNotifierProvider(create: (context) => UserProvider()..fetchUserData()),
         ChangeNotifierProvider(create: (context) => RenderedWidgetProvider()),
+        ChangeNotifierProvider(create: (context) => WidgetProvider()),
       ],
       child: const MyApp(),
     ),
@@ -59,6 +74,9 @@ class MyApp extends StatelessWidget {
       title: 'Time Countdown',
       theme: darkMode,
       home: AppWrapper(),
+      routes: {
+        '/widget_config': (context) => WidgetConfigPage(),
+      },
     );
   }
 }

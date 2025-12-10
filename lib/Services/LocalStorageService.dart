@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timecountdown/Model/CountDownData.dart';
 import 'package:timecountdown/Model/UserData.dart';
+import 'package:timecountdown/Services/WidgetService.dart';
 
 class LocalStorageService {
   static const String _countdownsKey = 'countdowns';
@@ -115,6 +116,9 @@ class LocalStorageService {
       countdowns.add(newCountdown);
       await _saveCountdowns(countdowns);
       
+      // Update widget data with all countdowns
+      await WidgetService.updateAllCountdowns(countdowns);
+      
       print('CountDownData saved successfully!');
     } catch (e) {
       print('Error saving CountDownData: ${e.toString()}');
@@ -129,6 +133,9 @@ class LocalStorageService {
       if (index != -1) {
         countdowns[index] = countDownData;
         await _saveCountdowns(countdowns);
+        
+        // Update widget data with all countdowns
+        await WidgetService.updateAllCountdowns(countdowns);
         
         print('CountDownData updated successfully!');
       }
@@ -182,6 +189,9 @@ class LocalStorageService {
       final countdowns = await getCountdowns();
       countdowns.removeWhere((countdown) => countdown.countDownId == countdownId);
       await _saveCountdowns(countdowns);
+      
+      // Update widget data with remaining countdowns
+      await WidgetService.updateAllCountdowns(countdowns);
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Countdown deleted successfully')),

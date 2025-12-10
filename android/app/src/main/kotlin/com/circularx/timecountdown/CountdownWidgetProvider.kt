@@ -9,6 +9,9 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.SystemClock
 import android.widget.RemoteViews
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import java.io.File
 import java.util.*
 import java.text.SimpleDateFormat
 
@@ -38,6 +41,7 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        android.util.Log.d("WidgetDebug", "onUpdate called for IDs: ${appWidgetIds.joinToString()}")
         // Update all widgets
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
@@ -78,6 +82,7 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetId: Int
     ) {
+        android.util.Log.d("WidgetDebug", "updateAppWidget called for ID: $appWidgetId")
         // Get widget style preference to determine which layout to use
         val widgetStyle = getWidgetStyle(context)
         val layoutId = when (widgetStyle) {
@@ -92,31 +97,48 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         
         // Get the selected countdown ID for this widget
         val countdownId = getSelectedCountdownId(context, appWidgetId)
+        android.util.Log.d("WidgetDebug", "Selected countdown ID for widget $appWidgetId is: '$countdownId'")
         
         if (countdownId.isNotEmpty()) {
             // Get countdown data from Flutter shared preferences
             val countdownData = getCountdownData(context, countdownId)
             
             if (countdownData != null) {
-                updateWidgetWithCountdown(views, countdownData)
+                updateWidgetWithCountdown(context, views, countdownData)
                 views.setViewVisibility(R.id.tap_to_configure, android.view.View.GONE)
             } else {
+                android.util.Log.d("WidgetDebug", "Countdown data not found for ID: $countdownId")
                 showConfigurationMessage(views)
             }
         } else {
             showConfigurationMessage(views)
         }
         
-        // Set up click intent to open the app
-        val intent = Intent(context, CountdownWidgetProvider::class.java)
-        intent.action = WIDGET_CLICK_ACTION
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, 
-            appWidgetId, 
-            intent, 
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        views.setOnClickPendingIntent(R.id.countdown_title, pendingIntent)
+        // Set up click intent - if not configured, open config activity, otherwise open app
+        if (countdownId.isEmpty()) {
+            // Widget not configured - open configuration activity
+            val configIntent = Intent(context, CountdownWidgetConfigureActivity::class.java)
+            configIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            configIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                appWidgetId,
+                configIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.countdown_title, pendingIntent)
+        } else {
+            // Widget configured - open main app
+            val intent = Intent(context, CountdownWidgetProvider::class.java)
+            intent.action = WIDGET_CLICK_ACTION
+            val pendingIntent = PendingIntent.getBroadcast(
+                context, 
+                appWidgetId, 
+                intent, 
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            views.setOnClickPendingIntent(R.id.countdown_title, pendingIntent)
+        }
         
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
@@ -129,7 +151,7 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         views.setViewVisibility(R.id.tap_to_configure, android.view.View.VISIBLE)
     }
 
-    private fun updateWidgetWithCountdown(views: RemoteViews, countdownData: CountdownData) {
+    private fun updateWidgetWithCountdown(context: Context, views: RemoteViews, countdownData: CountdownData) {
         views.setTextViewText(R.id.countdown_title, countdownData.title)
         
         val timeRemaining = calculateTimeRemaining(countdownData.targetDate)
@@ -138,8 +160,44 @@ class CountdownWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(R.id.hours_value, String.format("%02d", timeRemaining.hours))
         views.setTextViewText(R.id.minutes_value, String.format("%02d", timeRemaining.minutes))
         views.setViewVisibility(R.id.tap_to_configure, android.view.View.GONE)
+
+        // Set background image if available
+        if (countdownData.image.isNotEmpty()) {
+            val bitmap = loadBitmap(context, countdownData.image)
+            if (bitmap != null) {
+                views.setImageViewBitmap(R.id.widget_background_image, bitmap)
+                views.setViewVisibility(R.id.widget_background_image, android.view.View.VISIBLE)
+                views.setViewVisibility(R.id.widget_dim_overlay, android.view.View.VISIBLE)
+            } else {
+                 views.setViewVisibility(R.id.widget_background_image, android.view.View.GONE)
+                 views.setViewVisibility(R.id.widget_dim_overlay, android.view.View.GONE)
+            }
+        }
     }
 
+    private fun loadBitmap(context: Context, imagePath: String): Bitmap? {
+        return try {
+            if (imagePath.startsWith("assets/")) {
+                // Load from assets
+                // Flutter assets are stored in the "flutter_assets" directory within Android assets
+                val assetPath = "flutter_assets/" + imagePath
+                val inputStream = context.assets.open(assetPath)
+                BitmapFactory.decodeStream(inputStream)
+            } else {
+                // Load from file system
+                val file = File(imagePath)
+                if (file.exists()) {
+                    BitmapFactory.decodeFile(file.absolutePath)
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+    
     private fun calculateTimeRemaining(targetDate: Long): TimeRemaining {
         val now = System.currentTimeMillis()
         val diff = targetDate - now
@@ -177,6 +235,7 @@ class CountdownWidgetProvider : AppWidgetProvider() {
             // Access Flutter's shared preferences
             val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
             val countdownsJson = flutterPrefs.getString("flutter.widget_countdowns", null)
+            android.util.Log.d("WidgetDebug", "Raw JSON from prefs: $countdownsJson")
             
             if (countdownsJson != null) {
                 val countdowns = parseCountdownsJson(countdownsJson)
@@ -191,36 +250,22 @@ class CountdownWidgetProvider : AppWidgetProvider() {
     private fun parseCountdownsJson(json: String): List<CountdownData> {
         val countdowns = mutableListOf<CountdownData>()
         try {
-            // Simple JSON parsing - in production environment, consider using Gson
-            // Remove brackets and split by objects
-            val cleanJson = json.trim().removePrefix("[").removeSuffix("]")
-            if (cleanJson.isNotEmpty()) {
-                val objects = cleanJson.split("},{")
-                for (i in objects.indices) {
-                    var obj = objects[i]
-                    if (i == 0) obj = obj.removePrefix("{")
-                    if (i == objects.size - 1) obj = obj.removeSuffix("}")
-                    if (!obj.startsWith("{")) obj = "{$obj"
-                    if (!obj.endsWith("}")) obj = "$obj}"
-                    
-                    // Extract values using string manipulation
-                    val idMatch = Regex("\"id\"\\s*:\\s*\"([^\"]+)\"").find(obj)
-                    val titleMatch = Regex("\"title\"\\s*:\\s*\"([^\"]+)\"").find(obj)
-                    val targetDateMatch = Regex("\"targetDate\"\\s*:\\s*(\\d+)").find(obj)
-                    
-                    if (idMatch != null && titleMatch != null && targetDateMatch != null) {
-                        countdowns.add(
-                            CountdownData(
-                                id = idMatch.groupValues[1],
-                                title = titleMatch.groupValues[1],
-                                targetDate = targetDateMatch.groupValues[1].toLong()
-                            )
-                        )
-                    }
-                }
+            val jsonArray = org.json.JSONArray(json)
+            for (i in 0 until jsonArray.length()) {
+                val obj = jsonArray.getJSONObject(i)
+                countdowns.add(
+                    CountdownData(
+                        id = obj.getString("id"),
+                        title = obj.getString("title"),
+                        targetDate = obj.getLong("targetDate"),
+                        image = if (obj.has("image")) obj.getString("image") else ""
+                    )
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
+            // Fallback to manual parsing if JSON is malformed but potentially recoverable? 
+            // Or just log error. Better to stick to standard JSON.
         }
         return countdowns
     }
@@ -228,7 +273,8 @@ class CountdownWidgetProvider : AppWidgetProvider() {
     data class CountdownData(
         val id: String,
         val title: String,
-        val targetDate: Long
+        val targetDate: Long,
+        val image: String
     )
 
     data class TimeRemaining(
@@ -241,6 +287,7 @@ class CountdownWidgetProvider : AppWidgetProvider() {
 
 // Extension function to save selected countdown ID
 fun saveSelectedCountdownId(context: Context, appWidgetId: Int, countdownId: String) {
+    android.util.Log.d("WidgetDebug", "Saving countdown ID $countdownId for widget $appWidgetId")
     val prefs = context.getSharedPreferences(CountdownWidgetProvider.PREFS_NAME, Context.MODE_PRIVATE)
     val editor = prefs.edit()
     editor.putString(CountdownWidgetProvider.PREF_PREFIX_KEY + appWidgetId, countdownId)

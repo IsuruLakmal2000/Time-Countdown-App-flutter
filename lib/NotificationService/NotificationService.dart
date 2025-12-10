@@ -1,89 +1,123 @@
+import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest.dart' as tz;
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 Future<void> initializeNotifications() async {
+  // Ensure timezones are initialized
+  await initializeTimeZones();
+
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  const DarwinInitializationSettings initializationSettingsIOS =
+  const DarwinInitializationSettings initializationSettingsDarwin =
       DarwinInitializationSettings(
-    requestSoundPermission: true,
-    requestBadgePermission: true,
-    requestAlertPermission: true,
+    requestSoundPermission: false,
+    requestBadgePermission: false,
+    requestAlertPermission: false,
   );
 
   const InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
-    iOS: initializationSettingsIOS,
+    iOS: initializationSettingsDarwin,
+    macOS: initializationSettingsDarwin,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (NotificationResponse response) {
+      // Handle notification tap logic here
+      print('Notification tapped: ${response.payload}');
+    },
+  );
 }
 
 Future<void> initializeTimeZones() async {
   try {
     print('Initializing time zones...');
+    tz.initializeTimeZones();
     final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
     print('Current time zone: $currentTimeZone');
-    tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation(currentTimeZone));
   } catch (e) {
     print('Error initializing time zones: $e');
+    // Fallback if needed
   }
 }
 
 Future<void> requestPermissions() async {
-  final bool? isGranted = await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.areNotificationsEnabled();
-  final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
-  await androidImplementation?.requestExactAlarmsPermission();
-  
-  if (isGranted == true) {
-    print("Notification permission is already granted.");
-  } else {
-    print(
-        "Notification permission is not granted. Please enable it in settings.");
+  if (Platform.isIOS || Platform.isMacOS) {
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+  } else if (Platform.isAndroid) {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    await androidImplementation?.requestNotificationsPermission();
+    await androidImplementation?.requestExactAlarmsPermission();
+
+    // Check status
+    final bool? areEnabled =
+        await androidImplementation?.areNotificationsEnabled();
+    if (areEnabled == true) {
+      print("Notification permission is granted.");
+    } else {
+      print("Notification permission is not granted.");
+    }
   }
 }
 
 Future<void> scheduleReminder(DateTime reminderTime) async {
   print('Scheduling reminder for $reminderTime');
-  await flutterLocalNotificationsPlugin.zonedSchedule(
-    0,
-    'Countdown Reminder',
-    'Your countdown ends in 1 hour!',
-    tz.TZDateTime.from(reminderTime, tz.local),
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'Reminderid3',
-        'reminderdwf',
-        channelDescription: 'Your countdown ends in 1 hours!',
-        importance: Importance.max,
-        priority: Priority.high,
-        playSound: true,
-        sound: RawResourceAndroidNotificationSound('alarm'),
+  try {
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      0,
+      'Countdown Reminder',
+      'Your countdown ends in 1 hour!',
+      tz.TZDateTime.from(reminderTime, tz.local),
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'countdown_reminder_channel',
+          'Countdown Reminders',
+          channelDescription: 'Notifications for countdown reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+          playSound: true,
+          sound: RawResourceAndroidNotificationSound('alarm'),
+        ),
+        iOS: DarwinNotificationDetails(
+          categoryIdentifier: 'countdown_reminder',
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          sound: 'default',
+        ),
       ),
-      iOS: DarwinNotificationDetails(
-        categoryIdentifier: 'countdown_reminder',
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        sound: 'default',
-      ),
-    ),
-    androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
-  );
-  print('Reminder scheduled for $reminderTime');
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+    print('Reminder scheduled for $reminderTime');
+  } catch (e) {
+    print('Error scheduling reminder: $e');
+  }
 }

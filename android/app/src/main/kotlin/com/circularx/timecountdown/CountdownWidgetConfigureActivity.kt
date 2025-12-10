@@ -74,11 +74,20 @@ class CountdownWidgetConfigureActivity : FlutterActivity() {
                     val widgetConfig = getWidgetConfiguration()
                     result.success(widgetConfig)
                 }
+                "updateAllWidgets" -> {
+                    updateAllWidgets()
+                    result.success(true)
+                }
                 else -> {
                     result.notImplemented()
                 }
             }
         }
+    }
+
+    private fun updateAllWidgets() {
+        // Update all widgets immediately
+        CountdownWidgetProvider.updateAllWidgets(this)
     }
 
     private fun configureWidget(countdownId: String, frequency: String = "15min", widgetId: Int = appWidgetId) {
