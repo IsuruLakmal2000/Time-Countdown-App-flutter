@@ -1,82 +1,92 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:timecountdown/Theme/AppColors.dart';
 
 class OnboardingPage extends StatelessWidget {
   final String title;
   final String description;
-  // final VoidCallback onNext;
   final String imgUrl;
 
-  OnboardingPage({
+  const OnboardingPage({
+    Key? key,
     required this.title,
     required this.description,
     required this.imgUrl,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(
-          height: double.infinity,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(imgUrl),
-              fit: BoxFit.cover,
+        // Background Image
+        Positioned.fill(
+          child: Image.asset(
+            imgUrl,
+            fit: BoxFit.cover,
+          ),
+        ),
+
+        // Gradient Overlay
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 0.4, 0.7, 1.0],
+                colors: [
+                  Colors.black.withOpacity(0.3),
+                  Colors.black.withOpacity(0.5),
+                  Colors.black.withOpacity(0.85),
+                  AppColors.background,
+                ],
+              ),
             ),
           ),
         ),
-        Container(
-          height: double.infinity,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.4),
-                Colors.black.withOpacity(0.8),
-                Colors.black.withOpacity(1),
+
+        // Content
+        SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Spacer(flex: 3),
+
+                // Gradient Title
+                ShaderMask(
+                  shaderCallback: (bounds) =>
+                      AppColors.accentGradient.createShader(bounds),
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      height: 1.1,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Description
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    height: 1.5,
+                  ),
+                ),
+
+                // Space for bottom navigation
+                const SizedBox(height: 180),
               ],
             ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      textAlign: TextAlign.center,
-                      title,
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 255, 0, 255),
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20, right: 20),
-                      child: Text(
-                        textAlign: TextAlign.center,
-                        description,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.normal,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 100),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-            ],
           ),
         ),
       ],

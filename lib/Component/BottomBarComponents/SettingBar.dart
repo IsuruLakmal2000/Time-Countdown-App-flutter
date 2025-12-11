@@ -77,11 +77,11 @@ class _SettingsBarState extends State<SettingsBar>
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom:
-          80, // Adjusted to 80 for precise vertical centering (Icon center ~108px)
-      right: 90, // Move to the left of the close button
+      bottom: 32, // Align with the tick button's vertical position (calculated to match button center)
+      right: 90, // Position to the left of the tick button with proper spacing
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
           // Only show menu items - tick button is handled by BottomWidgetBar
@@ -90,11 +90,25 @@ class _SettingsBarState extends State<SettingsBar>
               opacity: _fadeAnimation,
               child: SlideTransition(
                 position: _slideAnimation,
-                child: Row(
-                  // Changed Column to Row
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withValues(alpha: 0.7),
+                        Colors.black.withValues(alpha: 0.85),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                     _buildSettingItem(
                       context: context,
                       icon: Icons.light_mode_sharp,
@@ -141,7 +155,8 @@ class _SettingsBarState extends State<SettingsBar>
                       },
                       index: 2,
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -158,41 +173,48 @@ class _SettingsBarState extends State<SettingsBar>
     required int index,
   }) {
     return Container(
-      margin: const EdgeInsets.only(
-          right: 12.0), // Changed bottom margin to right margin
+      margin: const EdgeInsets.only(right: 8.0),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           child: Container(
-            width: 70, // Fixed width for uniformity
-            height: 70, // Fixed height for uniformity
-            padding: const EdgeInsets.all(8), // Reduced padding
+            width: 65,
+            height: 65,
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [
+                  const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.15),
+                  const Color.fromARGB(255, 255, 0, 119).withValues(alpha: 0.15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: Colors.white.withOpacity(0.3),
-                width: 1,
+                color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.4),
+                width: 1.5,
               ),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+              mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   icon,
                   color: Colors.white,
-                  size: 28,
+                  size: 26,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   title,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,

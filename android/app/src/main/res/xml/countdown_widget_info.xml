@@ -8,4 +8,5 @@
     android:initialLayout="@layout/countdown_widget"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
-    android:previewImage="@drawable/widget_preview" />
+    android:previewImage="@drawable/widget_preview_large"
+    android:description="@string/large_widget_description" />

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget descriptions -->
+    <string name="large_widget_description">Countdown Timer - Horizontal Widget</string>
+    <string name="small_widget_description">Countdown Timer - Square Widget</string>
+    
+    <!-- App name (if not already defined) -->
+    <string name="app_name">Time Countdown</string>
+</resources>

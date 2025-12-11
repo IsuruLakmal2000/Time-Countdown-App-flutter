@@ -10,18 +10,17 @@ import 'package:timecountdown/Providers/WidgetProvider.dart';
 import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/Services/WidgetService.dart';
 import 'package:timecountdown/Theme/Theme.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
-import 'dart:io';
+import 'package:timecountdown/Services/RevenueCatService.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize local storage user data if needed
   await LocalStorageService.initializeUserData();
-  
+
   // Initialize widget service
   await WidgetService.initialize();
-  
+
   // Load all countdowns for widget
   try {
     final countdowns = await LocalStorageService.getCountdowns();
@@ -29,7 +28,7 @@ void main() async {
   } catch (e) {
     print('Error loading countdowns for widget: $e');
   }
-  
+
   await _initializeRevenueCat();
   runApp(
     MultiProvider(
@@ -37,7 +36,8 @@ void main() async {
         ChangeNotifierProvider(create: (context) => Editcountdownprovider()),
         ChangeNotifierProvider(
             create: (context) => PremiumProvider()..checkPremiumStatus()),
-        ChangeNotifierProvider(create: (context) => UserProvider()..fetchUserData()),
+        ChangeNotifierProvider(
+            create: (context) => UserProvider()..fetchUserData()),
         ChangeNotifierProvider(create: (context) => RenderedWidgetProvider()),
         ChangeNotifierProvider(create: (context) => WidgetProvider()),
       ],
@@ -47,21 +47,7 @@ void main() async {
 }
 
 Future<void> _initializeRevenueCat() async {
-  try {
-    await Purchases.setLogLevel(LogLevel.debug);
-    PurchasesConfiguration configuration;
-    if (Platform.isAndroid) {
-      configuration = PurchasesConfiguration("goog_olOAnQcQvdhSNeRGbIDWNoXJOoi");
-    } else if (Platform.isIOS) {
-      configuration = PurchasesConfiguration("appl_NsiZfSrVfgdJwEVKRRIzfVZrjiU");
-    } else {
-      // Handle other platforms if necessary
-      return;
-    }
-    await Purchases.configure(configuration);
-  } catch (e) {
-    print('Failed to initialize RevenueCat: $e');
-  }
+  await RevenueCatService.initialize();
 }
 
 class MyApp extends StatelessWidget {

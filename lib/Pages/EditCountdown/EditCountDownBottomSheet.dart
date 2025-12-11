@@ -109,114 +109,220 @@ class _EditCountDownBottomSheetState extends State<EditCountDownBottomSheet> {
       }
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 10,
-          ),
-          const Text(
-            'Edit Countdown',
-            style: TextStyle(
-              color: Color.fromARGB(255, 253, 253, 253),
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            // Drag handle indicator
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          GestureDetector(
-            onTap: () {
-              FocusScope.of(context).unfocus();
-            },
-            child: Textfieldcomponent(
-              focusNode: _textFieldFocusNode,
-              initialValue: widget.initialTitle,
-              hintText: "Enter Title",
-              maxLength: 30,
-              onTextChanged: (Text) {
-                setState(() {
-                  _textFieldValue = Text;
-                });
+            const SizedBox(height: 16),
+            ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 252, 6, 252),
+                  Color.fromARGB(255, 255, 0, 119),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ).createShader(bounds),
+              child: const Text(
+                'Edit Countdown',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
               },
+              child: Textfieldcomponent(
+                focusNode: _textFieldFocusNode,
+                initialValue: widget.initialTitle,
+                hintText: "Enter Title",
+                maxLength: 30,
+                onTextChanged: (Text) {
+                  setState(() {
+                    _textFieldValue = Text;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.1),
+                  const Color.fromARGB(255, 255, 0, 119).withValues(alpha: 0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Date',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedDate == null
+                            ? 'No Date Chosen'
+                            : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                        style: TextStyle(
+                          color: _selectedDate == null
+                              ? Colors.red.shade400
+                              : const Color.fromARGB(255, 252, 6, 252),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 252, 6, 252),
+                        Color.fromARGB(255, 255, 0, 119),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      _presentDatePicker();
+                    },
+                    icon: const Icon(
+                      Icons.calendar_today_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Select Date : ' +
-                    (_selectedDate == null
-                        ? 'No Date Chosen'
-                        : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'),
-                style: TextStyle(
-                  color: _selectedDate == null
-                      ? Color.fromARGB(255, 190, 57, 57)
-                      : Color.fromARGB(255, 61, 184, 37),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.1),
+                  const Color.fromARGB(255, 255, 0, 119).withValues(alpha: 0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Time',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedTime == null
+                            ? 'No Time Chosen'
+                            : '${_selectedTime!.format(context)}',
+                        style: TextStyle(
+                          color: _selectedTime == TimeOfDay(hour: 0, minute: 0)
+                              ? Colors.grey.shade400
+                              : const Color.fromARGB(255, 255, 0, 119),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              IconButton(
-                onPressed: () {
-                  _presentDatePicker();
-                },
-                icon: Icon(
-                  Icons.calendar_today,
-                  color: Color.fromARGB(255, 253, 253, 253),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 252, 6, 252),
+                        Color.fromARGB(255, 255, 0, 119),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      _presentTimePicker();
+                    },
+                    icon: const Icon(
+                      Icons.access_time_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Select Time : ' +
-                    (_selectedTime == null
-                        ? 'No Date Chosen'
-                        : '${_selectedTime!.format(context)}'),
-                style: TextStyle(
-                  color: _selectedTime == TimeOfDay(hour: 0, minute: 0)
-                      ? Color.fromARGB(255, 155, 155, 155)
-                      : Color.fromARGB(255, 61, 184, 37),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(
-                width: 20,
-              ),
-              IconButton(
-                onPressed: () {
-                  _presentTimePicker();
-                },
-                icon: Icon(
-                  Icons.access_time,
-                  color: Color.fromARGB(255, 253, 253, 253),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Buttoncomponent(
-            onPressed: () {
-              //set date and time as one
-              _SaveDateTimeTitle();
-            },
-            buttonText: "Next",
-          ),
-        ],
+            const SizedBox(height: 20),
+            Buttoncomponent(
+              onPressed: () {
+                //set date and time as one
+                _SaveDateTimeTitle();
+              },
+              buttonText: "Next",
+            ),
+          ],
+        ),
       ),
     );
   }

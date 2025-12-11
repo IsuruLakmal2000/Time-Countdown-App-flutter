@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timecountdown/Theme/AppColors.dart';
 
 class Textfieldcomponent extends StatefulWidget {
   final int maxLength;
@@ -21,7 +22,6 @@ class Textfieldcomponent extends StatefulWidget {
 }
 
 class _TextfieldcomponentState extends State<Textfieldcomponent> {
-  //final TextEditingController _controller = TextEditingController();
   late TextEditingController _controller;
 
   @override
@@ -47,28 +47,40 @@ class _TextfieldcomponentState extends State<Textfieldcomponent> {
       focusNode: widget.focusNode,
       controller: _controller,
       style: const TextStyle(
-        color: Colors.white,
+        color: AppColors.textPrimary,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
       ),
       maxLength: widget.maxLength,
       maxLines: 2,
+      cursorColor: AppColors.accentPrimary,
       decoration: InputDecoration(
-        hintText: 'Enter Title',
+        hintText: widget.hintText,
         hintStyle: TextStyle(
-          color: Colors.grey,
+          color: AppColors.textTertiary,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
         ),
+        filled: true,
+        fillColor: AppColors.surfaceLight,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.white),
-          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+          borderRadius: AppRadius.mdAll,
         ),
-        counterStyle:
-            const TextStyle(color: Colors.white), // Change counter text color
-        // suffix: Padding(
-        //   padding: const EdgeInsets.only(right: 10.0),
-        //   child: Text(
-        //     '$_remainingChars',
-        //     style: const TextStyle(color: Colors.white),
-        //   ),
-        // ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.border, width: 1),
+          borderRadius: AppRadius.mdAll,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.accentPrimary, width: 2),
+          borderRadius: AppRadius.mdAll,
+        ),
+        counterStyle: TextStyle(
+          color: AppColors.textTertiary,
+          fontSize: 12,
+        ),
       ),
     );
   }

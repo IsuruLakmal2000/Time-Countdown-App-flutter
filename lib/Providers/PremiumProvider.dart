@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:timecountdown/Services/RevenueCatService.dart';
 
 class PremiumProvider with ChangeNotifier {
   bool _isPremium = false;
@@ -7,12 +7,7 @@ class PremiumProvider with ChangeNotifier {
   bool get isPremium => _isPremium;
 
   Future<void> checkPremiumStatus() async {
-    try {
-      final customerInfo = await Purchases.getCustomerInfo();
-      _isPremium = customerInfo.entitlements.all["pro"]?.isActive ?? false;
-    } catch (e) {
-      _isPremium = false;
-    }
+    _isPremium = await RevenueCatService.isPremiumUser();
     notifyListeners();
   }
 

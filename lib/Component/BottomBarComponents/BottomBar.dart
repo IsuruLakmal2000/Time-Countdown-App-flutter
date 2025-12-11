@@ -24,29 +24,69 @@ class BottomBar extends StatelessWidget {
     final userProvider = context.watch<UserProvider>();
     final premiumProvider = context.watch<PremiumProvider>();
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.end,
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          Colors.black.withValues(alpha: 0.6),
+          Colors.black.withValues(alpha: 0.8),
+        ],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ),
+      borderRadius: BorderRadius.circular(30),
+      border: Border.all(
+        color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.2),
+        width: 1,
+      ),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         BottomBarItemComponent(
           context,
-          Icons.local_attraction_sharp,
+          Icons.view_carousel_rounded,
           "Template",
           "template",
           () {
             widgetStateProvider.renderedWidget = "template";
           },
-          iconSize: 36.0,
+          iconSize: 28.0,
         ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 16),
-          child: SizedBox(
-            width: 200,
+        Flexible(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 180, minWidth: 140),
+            height: 50,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 252, 6, 252),
+                  Color.fromARGB(255, 255, 0, 119),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(28),                boxShadow: [
+                BoxShadow(
+                  color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.4),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
             child: ElevatedButton(
               style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
                 padding: MaterialStateProperty.all<EdgeInsets>(
-                  EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                ),
+                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28),
+                  ),
                 ),
               ),
               onPressed: () async {
@@ -70,28 +110,46 @@ class BottomBar extends StatelessWidget {
                 _saveCountdown(context, widgetStateProvider,
                     editCountDownProvider, userProvider);
               },
-              child: const Text(
-                'Save',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(
+                    Icons.check_circle_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      'Save',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
         BottomBarItemComponent(
           context,
-          Icons.settings,
+          Icons.tune_rounded,
           'Settings',
           'settings',
           () {
             widgetStateProvider.renderedWidget = "settings";
           },
-          iconSize: 36.0,
+          iconSize: 28.0,
         ),
       ],
-    );
+    ),
+  );
   }
 
   void _showPremiumSaveDialog(

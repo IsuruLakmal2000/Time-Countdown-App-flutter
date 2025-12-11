@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:timecountdown/Services/BackupService.dart';
+import 'package:timecountdown/Theme/AppColors.dart';
 
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
@@ -15,202 +16,246 @@ Widget SideBar(BuildContext context, dynamic user) {
   final isPremium = context.watch<PremiumProvider>().isPremium;
 
   return Drawer(
-    child: Stack(
-      children: [
-        // Background image
-        Image.asset(
-          'assets/Images/cafe.jpg',
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-        ),
-        // Color filter
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.black.withOpacity(1),
-                Colors.black.withOpacity(0.96),
-                Colors.black.withOpacity(0.93),
-                Colors.black.withOpacity(0.94),
+    backgroundColor: AppColors.background,
+    child: SafeArea(
+      child: Column(
+        children: [
+          // Header Section
+          Container(
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+            child: Column(
+              children: [
+                // Avatar with gradient border
+                Container(
+                  padding: const EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: AppColors.accentGradient,
+                  ),
+                  child: Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.surface,
+                    ),
+                    child: Icon(
+                      Icons.person_rounded,
+                      size: 36,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // User Name
+                Text(
+                  user?.displayName ?? 'Welcome',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+
+                // Email
+                Text(
+                  user?.email ?? 'Countdown Timer',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Status Badge
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isPremium
+                        ? AppColors.success.withOpacity(0.15)
+                        : AppColors.surfaceLight,
+                    borderRadius: AppRadius.xlAll,
+                    border: Border.all(
+                      color: isPremium
+                          ? AppColors.success.withOpacity(0.3)
+                          : AppColors.border,
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isPremium ? Icons.star_rounded : Icons.timer_outlined,
+                        size: 16,
+                        color:
+                            isPremium ? AppColors.success : AppColors.warning,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isPremium
+                            ? 'Premium User'
+                            : '${userProvider.userData?.countdownCount ?? 0}/5 countdowns',
+                        style: TextStyle(
+                          color:
+                              isPremium ? AppColors.success : AppColors.warning,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
-              begin: Alignment.centerRight,
-              end: Alignment.centerLeft,
             ),
           ),
-        ),
-        // Sidebar content
-        Material(
-          color: Colors.transparent,
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      child: DrawerHeader(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.account_circle,
-                              size: 70,
-                              color: Colors.white,
-                            ),
-                            Text(
-                              user?.displayName ?? 'User',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 255, 0, 255),
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              user?.email ?? 'email@xyz.com',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                            isPremium
-                                ? Text(
-                                    'Premium User',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      color: Colors.green,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                : Text(
-                                    '${userProvider.userData?.countdownCount ?? 0}/5 countdowns used',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.amber,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    CustomListTile(
-                      icon: Icons.home,
-                      title: 'Home',
-                      onTap: () => {},
-                    ),
-                    if (!isPremium)
-                      CustomListTile(
-                        icon: Icons.workspace_premium,
-                        title: 'Buy Premium',
-                        onTap: () => {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PremiumPage(),
-                            ),
-                          ),
-                        },
-                      ),
-                    CustomListTile(
-                      icon: Icons.star,
-                      title: 'Rate Us!',
-                      onTap: () async {
-                        String url;
-                        if (Theme.of(context).platform ==
-                            TargetPlatform.android) {
-                          url =
-                              'https://play.google.com/store/apps/details?id=com.example.app'; // Example Play Store link
-                        } else if (Theme.of(context).platform ==
-                            TargetPlatform.iOS) {
-                          url =
-                              'https://apps.apple.com/app/id123456789'; // Example App Store link
-                        } else {
-                          url = 'https://example.com'; // Fallback link
-                        }
-                        final Uri uri = Uri.parse(url);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri,
-                              mode: LaunchMode.externalApplication);
-                        } else {
-                          throw 'Could not launch $url';
-                        }
-                      },
-                    ),
-                    CustomListTile(
-                      icon: Icons.privacy_tip,
-                      title: 'Privacy Policy',
-                      onTap: () => {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const PrivacyPolicyPage()),
-                        ),
-                      },
-                    ),
-                    // Backup Data - always visible, premium check inside
-                    CustomListTile(
-                      icon: Icons.backup,
-                      title: 'Backup Data',
-                      isPremiumFeature: !isPremium,
-                      onTap: () async {
-                        try {
-                          await BackupService.createBackup(context);
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Backup failed: ${e.toString()}'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    // Widget Settings
-                    CustomListTile(
-                      icon: Icons.settings_applications,
-                      title: 'Widget Settings',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const WidgetSettingsPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    // Import Backup - always visible, premium check inside
-                    CustomListTile(
-                      icon: Icons.restore,
-                      title: 'Import Backup',
-                      isPremiumFeature: !isPremium,
-                      onTap: () async {
-                        try {
-                          await BackupService.importBackup(context);
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Import failed: ${e.toString()}'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-            ],
+
+          // Divider
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Divider(color: AppColors.border, height: 1),
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+
+          // Menu Items
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              children: [
+                CustomListTile(
+                  icon: Icons.home_rounded,
+                  title: 'Home',
+                  onTap: () => Navigator.pop(context),
+                ),
+                if (!isPremium)
+                  CustomListTile(
+                    icon: Icons.workspace_premium_rounded,
+                    title: 'Buy Premium',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PremiumPage(),
+                        ),
+                      );
+                    },
+                  ),
+                CustomListTile(
+                  icon: Icons.widgets_rounded,
+                  title: 'Widget Settings',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const WidgetSettingsPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                // Section Divider
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Divider(color: AppColors.border, height: 1),
+                ),
+
+                CustomListTile(
+                  icon: Icons.backup_rounded,
+                  title: 'Backup Data',
+                  isPremiumFeature: !isPremium,
+                  onTap: () async {
+                    try {
+                      await BackupService.createBackup(context);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Backup failed: ${e.toString()}'),
+                          backgroundColor: AppColors.error,
+                        ),
+                      );
+                    }
+                  },
+                ),
+                CustomListTile(
+                  icon: Icons.restore_rounded,
+                  title: 'Import Backup',
+                  isPremiumFeature: !isPremium,
+                  onTap: () async {
+                    try {
+                      await BackupService.importBackup(context);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Import failed: ${e.toString()}'),
+                          backgroundColor: AppColors.error,
+                        ),
+                      );
+                    }
+                  },
+                ),
+
+                // Section Divider
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  child: Divider(color: AppColors.border, height: 1),
+                ),
+
+                CustomListTile(
+                  icon: Icons.star_rounded,
+                  title: 'Rate Us',
+                  onTap: () async {
+                    String url;
+                    if (Theme.of(context).platform == TargetPlatform.android) {
+                      url =
+                          'https://play.google.com/store/apps/details?id=com.example.app';
+                    } else if (Theme.of(context).platform ==
+                        TargetPlatform.iOS) {
+                      url = 'https://apps.apple.com/app/id123456789';
+                    } else {
+                      url = 'https://example.com';
+                    }
+                    final Uri uri = Uri.parse(url);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
+                    }
+                  },
+                ),
+                CustomListTile(
+                  icon: Icons.privacy_tip_rounded,
+                  title: 'Privacy Policy',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const PrivacyPolicyPage()),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // Footer
+          Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Version 1.0.0',
+              style: TextStyle(
+                color: AppColors.textTertiary,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
