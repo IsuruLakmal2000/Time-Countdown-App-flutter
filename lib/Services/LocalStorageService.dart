@@ -45,7 +45,7 @@ class LocalStorageService {
   static Future<UserData?> getCurrentUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final userDataJson = prefs.getString(_userDataKey);
-    
+
     if (userDataJson != null) {
       final userDataMap = json.decode(userDataJson) as Map<String, dynamic>;
       return UserData(
@@ -97,12 +97,12 @@ class LocalStorageService {
   static Future<void> saveCountDownData(CountDownData countDownData) async {
     try {
       final countdowns = await getCountdowns();
-      
+
       // Generate a unique ID for new countdowns
-      final countdownId = countDownData.countDownId.isEmpty 
+      final countdownId = countDownData.countDownId.isEmpty
           ? DateTime.now().millisecondsSinceEpoch.toString()
           : countDownData.countDownId;
-      
+
       final newCountdown = CountDownData(
         countDownId: countdownId,
         countDownTempId: countDownData.countDownTempId,
@@ -112,13 +112,13 @@ class LocalStorageService {
         countDownCreatedDate: countDownData.countDownCreatedDate,
         countDownImage: countDownData.countDownImage,
       );
-      
+
       countdowns.add(newCountdown);
       await _saveCountdowns(countdowns);
-      
+
       // Update widget data with all countdowns
       await WidgetService.updateAllCountdowns(countdowns);
-      
+
       print('CountDownData saved successfully!');
     } catch (e) {
       print('Error saving CountDownData: ${e.toString()}');
@@ -128,16 +128,23 @@ class LocalStorageService {
   static Future<void> updateCountDownData(CountDownData countDownData) async {
     try {
       final countdowns = await getCountdowns();
-      final index = countdowns.indexWhere((c) => c.countDownId == countDownData.countDownId);
-      
+      final index = countdowns
+          .indexWhere((c) => c.countDownId == countDownData.countDownId);
+
       if (index != -1) {
         countdowns[index] = countDownData;
         await _saveCountdowns(countdowns);
-        
+
         // Update widget data with all countdowns
         await WidgetService.updateAllCountdowns(countdowns);
-        
-        print('CountDownData updated successfully!');
+
+        print(
+            'CountDownData updated successfully at index $index with ID: ${countDownData.countDownId}');
+      } else {
+        print(
+            'ERROR: Countdown with ID ${countDownData.countDownId} not found for update!');
+        print(
+            'Available countdown IDs: ${countdowns.map((c) => c.countDownId).toList()}');
       }
     } catch (e) {
       print('Error updating CountDownData: ${e.toString()}');
@@ -147,7 +154,7 @@ class LocalStorageService {
   static Future<List<CountDownData>> getCountdowns() async {
     final prefs = await SharedPreferences.getInstance();
     final countdownsJson = prefs.getString(_countdownsKey);
-    
+
     if (countdownsJson != null) {
       final countdownsList = json.decode(countdownsJson) as List<dynamic>;
       return countdownsList.map((countdownMap) {
@@ -174,25 +181,29 @@ class LocalStorageService {
         'countDownId': countdown.countDownId,
         'countDownTempId': countdown.countDownTempId,
         'countDownTitle': countdown.countDownTitle,
-        'countDownTargetDate': countdown.countDownTargetDate.millisecondsSinceEpoch,
+        'countDownTargetDate':
+            countdown.countDownTargetDate.millisecondsSinceEpoch,
         'countDownDim': countdown.countDownDim,
-        'countDownCreatedDate': countdown.countDownCreatedDate.millisecondsSinceEpoch,
+        'countDownCreatedDate':
+            countdown.countDownCreatedDate.millisecondsSinceEpoch,
         'countDownImage': countdown.countDownImage,
       };
     }).toList();
-    
+
     await prefs.setString(_countdownsKey, json.encode(countdownsList));
   }
 
-  static Future<void> deleteCountdown(String countdownId, BuildContext context) async {
+  static Future<void> deleteCountdown(
+      String countdownId, BuildContext context) async {
     try {
       final countdowns = await getCountdowns();
-      countdowns.removeWhere((countdown) => countdown.countDownId == countdownId);
+      countdowns
+          .removeWhere((countdown) => countdown.countDownId == countdownId);
       await _saveCountdowns(countdowns);
-      
+
       // Update widget data with remaining countdowns
       await WidgetService.updateAllCountdowns(countdowns);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Countdown deleted successfully')),
       );
@@ -233,13 +244,12 @@ class LocalStorageService {
     try {
       final countdowns = await getCountdowns();
       bool hasChanges = false;
-      
+
       for (int i = 0; i < countdowns.length; i++) {
         final countdown = countdowns[i];
         if (countdown.countDownTempId == 'template_5' ||
             countdown.countDownTempId == 'template_6' ||
             countdown.countDownTempId == 'template_10') {
-          
           // Create a new countdown with template_1 instead
           countdowns[i] = CountDownData(
             countDownId: countdown.countDownId,
@@ -251,10 +261,11 @@ class LocalStorageService {
             countDownImage: countdown.countDownImage,
           );
           hasChanges = true;
-          print('Migrated countdown ${countdown.countDownId} from ${countdown.countDownTempId} to template_1');
+          print(
+              'Migrated countdown ${countdown.countDownId} from ${countdown.countDownTempId} to template_1');
         }
       }
-      
+
       if (hasChanges) {
         await _saveCountdowns(countdowns);
         print('Template migration completed successfully');

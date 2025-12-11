@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:timecountdown/Pages/MainPages/HomePage.dart';
 import 'package:timecountdown/Services/RevenueCatService.dart';
 import '../../Providers/PremiumProvider.dart';
 
 class PremiumPage extends StatefulWidget {
-  const PremiumPage({super.key});
+  final bool fromOnboarding;
+  
+  const PremiumPage({super.key, this.fromOnboarding = false});
 
   @override
   State<PremiumPage> createState() => _PremiumPageState();
@@ -13,7 +16,7 @@ class PremiumPage extends StatefulWidget {
 
 class _PremiumPageState extends State<PremiumPage> {
   bool _isLoading = false;
-  int _selectedIndex = 1; // Default to yearly (index 1)
+  int _selectedIndex = 0; // Default to lifetime (index 0)
   Package? _monthlyPackage;
   Package? _yearlyPackage;
   Package? _lifetimePackage;
@@ -100,9 +103,9 @@ class _PremiumPageState extends State<PremiumPage> {
 
     try {
       Package? packageToPurchase;
-      if (_selectedIndex == 0) packageToPurchase = _monthlyPackage;
+      if (_selectedIndex == 0) packageToPurchase = _lifetimePackage;
       if (_selectedIndex == 1) packageToPurchase = _yearlyPackage;
-      if (_selectedIndex == 2) packageToPurchase = _lifetimePackage;
+      if (_selectedIndex == 2) packageToPurchase = _monthlyPackage;
 
       if (packageToPurchase != null) {
         final result =
@@ -121,7 +124,15 @@ class _PremiumPageState extends State<PremiumPage> {
                 backgroundColor: Colors.green,
               ),
             );
-            Navigator.pop(context); // Go back to the previous screen
+            
+            // Navigate appropriately based on source
+            if (widget.fromOnboarding) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => HomePage()),
+              );
+            } else {
+              Navigator.pop(context);
+            }
           }
         } else {
           // Show error if available or just log
@@ -273,7 +284,17 @@ class _PremiumPageState extends State<PremiumPage> {
                               alignment: Alignment.topRight,
                               child: IconButton(
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                  if (widget.fromOnboarding) {
+                                    // If from onboarding, navigate to HomePage
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (context) => HomePage(),
+                                      ),
+                                    );
+                                  } else {
+                                    // Otherwise just pop
+                                    Navigator.pop(context);
+                                  }
                                 },
                                 icon: const Icon(
                                   Icons.close_rounded,
@@ -317,7 +338,20 @@ class _PremiumPageState extends State<PremiumPage> {
                                       ),
                                     ),
                                   ),
+
                                   const SizedBox(height: 40),
+                                     Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 30),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        _buildFeature("assets/Images/unlimited.png", "Unlimited\nCountdowns"),
+                                        _buildFeature("assets/Images/unlocked.png", "Pro\nTemplates"),
+                                        _buildFeatureIcon(Icons.backup, "Backup &\nRestore"),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
                                   const Text(
                                     "Choose Your Plan",
                                     style: TextStyle(
@@ -333,15 +367,17 @@ class _PremiumPageState extends State<PremiumPage> {
                                     padding: const EdgeInsets.symmetric(horizontal: 24),
                                     child: Column(
                                       children: [
-                                        // Monthly Package
-                                        _buildPlanCard(
+                                        // Lifetime Package - Best Deal (Top)
+                                        _buildPlanCardWithBadge(
                                           index: 0,
-                                          title: 'Monthly Plan',
-                                          subtitle: 'Flexible monthly billing',
-                                          price: _monthlyPackage?.storeProduct.priceString ?? '\$4.99',
-                                          period: 'per month',
+                                          title: 'Lifetime Access',
+                                          subtitle: 'One-time payment',
+                                          price: _lifetimePackage?.storeProduct.priceString ?? '\$49.99',
+                                          period: 'forever',
+                                          monthlyPrice: '',
+                                          badge: 'Best Deal',
                                         ),
-                                        // Yearly Package
+                                        // Yearly Package - Most Popular
                                         _buildPlanCardWithBadge(
                                           index: 1,
                                           title: 'Yearly Plan',
@@ -351,31 +387,20 @@ class _PremiumPageState extends State<PremiumPage> {
                                           monthlyPrice: _getMonthlyPrice(_yearlyPackage),
                                           badge: 'Save 58%',
                                         ),
-                                        // Lifetime Package
+                                        // Monthly Package
                                         _buildPlanCard(
                                           index: 2,
-                                          title: 'Lifetime Access',
-                                          subtitle: 'One-time payment',
-                                          price: _lifetimePackage?.storeProduct.priceString ?? '\$49.99',
-                                          period: 'forever',
+                                          title: 'Monthly Plan',
+                                          subtitle: 'Flexible monthly billing',
+                                          price: _monthlyPackage?.storeProduct.priceString ?? '\$4.99',
+                                          period: 'per month',
                                         ),
                                       ],
                                     ),
                                   ),
                                   const SizedBox(height: 24),
                                   // Features Section
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        _buildFeature("assets/Images/unlimited.png", "Unlimited\nCountdowns"),
-                                        _buildFeature("assets/Images/unlocked.png", "Pro\nTemplates"),
-                                        _buildFeatureIcon(Icons.backup, "Backup &\nRestore"),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
+                               
                                 ],
                               ),
                           // Bottom spacing for visual balance
@@ -405,7 +430,7 @@ class _PremiumPageState extends State<PremiumPage> {
                     padding: EdgeInsets.only(
                       left: 24,
                       right: 24,
-                      bottom: MediaQuery.of(context).padding.bottom + 20,
+                      bottom: MediaQuery.of(context).padding.bottom-20,
                       top: 24,
                     ),
                     child: SafeArea(
@@ -419,10 +444,10 @@ class _PremiumPageState extends State<PremiumPage> {
                               children: [
                                 TextSpan(
                                   text: _selectedIndex == 0
-                                      ? "Monthly subscription, "
+                                      ? "Lifetime access, "
                                       : _selectedIndex == 1
                                           ? "Yearly subscription, "
-                                          : "Lifetime access, ",
+                                          : "Monthly subscription, ",
                                   style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 14,
@@ -432,10 +457,10 @@ class _PremiumPageState extends State<PremiumPage> {
                                 ),
                                 TextSpan(
                                   text: _selectedIndex == 0
-                                      ? "cancel anytime!"
+                                      ? "pay once, use forever!"
                                       : _selectedIndex == 1
                                           ? "best value!"
-                                          : "pay once, use forever!",
+                                          : "cancel anytime!",
                                   style: const TextStyle(
                                     color: Colors.amber,
                                     fontSize: 14,
@@ -724,29 +749,32 @@ class _PremiumPageState extends State<PremiumPage> {
                         fontSize: 9,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [Colors.amber, Colors.orange],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ).createShader(bounds),
-                      child: Text(
-                        monthlyPrice,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                    // Only show monthly breakdown for yearly plan (index 1)
+                    if (monthlyPrice.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [Colors.amber, Colors.orange],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ).createShader(bounds),
+                        child: Text(
+                          monthlyPrice,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    const Text(
-                      'per month',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 9,
+                      const Text(
+                        'per month',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 9,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ],

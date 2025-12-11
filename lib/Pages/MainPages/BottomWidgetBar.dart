@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:timecountdown/Component/BottomBarComponents/BottomBar.dart';
 import 'package:timecountdown/Component/BottomBarComponents/DimControl.dart';
 import 'package:timecountdown/Component/BottomBarComponents/TemplateSelecter.dart';
-import 'package:timecountdown/Component/BottomBarItemComponent.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 // ignore: non_constant_identifier_names
@@ -32,29 +31,8 @@ Widget BottomWidgetBar(
   }
 }
 
-// Helper function to show only the settings button when settings is active
+// Helper function to hide bottom bar when settings is active (settings bar includes close button now)
 Widget _buildSettingsOnlyBar(BuildContext context) {
-  final widgetStateProvider = Provider.of<RenderedWidgetProvider>(context, listen: false);
-  
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    crossAxisAlignment: CrossAxisAlignment.end,
-    children: [
-      // Empty spacer to maintain layout (where template button was)
-      SizedBox(width: 60),
-      // Empty spacer to maintain layout (where save button was)  
-      SizedBox(width: 200),
-      // Only show the settings button (which will become tick button via SettingsBar overlay)
-      BottomBarItemComponent(
-        context,
-        Icons.check, // Show as tick when in settings mode
-        'Close',
-        'none', // Will close settings when pressed
-        () {
-          widgetStateProvider.renderedWidget = "none";
-        },
-        iconSize: 36.0,
-      ),
-    ],
-  );
+  // Return empty container since settings bar now includes the close button
+  return Container();
 }

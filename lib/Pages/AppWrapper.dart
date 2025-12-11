@@ -22,7 +22,9 @@ class _AppWrapperState extends State<AppWrapper> {
 
   Future<void> _checkOnboardingStatus() async {
     try {
+     //
       final isOnboardingCompleted = await LocalStorageService.isOnboardingCompleted();
+     //final isOnboardingCompleted = false; // Temporary hardcoded value
       setState(() {
         _showOnboarding = !isOnboardingCompleted;
         _isLoading = false;

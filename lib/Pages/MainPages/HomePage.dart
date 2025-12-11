@@ -9,6 +9,7 @@ import 'package:timecountdown/Pages/EditCountdown/EditCountDownBottomSheet.dart'
 import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Pages/SideBar/SideBar.dart';
 import 'package:timecountdown/Providers/EditCountDownProvider.dart';
+import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 import 'package:timecountdown/Providers/UserProvider.dart';
 import 'package:timecountdown/main.dart';
 
@@ -23,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = false;
   bool isFullScreen = false; // Track full screen mode
   bool showFullScreenIndicator = false; // Show visual feedback
-  
+
   @override
   void initState() {
     super.initState();
@@ -37,7 +38,7 @@ class _HomePageState extends State<HomePage> {
       isFullScreen = !isFullScreen;
       showFullScreenIndicator = true;
     });
-    
+
     // Hide the indicator after 1 second
     Future.delayed(Duration(milliseconds: 1000), () {
       if (mounted) {
@@ -60,116 +61,120 @@ class _HomePageState extends State<HomePage> {
         Provider.of<Editcountdownprovider>(context, listen: false);
     final userProvider = context.watch<UserProvider>();
     final isUserPurchased = userProvider.userData?.isPurchased == true;
-    
+
     return Scaffold(
       extendBodyBehindAppBar: true,
-      floatingActionButton: isFullScreen ? null : Container(
-        width: 56,
-        height: 56,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.white.withOpacity(0.3),
-              Colors.white.withOpacity(0.1),
-            ],
-          ),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.2),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Colors.white.withOpacity(0.1),
-              spreadRadius: -1,
-              blurRadius: 4,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(28),
-              onTap: () {
-                if (!isUserPurchased) {
-                  if ((userProvider.userData?.countdownCount ?? 0) >= 5) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      CustomSnackBar(
-                        message1: 'You can only add ',
-                        message2: '5 countdowns ',
-                        message3: 'in the free version. ',
-                        message4: 'Upgrade to premium ',
-                        message5: 'to add more.',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PremiumPage(),
+      floatingActionButton: isFullScreen
+          ? null
+          : Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withOpacity(0.3),
+                    Colors.white.withOpacity(0.1),
+                  ],
+                ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.1),
+                    spreadRadius: -1,
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(28),
+                    onTap: () {
+                      if (!isUserPurchased) {
+                        if ((userProvider.userData?.countdownCount ?? 0) >= 5) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            CustomSnackBar(
+                              message1: 'You can only add ',
+                              message2: '5 countdowns ',
+                              message3: 'in the free version. ',
+                              message4: 'Upgrade to premium ',
+                              message5: 'to add more.',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PremiumPage(),
+                                  ),
+                                );
+                              },
                             ),
                           );
-                        },
+                        } else {
+                          showNewcountdownAddpage(context);
+                        }
+                      } else {
+                        showNewcountdownAddpage(context);
+                      }
+                    },
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.05),
                       ),
-                    );
-                  } else {
-                    showNewcountdownAddpage(context);
-                  }
-                } else {
-                  showNewcountdownAddpage(context);
-                }
-              },
-              child: Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.05),
-                ),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 24,
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-      appBar: isFullScreen ? null : AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            color: Colors.white,
-            onPressed: () {
-              showDeleteConfirmationDialog(
-                  context, editCountDownProvider.currentCountDownId);
-            },
-            icon: const Icon(
-              Icons.delete_forever_rounded,
-              color: Colors.red,
+      appBar: isFullScreen
+          ? null
+          : AppBar(
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              centerTitle: true,
+              actions: [
+                IconButton(
+                  color: Colors.white,
+                  onPressed: () {
+                    showDeleteConfirmationDialog(
+                        context, editCountDownProvider.currentCountDownId);
+                  },
+                  icon: const Icon(
+                    Icons.delete_forever_rounded,
+                    color: Colors.red,
+                  ),
+                ),
+                IconButton(
+                  color: Colors.white,
+                  onPressed: () {
+                    showEditCountdownBottomSheet(context);
+                  },
+                  icon: const Icon(Icons.edit),
+                ),
+              ],
             ),
-          ),
-          IconButton(
-            color: Colors.white,
-            onPressed: () {
-              showEditCountdownBottomSheet(context);
-            },
-            icon: const Icon(Icons.edit),
-          ),
-        ],
-      ),
       body: Stack(
         children: [
           userProvider.userData != null
@@ -181,16 +186,16 @@ class _HomePageState extends State<HomePage> {
                   },
                   child: CountDownCardTemplate(
                     onDoubleTap: () {
-                      print("CountDownCardTemplate double tap detected!"); // Debug output
+                      print(
+                          "CountDownCardTemplate double tap detected!"); // Debug output
                       _toggleFullScreen();
                     },
                   ),
                 )
               : Center(
-                  child: isLoading 
-                    ? CircularProgressIndicator()
-                    : CountDownCardTemplate()
-                ),
+                  child: isLoading
+                      ? CircularProgressIndicator()
+                      : CountDownCardTemplate()),
           // Visual indicator for full screen toggle
           if (showFullScreenIndicator)
             Positioned(
@@ -224,8 +229,13 @@ class _HomePageState extends State<HomePage> {
   void showNewcountdownAddpage(BuildContext context) {
     final editCountDownProvider =
         Provider.of<Editcountdownprovider>(context, listen: false);
+    final widgetStateProvider =
+        Provider.of<RenderedWidgetProvider>(context, listen: false);
 
+    // Reset edit mode and clear any previous countdown ID
     editCountDownProvider.isEditCountDown = false;
+    widgetStateProvider.countDownId =
+        ''; // Clear old ID to ensure new countdown gets new ID
 
     showModalBottomSheet(
       backgroundColor: Color.fromARGB(255, 0, 0, 0),
@@ -283,19 +293,21 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 // Call the delete function here
                 await LocalStorageService.deleteCountdown(countdownId, context);
-                
+
                 // Ensure user data is available before updating countdown count
                 if (userProvider.userData != null) {
                   await LocalStorageService.updateCountdownCount(
                       userProvider.userData!.countdownCount - 1);
                 } else {
                   // Get current user data if provider data is null
-                  final userData = await LocalStorageService.getCurrentUserData();
+                  final userData =
+                      await LocalStorageService.getCurrentUserData();
                   if (userData != null) {
-                    await LocalStorageService.updateCountdownCount(userData.countdownCount - 1);
+                    await LocalStorageService.updateCountdownCount(
+                        userData.countdownCount - 1);
                   }
                 }
-                
+
                 context.read<UserProvider>().fetchUserData();
                 Navigator.pushReplacement(
                   context,

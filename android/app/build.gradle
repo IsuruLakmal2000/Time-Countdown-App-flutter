@@ -74,6 +74,13 @@ android {
             signingConfig = signingConfigs.release
         }
     }
+
+    // Ensure native libraries are uncompressed and aligned for 16 KB page size support (Android 15)
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
 }
 
 flutter {

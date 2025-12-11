@@ -24,132 +24,136 @@ class BottomBar extends StatelessWidget {
     final userProvider = context.watch<UserProvider>();
     final premiumProvider = context.watch<PremiumProvider>();
 
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          Colors.black.withValues(alpha: 0.6),
-          Colors.black.withValues(alpha: 0.8),
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ),
-      borderRadius: BorderRadius.circular(30),
-      border: Border.all(
-        color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.2),
-        width: 1,
-      ),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        BottomBarItemComponent(
-          context,
-          Icons.view_carousel_rounded,
-          "Template",
-          "template",
-          () {
-            widgetStateProvider.renderedWidget = "template";
-          },
-          iconSize: 28.0,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black.withValues(alpha: 0.6),
+            Colors.black.withValues(alpha: 0.8),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
         ),
-        Flexible(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 180, minWidth: 140),
-            height: 50,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color.fromARGB(255, 252, 6, 252),
-                  Color.fromARGB(255, 255, 0, 119),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(
+          color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          BottomBarItemComponent(
+            context,
+            Icons.view_carousel_rounded,
+            "Template",
+            "template",
+            () {
+              widgetStateProvider.renderedWidget = "template";
+            },
+            iconSize: 28.0,
+          ),
+          Flexible(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 180, minWidth: 140),
+              height: 50,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color.fromARGB(255, 252, 6, 252),
+                    Color.fromARGB(255, 255, 0, 119),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color.fromARGB(255, 252, 6, 252)
+                        .withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(28),                boxShadow: [
-                BoxShadow(
-                  color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-                shadowColor: MaterialStateProperty.all<Color>(Colors.transparent),
-                padding: MaterialStateProperty.all<EdgeInsets>(
-                  const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                ),
-                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all<Color>(Colors.transparent),
+                  shadowColor:
+                      MaterialStateProperty.all<Color>(Colors.transparent),
+                  padding: MaterialStateProperty.all<EdgeInsets>(
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                   ),
-                ),
-              ),
-              onPressed: () async {
-                // Check if template is premium and user has access
-                List<String> proTemplates = [
-                  'template_7',
-                  'template_8',
-                  'template_9'
-                ];
-                if (proTemplates.contains(widgetStateProvider.templateId)) {
-                  bool hasAccess = premiumProvider.isPremium;
-                  if (!hasAccess) {
-                    // Show premium dialog with options to purchase or switch template
-                    _showPremiumSaveDialog(context, widgetStateProvider,
-                        editCountDownProvider, userProvider);
-                    return;
-                  }
-                }
-
-                // Proceed with saving
-                _saveCountdown(context, widgetStateProvider,
-                    editCountDownProvider, userProvider);
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      'Save',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                ],
+                ),
+                onPressed: () async {
+                  // Check if template is premium and user has access
+                  List<String> proTemplates = [
+                    'template_7',
+                    'template_8',
+                    'template_9'
+                  ];
+                  if (proTemplates.contains(widgetStateProvider.templateId)) {
+                    bool hasAccess = premiumProvider.isPremium;
+                    if (!hasAccess) {
+                      // Show premium dialog with options to purchase or switch template
+                      _showPremiumSaveDialog(context, widgetStateProvider,
+                          editCountDownProvider, userProvider);
+                      return;
+                    }
+                  }
+
+                  // Proceed with saving
+                  _saveCountdown(context, widgetStateProvider,
+                      editCountDownProvider, userProvider);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(
+                      Icons.check_circle_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        'Save',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        BottomBarItemComponent(
-          context,
-          Icons.tune_rounded,
-          'Settings',
-          'settings',
-          () {
-            widgetStateProvider.renderedWidget = "settings";
-          },
-          iconSize: 28.0,
-        ),
-      ],
-    ),
-  );
+          BottomBarItemComponent(
+            context,
+            Icons.tune_rounded,
+            'Settings',
+            'settings',
+            () {
+              widgetStateProvider.renderedWidget = "settings";
+            },
+            iconSize: 28.0,
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPremiumSaveDialog(
@@ -247,15 +251,26 @@ class BottomBar extends StatelessWidget {
         imagePath = 'assets/Images/image1.jpg';
       }
 
+      // When editing, use the ID from editCountDownProvider
+      // When creating new, use empty string to force generation of new ID
+      String countdownId = editCountDownProvider.isEditCountDown
+          ? editCountDownProvider.currentCountDownId
+          : ''; // Empty string forces new ID generation in saveCountDownData
+
       CountDownData countDownData = CountDownData(
-        countDownId: widgetStateProvider.countDownId,
+        countDownId: countdownId,
         countDownTempId: widgetStateProvider.templateId,
         countDownTitle: widgetStateProvider.countDownTitle,
         countDownTargetDate: widgetStateProvider.selectedDate,
         countDownDim: widgetStateProvider.dimCount,
-        countDownCreatedDate: DateTime.now(),
+        countDownCreatedDate: editCountDownProvider.isEditCountDown
+            ? editCountDownProvider.currentCreatedDate
+            : DateTime.now(),
         countDownImage: imagePath,
       );
+
+      print(
+          'Saving countdown - isEdit: ${editCountDownProvider.isEditCountDown}, ID: $countdownId');
 
       if (editCountDownProvider.isEditCountDown) {
         await LocalStorageService.updateCountDownData(countDownData);

@@ -77,14 +77,13 @@ class _SettingsBarState extends State<SettingsBar>
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 32, // Align with the tick button's vertical position (calculated to match button center)
-      right: 90, // Position to the left of the tick button with proper spacing
+      bottom: 32,
+      right: 16,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Only show menu items - tick button is handled by BottomWidgetBar
           if (_isSettingsOpen)
             FadeTransition(
               opacity: _fadeAnimation,
@@ -109,52 +108,65 @@ class _SettingsBarState extends State<SettingsBar>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                    _buildSettingItem(
-                      context: context,
-                      icon: Icons.light_mode_sharp,
-                      title: 'Dim',
-                      onTap: () {
-                        Provider.of<RenderedWidgetProvider>(context,
-                                listen: false)
-                            .renderedWidget = "dim";
-                      },
-                      index: 0,
-                    ),
-                    _buildSettingItem(
-                      context: context,
-                      icon: Icons.add_photo_alternate,
-                      title: 'Image',
-                      onTap: () async {
-                        await SaveImageOnLocal();
-                        Provider.of<RenderedWidgetProvider>(context,
-                                listen: false)
-                            .renderedWidget = "none";
-                      },
-                      index: 1,
-                    ),
-                    _buildSettingItem(
-                      context: context,
-                      icon: Icons.alarm,
-                      title: 'Reminder',
-                      onTap: () async {
-                        showModalBottomSheet(
-                          context: context,
-                          backgroundColor: Color.fromARGB(255, 33, 33, 33),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20),
-                              topRight: Radius.circular(20),
+                      _buildSettingItem(
+                        context: context,
+                        icon: Icons.light_mode_sharp,
+                        title: 'Dim',
+                        onTap: () {
+                          Provider.of<RenderedWidgetProvider>(context,
+                                  listen: false)
+                              .renderedWidget = "dim";
+                        },
+                        index: 0,
+                      ),
+                      _buildSettingItem(
+                        context: context,
+                        icon: Icons.add_photo_alternate,
+                        title: 'Image',
+                        onTap: () async {
+                          await SaveImageOnLocal();
+                          Provider.of<RenderedWidgetProvider>(context,
+                                  listen: false)
+                              .renderedWidget = "none";
+                        },
+                        index: 1,
+                      ),
+                      _buildSettingItem(
+                        context: context,
+                        icon: Icons.alarm,
+                        title: 'Reminder',
+                        onTap: () async {
+                          showModalBottomSheet(
+                            context: context,
+                            backgroundColor: Color.fromARGB(255, 33, 33, 33),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              ),
                             ),
-                          ),
-                          builder: (context) => const ReminderSettingSheet(),
-                        );
+                            builder: (context) => const ReminderSettingSheet(),
+                          );
 
-                        Provider.of<RenderedWidgetProvider>(context,
-                                listen: false)
-                            .renderedWidget = "none";
-                      },
-                      index: 2,
-                    ),
+                          Provider.of<RenderedWidgetProvider>(context,
+                                  listen: false)
+                              .renderedWidget = "none";
+                        },
+                        index: 2,
+                      ),
+                      // Close button integrated into the settings bar
+                      _buildSettingItem(
+                        context: context,
+                        icon: Icons.check_rounded,
+                        title: 'Close',
+                        onTap: () {
+                          Provider.of<RenderedWidgetProvider>(context,
+                                  listen: false)
+                              .renderedWidget = "none";
+                        },
+                        index: 3,
+                        isCloseButton: true,
+                      ),
                     ],
                   ),
                 ),
@@ -171,9 +183,10 @@ class _SettingsBarState extends State<SettingsBar>
     required String title,
     required VoidCallback onTap,
     required int index,
+    bool isCloseButton = false,
   }) {
     return Container(
-      margin: const EdgeInsets.only(right: 8.0),
+      margin: EdgeInsets.only(right: isCloseButton ? 0 : 8.0),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -185,17 +198,24 @@ class _SettingsBarState extends State<SettingsBar>
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.15),
-                  const Color.fromARGB(255, 255, 0, 119).withValues(alpha: 0.15),
-                ],
+                colors: isCloseButton
+                    ? [
+                        const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.3),
+                        const Color.fromARGB(255, 255, 0, 119).withValues(alpha: 0.3),
+                      ]
+                    : [
+                        const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.15),
+                        const Color.fromARGB(255, 255, 0, 119).withValues(alpha: 0.15),
+                      ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.4),
-                width: 1.5,
+                color: isCloseButton
+                    ? const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.6)
+                    : const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.4),
+                width: isCloseButton ? 2.0 : 1.5,
               ),
             ),
             child: Column(
@@ -205,15 +225,15 @@ class _SettingsBarState extends State<SettingsBar>
                 Icon(
                   icon,
                   color: Colors.white,
-                  size: 26,
+                  size: isCloseButton ? 28 : 26,
                 ),
                 const SizedBox(height: 3),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w600,
+                    fontSize: isCloseButton ? 9.5 : 9,
+                    fontWeight: isCloseButton ? FontWeight.w700 : FontWeight.w600,
                     letterSpacing: 0.3,
                   ),
                   textAlign: TextAlign.center,

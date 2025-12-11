@@ -87,6 +87,8 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
       editCountDownProvider.currentCountDownId = countdowns[0].countDownId;
       editCountDownProvider.currentCountDownTempId =
           countdowns[0].countDownTempId;
+      editCountDownProvider.currentCreatedDate =
+          countdowns[0].countDownCreatedDate;
     }
 
     setState(() {
@@ -140,6 +142,8 @@ class _CountDownCardTemplateState extends State<CountDownCardTemplate> {
                       countdowns[index].countDownId;
                   editCountDownProvider.currentCountDownTempId =
                       countdowns[index].countDownTempId;
+                  editCountDownProvider.currentCreatedDate =
+                      countdowns[index].countDownCreatedDate;
                 },
               );
             },

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:timecountdown/Pages/MainPages/HomePage.dart';
 import 'package:timecountdown/Pages/OnBoarding/OnBoardingPage.dart';
+import 'package:timecountdown/Pages/PremiumPage/PremiumPage.dart';
 import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/Theme/AppColors.dart';
 
@@ -45,11 +45,22 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         curve: Curves.easeOutCubic,
       );
     } else {
+      // Complete onboarding and show paywall
       await LocalStorageService.setOnboardingCompleted();
-      await Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
+      await _showPaywallThenHome();
     }
+  }
+
+  Future<void> _showPaywallThenHome() async {
+    // Navigate to Premium Page (Paywall) from onboarding
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const PremiumPage(fromOnboarding: true),
+      ),
+    );
+    
+    // When user closes paywall or purchases, navigate to home
+    // This will be handled by the PremiumPage's close button
   }
 
   void _onPageChanged(int page) {
@@ -174,9 +185,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
               child: TextButton(
                 onPressed: () async {
                   await LocalStorageService.setOnboardingCompleted();
-                  await Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
+                  await _showPaywallThenHome();
                 },
                 child: Text(
                   'Skip',
