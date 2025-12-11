@@ -10,13 +10,14 @@ class WidgetStyleSelectionPage extends StatefulWidget {
   const WidgetStyleSelectionPage({Key? key}) : super(key: key);
 
   @override
-  State<WidgetStyleSelectionPage> createState() => _WidgetStyleSelectionPageState();
+  State<WidgetStyleSelectionPage> createState() =>
+      _WidgetStyleSelectionPageState();
 }
 
 class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
   String _selectedStyle = CountdownWidgetService.STYLE_GLASS;
   bool _isLoading = true;
-  
+
   // Android widget configuration
   List<CountDownData> _countdowns = [];
   Map<int, String> _widgetConfiguration = {};
@@ -37,11 +38,13 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
   Future<void> _loadCurrentStyle() async {
     try {
       final currentStyle = await CountdownWidgetService.getWidgetStyle();
-      final isPremium = Provider.of<PremiumProvider>(context, listen: false).isPremium;
-      
+      final isPremium =
+          Provider.of<PremiumProvider>(context, listen: false).isPremium;
+
       // If current style is premium but user doesn't have premium, reset to neomorphism
       if (_isPremiumStyle(currentStyle) && !isPremium) {
-        await CountdownWidgetService.setWidgetStyle(CountdownWidgetService.STYLE_NEOMORPHISM);
+        await CountdownWidgetService.setWidgetStyle(
+            CountdownWidgetService.STYLE_NEOMORPHISM);
         setState(() {
           _selectedStyle = CountdownWidgetService.STYLE_NEOMORPHISM;
           _isLoading = false;
@@ -55,7 +58,8 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
     } catch (e) {
       print('Error loading widget style: $e');
       setState(() {
-        _selectedStyle = CountdownWidgetService.STYLE_NEOMORPHISM; // Default to free style
+        _selectedStyle =
+            CountdownWidgetService.STYLE_NEOMORPHISM; // Default to free style
         _isLoading = false;
       });
     }
@@ -63,23 +67,25 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
 
   Future<void> _loadAndroidWidgetData() async {
     if (!Platform.isAndroid) return;
-    
+
     try {
       print('Loading countdowns and Android widget configuration...');
-      
+
       // Load available countdowns
       final countdowns = await CountdownWidgetService.getAvailableCountdowns();
-      
+
       // Load current Android widget configuration
-      final widgetConfig = await CountdownWidgetService.getAndroidWidgetConfiguration();
-      
+      final widgetConfig =
+          await CountdownWidgetService.getAndroidWidgetConfiguration();
+
       // Load current frequency configuration
-      final frequencyConfig = await CountdownWidgetService.getAndroidWidgetFrequencyConfiguration();
-      
+      final frequencyConfig =
+          await CountdownWidgetService.getAndroidWidgetFrequencyConfiguration();
+
       print('Loaded ${countdowns.length} countdowns');
       print('Current Android widget configuration: $widgetConfig');
       print('Current Android frequency configuration: $frequencyConfig');
-      
+
       setState(() {
         _countdowns = countdowns;
         _widgetConfiguration = widgetConfig;
@@ -95,10 +101,12 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
     }
   }
 
-  Future<void> _configureAndroidWidget(int widgetIndex, String countdownId) async {
+  Future<void> _configureAndroidWidget(
+      int widgetIndex, String countdownId) async {
     try {
-      await CountdownWidgetService.configureAndroidWidgetWithFrequency(widgetIndex, countdownId, _selectedFrequency);
-      
+      await CountdownWidgetService.configureAndroidWidgetWithFrequency(
+          widgetIndex, countdownId, _selectedFrequency);
+
       setState(() {
         _widgetConfiguration[widgetIndex] = countdownId;
         _widgetFrequencyConfiguration[widgetIndex] = _selectedFrequency;
@@ -106,11 +114,12 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
         _selectedCountdownId = null;
         _selectedFrequency = CountdownWidgetService.FREQUENCY_15_MIN;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Android Widget $widgetIndex configured successfully!'),
+            content:
+                Text('Android Widget $widgetIndex configured successfully!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -129,7 +138,8 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
   }
 
   String _formatTimeRemaining(DateTime targetDate) {
-    final timeRemaining = CountdownWidgetService.calculateTimeRemaining(targetDate);
+    final timeRemaining =
+        CountdownWidgetService.calculateTimeRemaining(targetDate);
     return '${timeRemaining['days']}d ${timeRemaining['hours']}h ${timeRemaining['minutes']}m';
   }
 
@@ -175,10 +185,10 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
   Widget _buildAndroidWidgetList() {
     // Show configured widgets and option to add more
     List<int> allWidgetIndices = [];
-    
+
     // Add all configured widget indices
     allWidgetIndices.addAll(_widgetConfiguration.keys);
-    
+
     // Add next available index for new widget
     if (allWidgetIndices.isEmpty) {
       allWidgetIndices.add(1);
@@ -208,7 +218,6 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
           ),
         ),
         const SizedBox(height: 20),
-        
         if (_countdowns.isEmpty)
           Container(
             padding: const EdgeInsets.all(20),
@@ -248,8 +257,9 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
           ...allWidgetIndices.map((widgetIndex) {
             final isConfigured = _widgetConfiguration.containsKey(widgetIndex);
             final countdownId = _widgetConfiguration[widgetIndex];
-            final frequency = _widgetFrequencyConfiguration[widgetIndex] ?? 'Not set';
-            
+            final frequency =
+                _widgetFrequencyConfiguration[widgetIndex] ?? 'Not set';
+
             return Container(
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
@@ -290,7 +300,7 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isConfigured 
+                      isConfigured
                           ? 'Showing: ${_getCountdownTitle(countdownId!)}'
                           : 'Tap to configure',
                       style: TextStyle(
@@ -318,7 +328,9 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                   setState(() {
                     _configuringWidgetIndex = widgetIndex;
                     _selectedCountdownId = countdownId;
-                    _selectedFrequency = _widgetFrequencyConfiguration[widgetIndex] ?? CountdownWidgetService.FREQUENCY_15_MIN;
+                    _selectedFrequency =
+                        _widgetFrequencyConfiguration[widgetIndex] ??
+                            CountdownWidgetService.FREQUENCY_15_MIN;
                   });
                 },
               ),
@@ -358,7 +370,7 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
           ],
         ),
         const SizedBox(height: 20),
-        
+
         // Countdown selection
         const Text(
           'Select Countdown',
@@ -369,20 +381,19 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
           ),
         ),
         const SizedBox(height: 12),
-        
+
         ..._countdowns.map((countdown) {
           final isSelected = _selectedCountdownId == countdown.countDownId;
-          
+
           return Container(
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: isSelected 
+              color: isSelected
                   ? const Color(0xFF3a3a3a)
                   : const Color(0xFF2C2C2E),
               borderRadius: BorderRadius.circular(12),
-              border: isSelected
-                  ? Border.all(color: Colors.green, width: 2)
-                  : null,
+              border:
+                  isSelected ? Border.all(color: Colors.green, width: 2) : null,
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.all(12),
@@ -434,9 +445,9 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
             ),
           );
         }).toList(),
-        
+
         const SizedBox(height: 20),
-        
+
         // Frequency selector
         const Text(
           'Update Frequency',
@@ -449,25 +460,31 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
         const SizedBox(height: 12),
         Row(
           children: [
-            _buildFrequencyOption(CountdownWidgetService.FREQUENCY_1_MIN, '1 min'),
+            _buildFrequencyOption(
+                CountdownWidgetService.FREQUENCY_1_MIN, '1 min'),
             const SizedBox(width: 8),
-            _buildFrequencyOption(CountdownWidgetService.FREQUENCY_5_MIN, '5 min'),
+            _buildFrequencyOption(
+                CountdownWidgetService.FREQUENCY_5_MIN, '5 min'),
             const SizedBox(width: 8),
-            _buildFrequencyOption(CountdownWidgetService.FREQUENCY_15_MIN, '15 min'),
+            _buildFrequencyOption(
+                CountdownWidgetService.FREQUENCY_15_MIN, '15 min'),
             const SizedBox(width: 8),
-            _buildFrequencyOption(CountdownWidgetService.FREQUENCY_1_HOUR, '1 hour'),
+            _buildFrequencyOption(
+                CountdownWidgetService.FREQUENCY_1_HOUR, '1 hour'),
           ],
         ),
-        
+
         const SizedBox(height: 20),
-        
+
         // Configure button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _selectedCountdownId != null && _configuringWidgetIndex != null
-                ? () => _configureAndroidWidget(_configuringWidgetIndex!, _selectedCountdownId!)
-                : null,
+            onPressed:
+                _selectedCountdownId != null && _configuringWidgetIndex != null
+                    ? () => _configureAndroidWidget(
+                        _configuringWidgetIndex!, _selectedCountdownId!)
+                    : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               disabledBackgroundColor: Colors.grey.shade600,
@@ -524,13 +541,14 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
 
   Future<void> _updateStyle(String style) async {
     // Check if style requires premium and user doesn't have it
-    final isPremium = Provider.of<PremiumProvider>(context, listen: false).isPremium;
-    
+    final isPremium =
+        Provider.of<PremiumProvider>(context, listen: false).isPremium;
+
     if (_isPremiumStyle(style) && !isPremium) {
       _showPremiumRequiredDialog(style);
       return;
     }
-    
+
     try {
       await CountdownWidgetService.setWidgetStyle(style);
       setState(() {
@@ -538,7 +556,8 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Widget style updated to ${getStyleDisplayName(style)}'),
+          content:
+              Text('Widget style updated to ${getStyleDisplayName(style)}'),
           backgroundColor: Colors.green,
         ),
       );
@@ -758,22 +777,22 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        
+
                         // Premium Notice
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: [
-                                Color.fromARGB(255, 252, 6, 252).withOpacity(0.1),
-                                Color.fromARGB(255, 255, 0, 119).withOpacity(0.1),
+                                Colors.green.withOpacity(0.1),
+                                Colors.lightGreen.withOpacity(0.1),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Color.fromARGB(255, 252, 6, 252).withOpacity(0.3),
+                              color: Colors.green.withOpacity(0.3),
                               width: 1,
                             ),
                           ),
@@ -812,22 +831,24 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                           ),
                         ),
                         const SizedBox(height: 30),
-                        
+
                         // Glass Effect Style Option
                         _buildStyleOption(
                           title: 'Glass Effect',
-                          description: 'Transparent glass effect with blur and frosted borders',
+                          description:
+                              'Transparent glass effect with blur and frosted borders',
                           style: CountdownWidgetService.STYLE_GLASS,
                           previewColor: Colors.white.withOpacity(0.2),
                           borderColor: Colors.white.withOpacity(0.3),
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // Gradient Style Option
                         _buildStyleOption(
                           title: 'Gradient',
-                          description: 'Beautiful gradient background with modern colors',
+                          description:
+                              'Beautiful gradient background with modern colors',
                           style: CountdownWidgetService.STYLE_GRADIENT,
                           previewColor: const Color(0xFF667eea),
                           borderColor: Colors.purple.withOpacity(0.5),
@@ -838,13 +859,14 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                             const Color(0xFFf093fb),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // Sunset Gradient Style Option
                         _buildStyleOption(
                           title: 'Sunset',
-                          description: 'Warm sunset gradient with pink and orange tones',
+                          description:
+                              'Warm sunset gradient with pink and orange tones',
                           style: CountdownWidgetService.STYLE_SUNSET,
                           previewColor: const Color(0xFFff9a9e),
                           borderColor: Colors.pink.withOpacity(0.5),
@@ -855,30 +877,31 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                             const Color(0xFFff6b6b),
                           ],
                         ),
-                        
+
                         const SizedBox(height: 20),
-                        
+
                         // Neomorphism Style Option
                         _buildStyleOption(
                           title: 'Neomorphism',
-                          description: 'Dark background with soft shadow and highlight effects',
+                          description:
+                              'Dark background with soft shadow and highlight effects',
                           style: CountdownWidgetService.STYLE_NEOMORPHISM,
                           previewColor: const Color(0xFF2C2C2E),
                           borderColor: Colors.grey.withOpacity(0.3),
                         ),
-                        
+
                         // Android Widget Configuration Section
                         if (Platform.isAndroid) ...[
                           const SizedBox(height: 40),
                           _buildAndroidWidgetConfigurationSection(),
                         ],
-                        
+
                         const SizedBox(height: 30),
                       ],
                     ),
                   ),
                 ),
-                
+
                 // Fixed Done Button at Bottom
                 Container(
                   padding: const EdgeInsets.all(20.0),
@@ -935,13 +958,15 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
     final isPremium = Provider.of<PremiumProvider>(context).isPremium;
     final isStylePremium = _isPremiumStyle(style);
     final isLocked = isStylePremium && !isPremium;
-    
+
     return GestureDetector(
       onTap: () => _updateStyle(style),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isLocked ? const Color(0xFF2C2C2E).withOpacity(0.5) : const Color(0xFF2C2C2E),
+          color: isLocked
+              ? const Color(0xFF2C2C2E).withOpacity(0.5)
+              : const Color(0xFF2C2C2E),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? Colors.blue : Colors.grey.withOpacity(0.3),
@@ -958,15 +983,18 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                   height: 80,
                   decoration: BoxDecoration(
                     color: isGradient ? null : previewColor,
-                    gradient: isGradient ? LinearGradient(
-                      colors: gradientColors ?? [
-                        const Color(0xFF667eea),
-                        const Color(0xFF764ba2),
-                        const Color(0xFFf093fb),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ) : null,
+                    gradient: isGradient
+                        ? LinearGradient(
+                            colors: gradientColors ??
+                                [
+                                  const Color(0xFF667eea),
+                                  const Color(0xFF764ba2),
+                                  const Color(0xFFf093fb),
+                                ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: borderColor,
@@ -986,22 +1014,22 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                             ),
                           ]
                         : style == CountdownWidgetService.STYLE_GRADIENT
-                        ? [
-                            BoxShadow(
-                              color: Colors.purple.withOpacity(0.3),
-                              offset: const Offset(2, 2),
-                              blurRadius: 6,
-                            ),
-                          ]
-                        : style == CountdownWidgetService.STYLE_SUNSET
-                        ? [
-                            BoxShadow(
-                              color: Colors.pink.withOpacity(0.3),
-                              offset: const Offset(2, 2),
-                              blurRadius: 6,
-                            ),
-                          ]
-                        : null,
+                            ? [
+                                BoxShadow(
+                                  color: Colors.purple.withOpacity(0.3),
+                                  offset: const Offset(2, 2),
+                                  blurRadius: 6,
+                                ),
+                              ]
+                            : style == CountdownWidgetService.STYLE_SUNSET
+                                ? [
+                                    BoxShadow(
+                                      color: Colors.pink.withOpacity(0.3),
+                                      offset: const Offset(2, 2),
+                                      blurRadius: 6,
+                                    ),
+                                  ]
+                                : null,
                   ),
                   child: Stack(
                     children: [
@@ -1014,10 +1042,15 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: style == CountdownWidgetService.STYLE_NEOMORPHISM 
-                                    ? const Color(0xFFE5E5E7) 
+                                color: style ==
+                                        CountdownWidgetService.STYLE_NEOMORPHISM
+                                    ? const Color(0xFFE5E5E7)
                                     : Colors.white,
-                                shadows: style == CountdownWidgetService.STYLE_GRADIENT || style == CountdownWidgetService.STYLE_SUNSET
+                                shadows: style ==
+                                            CountdownWidgetService
+                                                .STYLE_GRADIENT ||
+                                        style ==
+                                            CountdownWidgetService.STYLE_SUNSET
                                     ? [
                                         Shadow(
                                           color: Colors.black.withOpacity(0.5),
@@ -1032,10 +1065,15 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                               'Days',
                               style: TextStyle(
                                 fontSize: 10,
-                                color: style == CountdownWidgetService.STYLE_NEOMORPHISM 
-                                    ? const Color(0xFFA1A1A6) 
+                                color: style ==
+                                        CountdownWidgetService.STYLE_NEOMORPHISM
+                                    ? const Color(0xFFA1A1A6)
                                     : Colors.white70,
-                                shadows: style == CountdownWidgetService.STYLE_GRADIENT || style == CountdownWidgetService.STYLE_SUNSET
+                                shadows: style ==
+                                            CountdownWidgetService
+                                                .STYLE_GRADIENT ||
+                                        style ==
+                                            CountdownWidgetService.STYLE_SUNSET
                                     ? [
                                         Shadow(
                                           color: Colors.black.withOpacity(0.5),
@@ -1067,9 +1105,9 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
-                
+
                 // Text Content
                 Expanded(
                   child: Column(
@@ -1082,13 +1120,16 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isLocked ? Colors.white.withOpacity(0.6) : Colors.white,
+                              color: isLocked
+                                  ? Colors.white.withOpacity(0.6)
+                                  : Colors.white,
                             ),
                           ),
                           if (isStylePremium) ...[
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
@@ -1115,7 +1156,9 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                         description,
                         style: TextStyle(
                           fontSize: 14,
-                          color: isLocked ? Colors.grey[400]?.withOpacity(0.6) : Colors.grey[400],
+                          color: isLocked
+                              ? Colors.grey[400]?.withOpacity(0.6)
+                              : Colors.grey[400],
                         ),
                       ),
                       if (isLocked) ...[
@@ -1132,7 +1175,7 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                     ],
                   ),
                 ),
-                
+
                 // Selection Indicator
                 Container(
                   width: 24,
@@ -1141,7 +1184,11 @@ class _WidgetStyleSelectionPageState extends State<WidgetStyleSelectionPage> {
                     shape: BoxShape.circle,
                     color: isSelected ? Colors.blue : Colors.transparent,
                     border: Border.all(
-                      color: isSelected ? Colors.blue : (isLocked ? Colors.grey.withOpacity(0.5) : Colors.grey),
+                      color: isSelected
+                          ? Colors.blue
+                          : (isLocked
+                              ? Colors.grey.withOpacity(0.5)
+                              : Colors.grey),
                       width: 2,
                     ),
                   ),

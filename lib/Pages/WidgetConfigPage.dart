@@ -126,7 +126,7 @@ class _WidgetConfigPageState extends State<WidgetConfigPage> {
       body: isLoading
           ? Center(
               child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
               ),
             )
           : countdowns.isEmpty
@@ -165,17 +165,17 @@ class _WidgetConfigPageState extends State<WidgetConfigPage> {
                       child: Container(
                         padding: EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.1),
+                          color: Colors.green.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.purple.withOpacity(0.3),
+                            color: Colors.green.withOpacity(0.3),
                           ),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.info_outline,
-                              color: Colors.purple,
+                              color: Colors.green,
                               size: 24,
                             ),
                             SizedBox(width: 12),
@@ -214,12 +214,12 @@ class _WidgetConfigPageState extends State<WidgetConfigPage> {
                                 padding: EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color: isSelected
-                                      ? Colors.purple.withOpacity(0.2)
+                                      ? Colors.green.withOpacity(0.2)
                                       : Colors.white.withOpacity(0.05),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: isSelected
-                                        ? Colors.purple
+                                        ? Colors.green
                                         : Colors.white.withOpacity(0.1),
                                     width: isSelected ? 2 : 1,
                                   ),
@@ -232,7 +232,7 @@ class _WidgetConfigPageState extends State<WidgetConfigPage> {
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: isSelected
-                                            ? Colors.purple
+                                            ? Colors.green
                                             : Colors.white.withOpacity(0.1),
                                       ),
                                       child: Icon(
@@ -269,7 +269,7 @@ class _WidgetConfigPageState extends State<WidgetConfigPage> {
                                     if (isSelected)
                                       Icon(
                                         Icons.radio_button_checked,
-                                        color: Colors.purple,
+                                        color: Colors.green,
                                       )
                                     else
                                       Icon(
@@ -320,7 +320,7 @@ class _WidgetConfigPageState extends State<WidgetConfigPage> {
                                     ? _configureWidget
                                     : null,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple,
+                                  backgroundColor: Colors.green,
                                   foregroundColor: Colors.white,
                                   padding: EdgeInsets.symmetric(vertical: 16),
                                   elevation: 0,

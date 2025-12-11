@@ -14,7 +14,8 @@ class WidgetConfigurationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final widgetProvider = Provider.of<WidgetProvider>(context, listen: false);
-    final isAlreadySet = widgetProvider.isCountdownSetForWidget(countdown.countDownId);
+    final isAlreadySet =
+        widgetProvider.isCountdownSetForWidget(countdown.countDownId);
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -30,17 +31,17 @@ class WidgetConfigurationDialog extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.purple.withOpacity(0.2),
+                color: Colors.green.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.widgets_outlined,
                 size: 48,
-                color: Colors.purple,
+                color: Colors.green,
               ),
             ),
             SizedBox(height: 20),
-            
+
             // Title
             Text(
               'Home Screen Widget',
@@ -52,7 +53,7 @@ class WidgetConfigurationDialog extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 12),
-            
+
             // Description
             Text(
               isAlreadySet
@@ -66,7 +67,7 @@ class WidgetConfigurationDialog extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24),
-            
+
             // Info cards
             _buildInfoCard(
               icon: Icons.access_time,
@@ -80,7 +81,7 @@ class WidgetConfigurationDialog extends StatelessWidget {
               description: 'Shows your countdown background',
             ),
             SizedBox(height: 24),
-            
+
             // Buttons
             Row(
               children: [
@@ -104,7 +105,7 @@ class WidgetConfigurationDialog extends StatelessWidget {
                     onPressed: () async {
                       await widgetProvider.setCountdownForWidget(countdown);
                       Navigator.of(context).pop();
-                      
+
                       // Show success message
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -129,7 +130,7 @@ class WidgetConfigurationDialog extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
+                      backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 14),
                       elevation: 0,
@@ -169,7 +170,7 @@ class WidgetConfigurationDialog extends StatelessWidget {
         children: [
           Icon(
             icon,
-            color: Colors.purple,
+            color: Colors.green,
             size: 24,
           ),
           SizedBox(width: 12),

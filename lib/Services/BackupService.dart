@@ -37,15 +37,18 @@ class BackupService {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Backup and Import features are available for Premium users only.'),
+              Text(
+                  'Backup and Import features are available for Premium users only.'),
               SizedBox(height: 16),
-              Text('Upgrade to Premium to:', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Upgrade to Premium to:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
               Row(
                 children: [
                   Icon(Icons.backup, size: 16, color: Colors.green),
                   SizedBox(width: 8),
-                  Expanded(child: Text('Create backups of your countdown data')),
+                  Expanded(
+                      child: Text('Create backups of your countdown data')),
                 ],
               ),
               SizedBox(height: 4),
@@ -59,7 +62,7 @@ class BackupService {
               SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.all_inclusive, size: 16, color: Colors.purple),
+                  Icon(Icons.all_inclusive, size: 16, color: Colors.green),
                   SizedBox(width: 8),
                   Expanded(child: Text('Access unlimited countdowns')),
                 ],
@@ -129,7 +132,8 @@ class BackupService {
         'backup_version': backupVersion,
         'backup_date': DateTime.now().toIso8601String(),
         'user_data': userData != null ? _userDataToMap(userData) : null,
-        'countdowns': countdowns.map((countdown) => _countdownToMap(countdown)).toList(),
+        'countdowns':
+            countdowns.map((countdown) => _countdownToMap(countdown)).toList(),
         'total_countdowns': countdowns.length,
       };
 
@@ -137,16 +141,16 @@ class BackupService {
       final jsonString = json.encode(backupData);
 
       // Create filename with timestamp
-      final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
+      final timestamp =
+          DateTime.now().toIso8601String().replaceAll(':', '-').split('.')[0];
       final fileName = 'TimeCountdown_Backup_$timestamp.json';
 
       // Save to device and share
       await _saveAndShareBackup(context, jsonString, fileName);
-
     } catch (e) {
       // Hide loading dialog
       Navigator.of(context).pop();
-      
+
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -176,20 +180,23 @@ class BackupService {
       'countDownId': countdown.countDownId,
       'countDownTempId': countdown.countDownTempId,
       'countDownTitle': countdown.countDownTitle,
-      'countDownTargetDate': countdown.countDownTargetDate.millisecondsSinceEpoch,
+      'countDownTargetDate':
+          countdown.countDownTargetDate.millisecondsSinceEpoch,
       'countDownDim': countdown.countDownDim,
-      'countDownCreatedDate': countdown.countDownCreatedDate.millisecondsSinceEpoch,
+      'countDownCreatedDate':
+          countdown.countDownCreatedDate.millisecondsSinceEpoch,
       'countDownImage': countdown.countDownImage,
     };
   }
 
   /// Saves backup to device storage and provides sharing options
-  static Future<void> _saveAndShareBackup(BuildContext context, String jsonString, String fileName) async {
+  static Future<void> _saveAndShareBackup(
+      BuildContext context, String jsonString, String fileName) async {
     try {
       // Get temporary directory
       final directory = await getTemporaryDirectory();
       final file = File('${directory.path}/$fileName');
-      
+
       // Write backup data to file
       await file.writeAsString(jsonString);
 
@@ -233,11 +240,10 @@ class BackupService {
           );
         },
       );
-
     } catch (e) {
       // Hide loading dialog if still showing
       Navigator.of(context).pop();
-      
+
       throw Exception('Failed to save backup: ${e.toString()}');
     }
   }
@@ -255,9 +261,9 @@ class BackupService {
 
       // Check required fields
       return backupData.containsKey('app_name') &&
-             backupData.containsKey('backup_version') &&
-             backupData.containsKey('countdowns') &&
-             backupData['app_name'] == appName;
+          backupData.containsKey('backup_version') &&
+          backupData.containsKey('countdowns') &&
+          backupData['app_name'] == appName;
     } catch (e) {
       return false;
     }
@@ -306,7 +312,7 @@ class BackupService {
       }
 
       final file = File(result.files.single.path!);
-      
+
       // Show loading dialog
       showDialog(
         context: context,
@@ -327,7 +333,8 @@ class BackupService {
       // Validate backup file
       if (!await validateBackupFile(file.path)) {
         Navigator.of(context).pop(); // Close loading dialog
-        _showErrorDialog(context, 'Invalid backup file. Please select a valid Time Countdown backup file.');
+        _showErrorDialog(context,
+            'Invalid backup file. Please select a valid Time Countdown backup file.');
         return;
       }
 
@@ -341,7 +348,8 @@ class BackupService {
       }
 
       // Show confirmation dialog with backup info
-      final shouldImport = await _showImportConfirmationDialog(context, backupInfo);
+      final shouldImport =
+          await _showImportConfirmationDialog(context, backupInfo);
       if (!shouldImport) {
         return;
       }
@@ -365,7 +373,7 @@ class BackupService {
 
       // Import the backup
       await _performImport(file.path);
-      
+
       Navigator.of(context).pop(); // Close loading dialog
 
       // Show success dialog
@@ -374,7 +382,8 @@ class BackupService {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text('Import Successful'),
-            content: Text('Backup imported successfully!\n\nTotal countdowns restored: ${backupInfo['total_countdowns']}'),
+            content: Text(
+                'Backup imported successfully!\n\nTotal countdowns restored: ${backupInfo['total_countdowns']}'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -386,60 +395,62 @@ class BackupService {
           );
         },
       );
-
     } catch (e) {
       // Hide loading dialog if showing
       if (Navigator.canPop(context)) {
         Navigator.of(context).pop();
       }
-      
+
       _showErrorDialog(context, 'Import failed: ${e.toString()}');
     }
   }
 
   /// Shows confirmation dialog with backup information
-  static Future<bool> _showImportConfirmationDialog(BuildContext context, Map<String, dynamic> backupInfo) async {
+  static Future<bool> _showImportConfirmationDialog(
+      BuildContext context, Map<String, dynamic> backupInfo) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        final backupDate = DateTime.parse(backupInfo['backup_date']);
-        return AlertDialog(
-          title: const Text('Confirm Import'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Are you sure you want to import this backup?'),
-              const SizedBox(height: 16),
-              Text('Backup Date: ${backupDate.day}/${backupDate.month}/${backupDate.year}'),
-              Text('Countdowns: ${backupInfo['total_countdowns']}'),
-              Text('Version: ${backupInfo['backup_version']}'),
-              const SizedBox(height: 16),
-              const Text(
-                'Warning: This will replace all your current countdown data!',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
+          context: context,
+          builder: (BuildContext context) {
+            final backupDate = DateTime.parse(backupInfo['backup_date']);
+            return AlertDialog(
+              title: const Text('Confirm Import'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Are you sure you want to import this backup?'),
+                  const SizedBox(height: 16),
+                  Text(
+                      'Backup Date: ${backupDate.day}/${backupDate.month}/${backupDate.year}'),
+                  Text('Countdowns: ${backupInfo['total_countdowns']}'),
+                  Text('Version: ${backupInfo['backup_version']}'),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Warning: This will replace all your current countdown data!',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
                 ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.red,
-              ),
-              child: const Text('Import'),
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red,
+                  ),
+                  child: const Text('Import'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   /// Performs the actual import operation
@@ -460,7 +471,8 @@ class BackupService {
 
     // Import user data if available
     if (backupData['user_data'] != null) {
-      final userData = _mapToUserData(backupData['user_data'] as Map<String, dynamic>);
+      final userData =
+          _mapToUserData(backupData['user_data'] as Map<String, dynamic>);
       await LocalStorageService.updateCurrentUserData(userData);
     }
   }
@@ -471,9 +483,11 @@ class BackupService {
       countDownId: map['countDownId'] as String,
       countDownTempId: map['countDownTempId'] as String,
       countDownTitle: map['countDownTitle'] as String,
-      countDownTargetDate: DateTime.fromMillisecondsSinceEpoch(map['countDownTargetDate'] as int),
+      countDownTargetDate: DateTime.fromMillisecondsSinceEpoch(
+          map['countDownTargetDate'] as int),
       countDownDim: map['countDownDim'] as double,
-      countDownCreatedDate: DateTime.fromMillisecondsSinceEpoch(map['countDownCreatedDate'] as int),
+      countDownCreatedDate: DateTime.fromMillisecondsSinceEpoch(
+          map['countDownCreatedDate'] as int),
       countDownImage: map['countDownImage'] as String,
     );
   }

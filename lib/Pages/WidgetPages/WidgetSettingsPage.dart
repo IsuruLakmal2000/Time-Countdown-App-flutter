@@ -136,7 +136,7 @@ class _WidgetSettingsPageState extends State<WidgetSettingsPage> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? Colors.purple : Colors.white54,
+                  color: isSelected ? Colors.green : Colors.white54,
                   width: 2,
                 ),
               ),
@@ -147,7 +147,7 @@ class _WidgetSettingsPageState extends State<WidgetSettingsPage> {
                         height: 12,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.purple,
+                          color: Colors.green,
                         ),
                       ),
                     )

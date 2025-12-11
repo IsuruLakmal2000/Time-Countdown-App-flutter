@@ -51,21 +51,27 @@ class BottomBar extends StatelessWidget {
               ),
               onPressed: () async {
                 // Check if template is premium and user has access
-                List<String> proTemplates = ['template_7', 'template_8', 'template_9'];
+                List<String> proTemplates = [
+                  'template_7',
+                  'template_8',
+                  'template_9'
+                ];
                 if (proTemplates.contains(widgetStateProvider.templateId)) {
                   bool hasAccess = premiumProvider.isPremium;
                   if (!hasAccess) {
                     // Show premium dialog with options to purchase or switch template
-                    _showPremiumSaveDialog(context, widgetStateProvider, editCountDownProvider, userProvider);
+                    _showPremiumSaveDialog(context, widgetStateProvider,
+                        editCountDownProvider, userProvider);
                     return;
                   }
                 }
-                
+
                 // Proceed with saving
-                _saveCountdown(context, widgetStateProvider, editCountDownProvider, userProvider);
+                _saveCountdown(context, widgetStateProvider,
+                    editCountDownProvider, userProvider);
               },
               child: const Text(
-                'Save', 
+                'Save',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 18,
@@ -88,15 +94,19 @@ class BottomBar extends StatelessWidget {
     );
   }
 
-  void _showPremiumSaveDialog(BuildContext context, RenderedWidgetProvider widgetStateProvider, 
-      Editcountdownprovider editCountDownProvider, UserProvider userProvider) {
+  void _showPremiumSaveDialog(
+      BuildContext context,
+      RenderedWidgetProvider widgetStateProvider,
+      Editcountdownprovider editCountDownProvider,
+      UserProvider userProvider) {
     Map<String, String> templateNames = {
       'template_7': 'Heart Animation Template',
-      'template_8': 'Love Theme Template', 
+      'template_8': 'Love Theme Template',
       'template_9': 'Money Countdown Template'
     };
-    String templateName = templateNames[widgetStateProvider.templateId] ?? widgetStateProvider.templateId;
-    
+    String templateName = templateNames[widgetStateProvider.templateId] ??
+        widgetStateProvider.templateId;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -167,15 +177,18 @@ class BottomBar extends StatelessWidget {
     );
   }
 
-  void _saveCountdown(BuildContext context, RenderedWidgetProvider widgetStateProvider,
-      Editcountdownprovider editCountDownProvider, UserProvider userProvider) async {
+  void _saveCountdown(
+      BuildContext context,
+      RenderedWidgetProvider widgetStateProvider,
+      Editcountdownprovider editCountDownProvider,
+      UserProvider userProvider) async {
     try {
       // Ensure we have a valid image path
       String imagePath = widgetStateProvider.image;
       if (imagePath.isEmpty) {
-        imagePath = 'assets/Images/office.jpg';
+        imagePath = 'assets/Images/image1.jpg';
       }
-      
+
       CountDownData countDownData = CountDownData(
         countDownId: widgetStateProvider.countDownId,
         countDownTempId: widgetStateProvider.templateId,
@@ -190,7 +203,7 @@ class BottomBar extends StatelessWidget {
         await LocalStorageService.updateCountDownData(countDownData);
       } else {
         await LocalStorageService.saveCountDownData(countDownData);
-        
+
         // Ensure user data is available before updating countdown count
         if (userProvider.userData != null) {
           await LocalStorageService.updateCountdownCount(
@@ -200,7 +213,8 @@ class BottomBar extends StatelessWidget {
           await LocalStorageService.initializeUserData();
           final userData = await LocalStorageService.getCurrentUserData();
           if (userData != null) {
-            await LocalStorageService.updateCountdownCount(userData.countdownCount + 1);
+            await LocalStorageService.updateCountdownCount(
+                userData.countdownCount + 1);
           }
         }
         context.read<UserProvider>().fetchUserData();

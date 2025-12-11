@@ -19,7 +19,7 @@ Widget SideBar(BuildContext context, dynamic user) {
       children: [
         // Background image
         Image.asset(
-          'assets/Images/jym.jpg',
+          'assets/Images/cafe.jpg',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,

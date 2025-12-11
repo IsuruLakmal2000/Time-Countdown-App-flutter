@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:timecountdown/Component/BottomBarComponents/ReminderSettingSheet.dart';
 import 'package:timecountdown/Providers/RenderedWidgetProvider.dart';
 
 class SettingsBar extends StatefulWidget {
@@ -12,7 +13,8 @@ class SettingsBar extends StatefulWidget {
   State<SettingsBar> createState() => _SettingsBarState();
 }
 
-class _SettingsBarState extends State<SettingsBar> with SingleTickerProviderStateMixin {
+class _SettingsBarState extends State<SettingsBar>
+    with SingleTickerProviderStateMixin {
   bool _isSettingsOpen = false;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -21,16 +23,21 @@ class _SettingsBarState extends State<SettingsBar> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _isSettingsOpen = true; // Start with settings open when this widget is created
+    _isSettingsOpen =
+        true; // Start with settings open when this widget is created
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
+    _fadeAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
     ));
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.5), end: const Offset(0, 0)).animate(CurvedAnimation(
+    // Changed slide animation to coming from right to left since it's horizontal
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.5, 0), end: const Offset(0, 0))
+            .animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.elasticOut,
     ));
@@ -45,11 +52,14 @@ class _SettingsBarState extends State<SettingsBar> with SingleTickerProviderStat
   }
 
   Future<void> SaveImageOnLocal() async {
-    final widgetStateProvider = Provider.of<RenderedWidgetProvider>(context, listen: false);
+    final widgetStateProvider =
+        Provider.of<RenderedWidgetProvider>(context, listen: false);
     try {
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+      final pickedFile =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
-        String fileName = DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
+        String fileName =
+            DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
         widgetStateProvider.isLoading = true;
         final directory = await getApplicationDocumentsDirectory();
         final File newImage = File('${directory.path}/$fileName');
@@ -67,38 +77,44 @@ class _SettingsBarState extends State<SettingsBar> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 140, // Position above the settings button (50 + 60 for button height)
-      right: 30,   // Move more to the left to align with tick button center
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, // Center align to match tick button
+      bottom:
+          80, // Adjusted to 80 for precise vertical centering (Icon center ~108px)
+      right: 90, // Move to the left of the close button
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
-          children: [
-            // Only show menu items - tick button is handled by BottomWidgetBar
-            if (_isSettingsOpen)
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center, // Center align menu items
-                    mainAxisSize: MainAxisSize.min,
+        children: [
+          // Only show menu items - tick button is handled by BottomWidgetBar
+          if (_isSettingsOpen)
+            FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: Row(
+                  // Changed Column to Row
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     _buildSettingItem(
                       context: context,
                       icon: Icons.light_mode_sharp,
-                      title: 'Dark Mode',
+                      title: 'Dim',
                       onTap: () {
-                        Provider.of<RenderedWidgetProvider>(context, listen: false).renderedWidget = "dim";
+                        Provider.of<RenderedWidgetProvider>(context,
+                                listen: false)
+                            .renderedWidget = "dim";
                       },
                       index: 0,
                     ),
                     _buildSettingItem(
                       context: context,
                       icon: Icons.add_photo_alternate,
-                      title: 'Background',
+                      title: 'Image',
                       onTap: () async {
                         await SaveImageOnLocal();
-                        Provider.of<RenderedWidgetProvider>(context, listen: false).renderedWidget = "none";
+                        Provider.of<RenderedWidgetProvider>(context,
+                                listen: false)
+                            .renderedWidget = "none";
                       },
                       index: 1,
                     ),
@@ -107,13 +123,21 @@ class _SettingsBarState extends State<SettingsBar> with SingleTickerProviderStat
                       icon: Icons.alarm,
                       title: 'Reminder',
                       onTap: () async {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Reminder feature available soon in next update :)'),
-                            duration: Duration(seconds: 2),
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Color.fromARGB(255, 33, 33, 33),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            ),
                           ),
+                          builder: (context) => const ReminderSettingSheet(),
                         );
-                        Provider.of<RenderedWidgetProvider>(context, listen: false).renderedWidget = "none";
+
+                        Provider.of<RenderedWidgetProvider>(context,
+                                listen: false)
+                            .renderedWidget = "none";
                       },
                       index: 2,
                     ),
@@ -134,14 +158,17 @@ class _SettingsBarState extends State<SettingsBar> with SingleTickerProviderStat
     required int index,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8.0),
+      margin: const EdgeInsets.only(
+          right: 12.0), // Changed bottom margin to right margin
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            width: 70, // Fixed width for uniformity
+            height: 70, // Fixed height for uniformity
+            padding: const EdgeInsets.all(8), // Reduced padding
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.3),
               borderRadius: BorderRadius.circular(12),
@@ -150,10 +177,28 @@ class _SettingsBarState extends State<SettingsBar> with SingleTickerProviderStat
                 width: 1,
               ),
             ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 34,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 28,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ),

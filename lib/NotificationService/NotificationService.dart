@@ -86,14 +86,25 @@ Future<void> requestPermissions() async {
   }
 }
 
-Future<void> scheduleReminder(DateTime reminderTime) async {
-  print('Scheduling reminder for $reminderTime');
+Future<void> scheduleReminder({
+  required int id,
+  required String title,
+  required String body,
+  required DateTime scheduledDate,
+}) async {
+  print('Scheduling reminder: $title for $scheduledDate');
+
+  if (scheduledDate.isBefore(DateTime.now())) {
+    print('Cannot schedule reminder in the past');
+    throw Exception('Cannot schedule reminder in the past');
+  }
+
   try {
     await flutterLocalNotificationsPlugin.zonedSchedule(
-      0,
-      'Countdown Reminder',
-      'Your countdown ends in 1 hour!',
-      tz.TZDateTime.from(reminderTime, tz.local),
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledDate, tz.local),
       const NotificationDetails(
         android: AndroidNotificationDetails(
           'countdown_reminder_channel',
@@ -115,9 +126,11 @@ Future<void> scheduleReminder(DateTime reminderTime) async {
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.dateAndTime,
     );
-    print('Reminder scheduled for $reminderTime');
+    print('Reminder scheduled successfully for $scheduledDate with ID $id');
   } catch (e) {
     print('Error scheduling reminder: $e');
+    throw e;
   }
 }

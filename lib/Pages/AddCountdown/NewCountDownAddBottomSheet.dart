@@ -83,7 +83,7 @@ class _NewcountdownAddBottomSheetState
         widgetStateProvider.countDownTitle = _textFieldValue;
         // Initialize with default image if no image is set
         if (widgetStateProvider.image.isEmpty) {
-          widgetStateProvider.image = 'assets/Images/office.jpg';
+          widgetStateProvider.image = 'assets/Images/image1.jpg';
         }
         // Set default dimCount for new countdown
         if (widgetStateProvider.dimCount == 0.0) {

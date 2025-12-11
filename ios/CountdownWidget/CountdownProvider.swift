@@ -35,7 +35,6 @@ struct CountdownProvider: TimelineProvider {
         
         // Get countdown data from UserDefaults (shared with main app via App Groups)
         let sharedDefaults = UserDefaults(suiteName: "group.com.circularx.timecountdown.widgets")
-        let countdownsData = sharedDefaults?.data(forKey: "countdowns")
         let style = sharedDefaults?.string(forKey: "widget_style") ?? "glass"
         
         // Use a round-robin approach for multiple widgets
@@ -44,16 +43,28 @@ struct CountdownProvider: TimelineProvider {
         let selectedCountdownId = getSelectedCountdownForIndex(widgetIndex)
         
         print("Widget timeline update - Selected ID: \(selectedCountdownId)")
-        print("Widget data available: \(countdownsData != nil)")
         
         var countdown: [String: Any]?
         var title = "Tap to Configure"
         var targetDate = Date().addingTimeInterval(86400)
         var isConfigured = false
         
-        if let data = countdownsData,
-           let countdowns = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]] {
-            
+        // Try reading as String first (home_widget format), then try Data
+        var countdowns: [[String: Any]]?
+        
+        if let countdownsString = sharedDefaults?.string(forKey: "countdowns") {
+            // home_widget saves data as strings
+            print("Widget: Found countdowns as String")
+            if let data = countdownsString.data(using: .utf8) {
+                countdowns = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
+            }
+        } else if let countdownsData = sharedDefaults?.data(forKey: "countdowns") {
+            // Legacy: try reading as Data directly
+            print("Widget: Found countdowns as Data")
+            countdowns = try? JSONSerialization.jsonObject(with: countdownsData) as? [[String: Any]]
+        }
+        
+        if let countdowns = countdowns {
             print("Widget found \(countdowns.count) countdowns")
             print("Looking for countdown ID: \(selectedCountdownId)")
             

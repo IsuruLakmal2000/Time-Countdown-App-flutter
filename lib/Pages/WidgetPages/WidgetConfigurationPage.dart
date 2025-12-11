@@ -9,7 +9,8 @@ class WidgetConfigurationPage extends StatefulWidget {
   const WidgetConfigurationPage({Key? key}) : super(key: key);
 
   @override
-  State<WidgetConfigurationPage> createState() => _WidgetConfigurationPageState();
+  State<WidgetConfigurationPage> createState() =>
+      _WidgetConfigurationPageState();
 }
 
 class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
@@ -17,7 +18,7 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
   bool _isLoading = true;
   String? _selectedCountdownId;
   String _selectedFrequency = CountdownWidgetService.FREQUENCY_15_MIN;
-  
+
   // Initialize platform detection directly in the variable declaration
   late final bool _isAndroid = Platform.isAndroid;
 
@@ -25,7 +26,7 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
   void initState() {
     super.initState();
     _loadCountdowns();
-    
+
     // Fallback timeout to prevent infinite loading
     Timer(const Duration(seconds: 10), () {
       if (_isLoading && mounted) {
@@ -39,7 +40,7 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
   Future<void> _loadCountdowns() async {
     try {
       final countdowns = await CountdownWidgetService.getAvailableCountdowns();
-      
+
       if (mounted) {
         setState(() {
           _countdowns = countdowns;
@@ -80,7 +81,8 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
         // For Android, we need a widget ID - get it from the platform
         final widgetId = await CountdownWidgetService.getWidgetId();
         if (widgetId != -1) {
-          await CountdownWidgetService.configureAndroidWidgetWithFrequency(widgetId, _selectedCountdownId!, _selectedFrequency);
+          await CountdownWidgetService.configureAndroidWidgetWithFrequency(
+              widgetId, _selectedCountdownId!, _selectedFrequency);
         } else {
           // Fallback to basic configuration
           await CountdownWidgetService.configureWidget(_selectedCountdownId!);
@@ -89,7 +91,7 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
         // For iOS, use the basic configuration (frequency is handled internally)
         await CountdownWidgetService.configureIOSWidget(_selectedCountdownId!);
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -118,7 +120,8 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
   }
 
   String _formatTimeRemaining(DateTime targetDate) {
-    final timeRemaining = CountdownWidgetService.calculateTimeRemaining(targetDate);
+    final timeRemaining =
+        CountdownWidgetService.calculateTimeRemaining(targetDate);
     return '${timeRemaining['days']}d ${timeRemaining['hours']}h ${timeRemaining['minutes']}m';
   }
 
@@ -204,7 +207,8 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -223,7 +227,7 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
       itemBuilder: (context, index) {
         final countdown = _countdowns[index];
         final isSelected = _selectedCountdownId == countdown.countDownId;
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
@@ -261,7 +265,7 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
                 gradient: LinearGradient(
                   colors: [
                     Colors.blue.withOpacity(0.8),
-                    Colors.purple.withOpacity(0.8),
+                    Colors.green.withOpacity(0.8),
                   ],
                 ),
               ),
@@ -350,7 +354,7 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple.withOpacity(0.8),
+                backgroundColor: Colors.green.withOpacity(0.8),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -397,10 +401,11 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: _selectedCountdownId != null ? _configureWidget : null,
+                  onPressed:
+                      _selectedCountdownId != null ? _configureWidget : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedCountdownId != null 
-                        ? Colors.blue 
+                    backgroundColor: _selectedCountdownId != null
+                        ? Colors.blue
                         : Colors.grey.withOpacity(0.3),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -450,13 +455,17 @@ class _WidgetConfigurationPageState extends State<WidgetConfigurationPage> {
           const SizedBox(height: 12),
           Row(
             children: [
-              _buildFrequencyOption(CountdownWidgetService.FREQUENCY_1_MIN, '1 min'),
+              _buildFrequencyOption(
+                  CountdownWidgetService.FREQUENCY_1_MIN, '1 min'),
               const SizedBox(width: 8),
-              _buildFrequencyOption(CountdownWidgetService.FREQUENCY_5_MIN, '5 min'),
+              _buildFrequencyOption(
+                  CountdownWidgetService.FREQUENCY_5_MIN, '5 min'),
               const SizedBox(width: 8),
-              _buildFrequencyOption(CountdownWidgetService.FREQUENCY_15_MIN, '15 min'),
+              _buildFrequencyOption(
+                  CountdownWidgetService.FREQUENCY_15_MIN, '15 min'),
               const SizedBox(width: 8),
-              _buildFrequencyOption(CountdownWidgetService.FREQUENCY_1_HOUR, '1 hour'),
+              _buildFrequencyOption(
+                  CountdownWidgetService.FREQUENCY_1_HOUR, '1 hour'),
             ],
           ),
         ],

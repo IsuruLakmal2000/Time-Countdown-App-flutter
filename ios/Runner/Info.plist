@@ -54,5 +54,7 @@
 			</array>
 		</dict>
 	</array>
+	<key>AppGroupId</key>
+	<string>group.com.circularx.timecountdown.widgets</string>
 </dict>
 </plist>

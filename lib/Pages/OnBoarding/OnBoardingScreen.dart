@@ -26,7 +26,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } else {
       // Mark onboarding as completed before navigating to main app
       await LocalStorageService.setOnboardingCompleted();
-      
+
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => HomePage()),
       );
@@ -58,13 +58,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 title: 'Make Every Second Count',
                 description:
                     'Reach your goals with our countdown timer. Every second matters',
-                imgUrl: "assets/Images/office2.jpg",
+                imgUrl: "assets/Images/dream.jpg",
               ),
               OnboardingPage(
                 title: 'Time is Your Ally',
                 description:
                     'Set a deadline and let our countdown keep you on track to achieve your goals',
-                imgUrl: "assets/Images/dream.jpg",
+                imgUrl: "assets/Images/cafe.jpg",
               ),
             ],
           ),

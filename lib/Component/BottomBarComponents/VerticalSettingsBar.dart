@@ -54,7 +54,7 @@ class _VerticalSettingsBarState extends State<VerticalSettingsBar>
   Future<void> _saveImageOnLocal() async {
     final widgetStateProvider =
         Provider.of<RenderedWidgetProvider>(context, listen: false);
-    
+
     try {
       final pickedFile =
           await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -114,13 +114,13 @@ class _VerticalSettingsBarState extends State<VerticalSettingsBar>
                   color: Colors.black.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Color.fromARGB(255, 184, 54, 244).withOpacity(0.3),
+                    color: Colors.green.withOpacity(0.3),
                     width: 1,
                   ),
                 ),
                 child: Icon(
                   icon,
-                  color: Color.fromARGB(255, 184, 54, 244),
+                  color: Colors.green,
                   size: 34,
                 ),
               ),
@@ -136,8 +136,9 @@ class _VerticalSettingsBarState extends State<VerticalSettingsBar>
     final widgetStateProvider = Provider.of<RenderedWidgetProvider>(context);
 
     return Positioned(
-      bottom: 150, // Moved up to maintain alignment with the new bottom bar position (100 + 50)
-      right: 20,   // Align to the right where settings button is
+      bottom:
+          150, // Moved up to maintain alignment with the new bottom bar position (100 + 50)
+      right: 20, // Align to the right where settings button is
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: SlideTransition(
