@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:timecountdown/Pages/MainPages/HomePage.dart';
+import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
 import 'package:timecountdown/Services/RevenueCatService.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../Providers/PremiumProvider.dart';
 
 class PremiumPage extends StatefulWidget {
@@ -529,6 +531,63 @@ class _PremiumPageState extends State<PremiumPage> {
                                 decorationColor: Colors.white60,
                               ),
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Privacy Policy and Terms of Use Links
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const PrivacyPolicyPage(),
+                                    ),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                ),
+                                child: const Text(
+                                  "Privacy Policy",
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.white54,
+                                  ),
+                                ),
+                              ),
+                              const Text(
+                                " • ",
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () async {
+                                  // Apple's default EULA for iOS apps
+                                  final Uri eulaUrl = Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/');
+                                  if (await canLaunchUrl(eulaUrl)) {
+                                    await launchUrl(eulaUrl, mode: LaunchMode.externalApplication);
+                                  }
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                ),
+                                child: const Text(
+                                  "Terms of Use",
+                                  style: TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: Colors.white54,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
