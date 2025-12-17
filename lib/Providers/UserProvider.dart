@@ -20,8 +20,12 @@ class UserProvider extends ChangeNotifier {
   Future<void> _checkPremiumStatus() async {
     try {
       final customerInfo = await Purchases.getCustomerInfo();
-      _isPremium = customerInfo.entitlements.all["premium"]?.isActive ?? false;
+      // Fixed: Use correct entitlement ID from RevenueCatService
+      _isPremium = customerInfo.entitlements.all["pro"]?.isActive ?? false;
       print("User is premium: $_isPremium");
+      
+      // Sync premium status to local storage
+      await LocalStorageService.updateIsPurchased(_isPremium);
     } catch (e) {
       print("Error checking premium status: $e");
       _isPremium = false;

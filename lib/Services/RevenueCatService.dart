@@ -69,8 +69,10 @@ class RevenueCatService {
 
       await Purchases.configure(configuration);
 
-      // Enable debug logs (disable in production)
-      await Purchases.setLogLevel(LogLevel.debug);
+      // Enable debug logs only in debug mode
+      if (const bool.fromEnvironment('dart.vm.product') == false) {
+        await Purchases.setLogLevel(LogLevel.debug);
+      }
 
       _isInitialized = true;
       print('RevenueCat initialized successfully');

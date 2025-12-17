@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:timecountdown/Pages/MainPages/HomePage.dart';
 import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
+import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/Services/RevenueCatService.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Providers/PremiumProvider.dart';
@@ -115,6 +116,10 @@ class _PremiumPageState extends State<PremiumPage> {
 
         if (result.success) {
           if (!mounted) return;
+          
+          // Update premium status in local storage
+          await LocalStorageService.updateIsPurchased(true);
+          
           // Update the provider
           Provider.of<PremiumProvider>(context, listen: false)
               .setPremiumStatus(true);
@@ -161,6 +166,10 @@ class _PremiumPageState extends State<PremiumPage> {
       final isPremium = await RevenueCatService.restorePurchases();
 
       if (!mounted) return;
+      
+      // Update premium status in local storage
+      await LocalStorageService.updateIsPurchased(isPremium);
+      
       Provider.of<PremiumProvider>(context, listen: false)
           .setPremiumStatus(isPremium);
 
