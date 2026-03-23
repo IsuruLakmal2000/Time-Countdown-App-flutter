@@ -5,157 +5,107 @@ import 'package:timecountdown/Pages/MainPages/HomePage.dart';
 import 'package:timecountdown/Pages/MainPages/PrivacyPolicy.dart';
 import 'package:timecountdown/Services/LocalStorageService.dart';
 import 'package:timecountdown/Services/RevenueCatService.dart';
+import 'package:timecountdown/Theme/AppColors.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../Providers/PremiumProvider.dart';
 
 class PremiumPage extends StatefulWidget {
   final bool fromOnboarding;
-  
+
   const PremiumPage({super.key, this.fromOnboarding = false});
 
   @override
   State<PremiumPage> createState() => _PremiumPageState();
 }
 
-class _PremiumPageState extends State<PremiumPage> {
+class _PremiumPageState extends State<PremiumPage>
+    with SingleTickerProviderStateMixin {
   bool _isLoading = false;
-  int _selectedIndex = 0; // Default to lifetime (index 0)
-  Package? _monthlyPackage;
-  Package? _yearlyPackage;
   Package? _lifetimePackage;
+  late AnimationController _shimmerController;
+  bool _showCloseButton = false;
 
   @override
   void initState() {
-    print("Initializing PremiumPage");
     super.initState();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
     _fetchOfferings();
-    // No need to check for premium here, the provider will handle it
+    
+    // Show close button after 3 seconds
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _showCloseButton = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchOfferings() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
     try {
       final packages = await RevenueCatService.getAvailablePackages();
-
-      // Filter packages based on identifiers defined in the service
-      final monthly = RevenueCatService.getPackageByProductId(
-          packages, RevenueCatService.monthlyProductId);
-      final yearly = RevenueCatService.getPackageByProductId(
-          packages, RevenueCatService.yearlyProductId);
       final lifetime = RevenueCatService.getPackageByProductId(
           packages, RevenueCatService.lifetimeProductId);
 
       if (mounted) {
         setState(() {
-          _monthlyPackage = monthly;
-          _yearlyPackage = yearly;
           _lifetimePackage = lifetime;
           _isLoading = false;
         });
       }
     } catch (e) {
       print('Error fetching offerings: $e');
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  void _selectPackage(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  // Helper function to calculate monthly price from yearly price
-  String _getMonthlyPrice(Package? yearlyPackage) {
-    if (yearlyPackage == null) return '\$1.67';
-
-    // Attempt to calculate based on actual price if available
-    try {
-      // Logic from user provided service could be used, or custom logic:
-      final priceString = yearlyPackage.storeProduct.priceString;
-
-      // Extract numeric value from price string for rough calculation fallback
-      final RegExp priceRegex = RegExp(r'[\d,]+\.?\d*');
-      final Match? match = priceRegex.firstMatch(priceString);
-
-      if (match != null) {
-        final String numericPart = match.group(0)!.replaceAll(',', '');
-        final double yearlyPrice = double.tryParse(numericPart) ?? 19.99;
-        final double monthlyPrice = yearlyPrice / 12;
-
-        // Get currency symbol from original string
-        final String currencySymbol = priceString.substring(0, match.start);
-
-        return '$currencySymbol${monthlyPrice.toStringAsFixed(2)}';
-      }
-      return '\$1.67';
-    } catch (e) {
-      return '\$1.67';
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> _purchasePremium() async {
-    if (_isLoading) return;
+    if (_isLoading || _lifetimePackage == null) return;
     setState(() => _isLoading = true);
 
     try {
-      Package? packageToPurchase;
-      if (_selectedIndex == 0) packageToPurchase = _lifetimePackage;
-      if (_selectedIndex == 1) packageToPurchase = _yearlyPackage;
-      if (_selectedIndex == 2) packageToPurchase = _monthlyPackage;
+      final result =
+          await RevenueCatService.purchasePackage(_lifetimePackage!);
 
-      if (packageToPurchase != null) {
-        final result =
-            await RevenueCatService.purchasePackage(packageToPurchase);
+      if (result.success) {
+        if (!mounted) return;
 
-        if (result.success) {
-          if (!mounted) return;
-          
-          // Update premium status in local storage
-          await LocalStorageService.updateIsPurchased(true);
-          
-          // Update the provider
-          Provider.of<PremiumProvider>(context, listen: false)
-              .setPremiumStatus(true);
+        await LocalStorageService.updateIsPurchased(true);
 
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('🎉 Premium purchased successfully!'),
-                backgroundColor: Colors.green,
-              ),
+        Provider.of<PremiumProvider>(context, listen: false)
+            .setPremiumStatus(true);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🎉 Welcome to Premium!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+
+          if (widget.fromOnboarding) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => HomePage()),
             );
-            
-            // Navigate appropriately based on source
-            if (widget.fromOnboarding) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => HomePage()),
-              );
-            } else {
-              Navigator.pop(context);
-            }
-          }
-        } else {
-          // Show error if available or just log
-          if (result.error != null && mounted) {
-            // Optional: Show specific error to user if desired
-            // print('Purchase failed: ${result.error}');
+          } else {
+            Navigator.pop(context);
           }
         }
       }
     } catch (e) {
-      // Only log the error, don't show a snackbar for cancellation
       print('Purchase error: $e');
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -166,10 +116,9 @@ class _PremiumPageState extends State<PremiumPage> {
       final isPremium = await RevenueCatService.restorePurchases();
 
       if (!mounted) return;
-      
-      // Update premium status in local storage
+
       await LocalStorageService.updateIsPurchased(isPremium);
-      
+
       Provider.of<PremiumProvider>(context, listen: false)
           .setPremiumStatus(isPremium);
 
@@ -178,13 +127,11 @@ class _PremiumPageState extends State<PremiumPage> {
           SnackBar(
             content: Text(isPremium
                 ? '✅ Purchases restored successfully!'
-                : '🤔 No active premium subscription found.'),
-            backgroundColor: isPremium ? Colors.green : Colors.orange,
+                : '🤔 No active purchase found.'),
+            backgroundColor: isPremium ? AppColors.success : AppColors.warning,
           ),
         );
-        if (isPremium) {
-          Navigator.pop(context); // Go back if restore was successful
-        }
+        if (isPremium) Navigator.pop(context);
       }
     } catch (e) {
       print('Restore error: $e');
@@ -192,748 +139,677 @@ class _PremiumPageState extends State<PremiumPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Restore failed: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
     }
-    if (mounted) {
-      setState(() => _isLoading = false);
-    }
+    if (mounted) setState(() => _isLoading = false);
   }
 
-  //----------
+  void _close() {
+    if (widget.fromOnboarding) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } else {
+      Navigator.pop(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final isPremium = Provider.of<PremiumProvider>(context).isPremium;
 
     if (isPremium) {
-      // ...existing premium user view...
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.star, color: Colors.amber, size: 100),
-              const SizedBox(height: 20),
-              const Text(
-                "You are a Premium User!",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "All features are unlocked.",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                ),
-                child: const Text("Continue"),
-              ),
-            ],
-          ),
-        ),
-      );
+      return _buildAlreadyPremiumView();
     }
 
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: _isLoading
+      backgroundColor: AppColors.background,
+      body: _isLoading && _lifetimePackage == null
           ? const Center(
               child: CircularProgressIndicator(
-              color: Colors.white,
-            ))
+                color: AppColors.accentPrimary,
+              ),
+            )
           : Stack(
               children: [
-                // Scrollable content
-                SingleChildScrollView(
+                // Background gradient glow
+                Positioned(
+                  top: -120,
+                  left: -80,
                   child: Container(
-                    constraints: BoxConstraints(
-                      minHeight: MediaQuery.of(context).size.height,
-                    ),
+                    width: 300,
+                    height: 300,
                     decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage("assets/Images/cafe.jpg"),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withValues(alpha: 0.3),
-                            Colors.black.withValues(alpha: 0.7),
-                            Colors.black.withValues(alpha: 0.95),
-                          ],
-                        ),
-                      ),
-                      padding: const EdgeInsets.only(bottom: 160),
-                      child: Column(
-                        children: [
-                          // Close Button
-                          Padding(
-                            padding: const EdgeInsets.only(right: 20, top: 50, left: 20),
-                            child: Align(
-                              alignment: Alignment.topRight,
-                              child: IconButton(
-                                onPressed: () {
-                                  if (widget.fromOnboarding) {
-                                    // If from onboarding, navigate to HomePage
-                                    Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (context) => HomePage(),
-                                      ),
-                                    );
-                                  } else {
-                                    // Otherwise just pop
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                icon: const Icon(
-                                  Icons.close_rounded,
-                                  color: Colors.white70,
-                                  size: 35,
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Top spacing to push content down
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
-                          // Main Content
-                          Column(
-                                children: [
-                                  // Title with padding
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                                    child: const Text(
-                                      "Upgrade to Premium",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 255, 48, 238),
-                                        fontSize: 32,
-                                        fontWeight: FontWeight.w700,
-                                        height: 1.2,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 40),
-                                    child: const Text(
-                                      "Unlock all premium features and content without restrictions.",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.normal,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ),
-
-                                  const SizedBox(height: 40),
-                                     Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 30),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        _buildFeature("assets/Images/unlimited.png", "Unlimited\nCountdowns"),
-                                        _buildFeature("assets/Images/unlocked.png", "Pro\nTemplates"),
-                                        _buildFeatureIcon(Icons.backup, "Backup &\nRestore"),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  const Text(
-                                    "Choose Your Plan",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.3,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  // Subscription Selection Cards
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                                    child: Column(
-                                      children: [
-                                        // Lifetime Package - Best Deal (Top)
-                                        _buildPlanCardWithBadge(
-                                          index: 0,
-                                          title: 'Lifetime Access',
-                                          subtitle: 'One-time payment',
-                                          price: _lifetimePackage?.storeProduct.priceString ?? '\$49.99',
-                                          period: 'forever',
-                                          monthlyPrice: '',
-                                          badge: 'Best Deal',
-                                        ),
-                                        // Yearly Package - Most Popular
-                                        _buildPlanCardWithBadge(
-                                          index: 1,
-                                          title: 'Yearly Plan',
-                                          subtitle: 'Best value - billed annually',
-                                          price: _yearlyPackage?.storeProduct.priceString ?? '\$19.99',
-                                          period: 'per year',
-                                          monthlyPrice: _getMonthlyPrice(_yearlyPackage),
-                                          badge: 'Save 58%',
-                                        ),
-                                        // Monthly Package
-                                        _buildPlanCard(
-                                          index: 2,
-                                          title: 'Monthly Plan',
-                                          subtitle: 'Flexible monthly billing',
-                                          price: _monthlyPackage?.storeProduct.priceString ?? '\$4.99',
-                                          period: 'per month',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  // Features Section
-                               
-                                ],
-                              ),
-                          // Bottom spacing for visual balance
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          AppColors.accentPrimary.withOpacity(0.15),
+                          Colors.transparent,
                         ],
                       ),
                     ),
                   ),
                 ),
-                // Fixed bottom button overlay - sticks to bottom
+                Positioned(
+                  top: -60,
+                  right: -100,
+                  child: Container(
+                    width: 250,
+                    height: 250,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          AppColors.accentSecondary.withOpacity(0.1),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Main content
+                SafeArea(
+                  child: Column(
+                    children: [
+                      // Close button (appears after 3 seconds)
+                      Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8, top: 4),
+                          child: AnimatedOpacity(
+                            opacity: _showCloseButton ? 1.0 : 0.0,
+                            duration: const Duration(milliseconds: 500),
+                            child: AnimatedScale(
+                              scale: _showCloseButton ? 1.0 : 0.8,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeOutBack,
+                              child: IconButton(
+                                onPressed: _showCloseButton ? _close : null,
+                                icon: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceLight,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: AppColors.border,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.close_rounded,
+                                    color: AppColors.textSecondary,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Scrollable content
+                      Expanded(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 8),
+
+                              // Crown icon
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      AppColors.accentPrimary.withOpacity(0.2),
+                                      AppColors.accentSecondary.withOpacity(0.2),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  border: Border.all(
+                                    color:
+                                        AppColors.accentPrimary.withOpacity(0.3),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.workspace_premium_rounded,
+                                  color: AppColors.accentPrimary,
+                                  size: 40,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+
+                              // Title
+                              ShaderMask(
+                                shaderCallback: (bounds) =>
+                                    AppColors.accentGradient
+                                        .createShader(bounds),
+                                child: const Text(
+                                  "Unlock Everything",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.1,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                "One purchase. Lifetime access. No subscriptions.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 15,
+                                  height: 1.4,
+                                ),
+                              ),
+
+                              const SizedBox(height: 36),
+
+                              // Lifetime deal card (moved to top)
+                              _buildLifetimeDealCard(),
+
+                              const SizedBox(height: 32),
+
+                              // Feature list (moved below price)
+                              _buildFeatureItem(
+                                icon: Icons.all_inclusive_rounded,
+                                title: "Unlimited Countdowns",
+                                subtitle:
+                                    "Create as many countdowns as you need",
+                              ),
+                              _buildFeatureItem(
+                                icon: Icons.palette_rounded,
+                                title: "All Premium Templates",
+                                subtitle:
+                                    "Beautiful designs for every occasion",
+                              ),
+                              _buildFeatureItem(
+                                icon: Icons.cloud_upload_rounded,
+                                title: "Backup & Restore",
+                                subtitle:
+                                    "Never lose your countdowns again",
+                              ),
+                              _buildFeatureItem(
+                                icon: Icons.widgets_rounded,
+                                title: "Home Screen Widgets",
+                                subtitle:
+                                    "All widget styles & customization",
+                              ),
+                              _buildFeatureItem(
+                                icon: Icons.block_rounded,
+                                title: "No Ads, Ever",
+                                subtitle:
+                                    "Clean, distraction-free experience",
+                                isLast: true,
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Social proof
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceLight,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppColors.border,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ...List.generate(
+                                      5,
+                                      (i) => const Icon(Icons.star_rounded,
+                                          color: Colors.amber, size: 18),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      "Loved by 10,000+ users",
+                                      style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Extra bottom padding for the fixed CTA
+                              const SizedBox(height: 200),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Fixed bottom CTA
                 Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withValues(alpha: 0),
-                          Colors.black.withValues(alpha: 0.85),
-                          Colors.black.withValues(alpha: 0.98),
-                        ],
-                      ),
-                    ),
-                    padding: EdgeInsets.only(
-                      left: 24,
-                      right: 24,
-                      bottom: MediaQuery.of(context).padding.bottom-20,
-                      top: 24,
-                    ),
-                    child: SafeArea(
-                      top: false,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: _selectedIndex == 0
-                                      ? "Lifetime access, "
-                                      : _selectedIndex == 1
-                                          ? "Yearly subscription, "
-                                          : "Monthly subscription, ",
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                    height: 1.3,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: _selectedIndex == 0
-                                      ? "pay once, use forever!"
-                                      : _selectedIndex == 1
-                                          ? "best value!"
-                                          : "cancel anytime!",
-                                  style: const TextStyle(
-                                    color: Colors.amber,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color.fromARGB(255, 252, 6, 252),
-                                  Color.fromARGB(255, 255, 0, 119),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.3),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: Material(
-                              borderRadius: BorderRadius.circular(30),
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(30),
-                                onTap: _purchasePremium,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 18),
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    "Upgrade to Premium",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          TextButton(
-                            onPressed: _restorePurchases,
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                            ),
-                            child: const Text(
-                              "Restore Purchases",
-                              style: TextStyle(
-                                color: Colors.white60,
-                                fontSize: 13,
-                                decoration: TextDecoration.underline,
-                                decorationColor: Colors.white60,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          // Privacy Policy and Terms of Use Links
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const PrivacyPolicyPage(),
-                                    ),
-                                  );
-                                },
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                ),
-                                child: const Text(
-                                  "Privacy Policy",
-                                  style: TextStyle(
-                                    color: Colors.white54,
-                                    fontSize: 12,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: Colors.white54,
-                                  ),
-                                ),
-                              ),
-                              const Text(
-                                " • ",
-                                style: TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () async {
-                                  // Apple's default EULA for iOS apps
-                                  final Uri eulaUrl = Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/');
-                                  if (await canLaunchUrl(eulaUrl)) {
-                                    await launchUrl(eulaUrl, mode: LaunchMode.externalApplication);
-                                  }
-                                },
-                                style: TextButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                                ),
-                                child: const Text(
-                                  "Terms of Use",
-                                  style: TextStyle(
-                                    color: Colors.white54,
-                                    fontSize: 12,
-                                    decoration: TextDecoration.underline,
-                                    decorationColor: Colors.white54,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: _buildBottomCTA(),
                 ),
               ],
             ),
     );
   }
 
-  // Helper widget to build compact plan cards
-  Widget _buildPlanCard({
-    required int index,
+  Widget _buildFeatureItem({
+    required IconData icon,
     required String title,
     required String subtitle,
-    required String price,
-    required String period,
+    bool isLast = false,
   }) {
-    return GestureDetector(
-      onTap: () => _selectPackage(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: _selectedIndex == index
-              ? LinearGradient(
-                  colors: [
-                    const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.25),
-                    const Color.fromARGB(255, 255, 0, 119).withValues(alpha: 0.25),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          border: Border.all(
-            color: _selectedIndex == index
-                ? const Color.fromARGB(255, 252, 6, 252)
-                : Colors.grey.withValues(alpha: 0.3),
-            width: 2,
-          ),
-          color: _selectedIndex == index ? null : Colors.white.withValues(alpha: 0.08),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: _selectedIndex == index
-                      ? const Color.fromARGB(255, 252, 6, 252)
-                      : Colors.grey,
-                  width: 2,
-                ),
-                color: _selectedIndex == index
-                    ? const Color.fromARGB(255, 252, 6, 252)
-                    : Colors.transparent,
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 20),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.accentPrimary.withOpacity(0.15),
+                  AppColors.accentSecondary.withOpacity(0.15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              child: _selectedIndex == index
-                  ? const Icon(Icons.check, color: Colors.white, size: 12)
-                  : null,
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            child: Icon(icon, color: AppColors.accentPrimary, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.check_circle_rounded,
+            color: AppColors.success,
+            size: 20,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLifetimeDealCard() {
+    final price =
+        _lifetimePackage?.storeProduct.priceString ?? '\$49.99';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.accentPrimary.withOpacity(0.12),
+            AppColors.accentSecondary.withOpacity(0.08),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        border: Border.all(
+          color: AppColors.accentPrimary.withOpacity(0.4),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              gradient: AppColors.accentGradient,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              "💎  LIFETIME DEAL",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Price
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                price,
+                style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 42,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1,
+                  height: 1,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          // One time
+          const Text(
+            "One-time payment  •  Forever yours",
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 14),
+
+          
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomCTA() {
+    final price =
+        _lifetimePackage?.storeProduct.priceString ?? '\$49.99';
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.0, 0.3, 1.0],
+          colors: [
+            AppColors.background.withOpacity(0),
+            AppColors.background.withOpacity(0.95),
+            AppColors.background,
+          ],
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // CTA button with animated glow
+              AnimatedBuilder(
+                animation: _shimmerController,
+                builder: (context, child) {
+                  return Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: AppColors.accentGradient,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.accentPrimary.withOpacity(
+                            0.3 + (_shimmerController.value * 0.15),
+                          ),
+                          blurRadius: 20 + (_shimmerController.value * 8),
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: _isLoading ? null : _purchasePremium,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          child: _isLoading
+                              ? const Center(
+                                  child: SizedBox(
+                                    width: 22,
+                                    height: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : Column(
+                                  children: [
+                                    Text(
+                                      "Get Lifetime Access — $price",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    const Text(
+                                      "Pay once, own it forever",
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 12),
+
+              // Restore
+              TextButton(
+                onPressed: _restorePurchases,
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                ),
+                child: const Text(
+                  "Restore Purchases",
+                  style: TextStyle(
+                    color: AppColors.textTertiary,
+                    fontSize: 13,
+                    decoration: TextDecoration.underline,
+                    decorationColor: AppColors.textTertiary,
+                  ),
+                ),
+              ),
+
+              // Privacy & Terms
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PrivacyPolicyPage(),
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2, horizontal: 8),
+                    ),
+                    child: const Text(
+                      "Privacy Policy",
+                      style: TextStyle(
+                        color: AppColors.textDisabled,
+                        fontSize: 11,
+                        decoration: TextDecoration.underline,
+                        decorationColor: AppColors.textDisabled,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 11,
+                  const Text(
+                    " • ",
+                    style:
+                        TextStyle(color: AppColors.textDisabled, fontSize: 11),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      final Uri eulaUrl = Uri.parse(
+                          'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/');
+                      if (await canLaunchUrl(eulaUrl)) {
+                        await launchUrl(eulaUrl,
+                            mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2, horizontal: 8),
+                    ),
+                    child: const Text(
+                      "Terms of Use",
+                      style: TextStyle(
+                        color: AppColors.textDisabled,
+                        fontSize: 11,
+                        decoration: TextDecoration.underline,
+                        decorationColor: AppColors.textDisabled,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  price,
-                  style: const TextStyle(
-                    color: Color.fromARGB(255, 252, 6, 252),
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  period,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 10,
-                  ),
-                ),
-              ],
-            ),
-          ],
+              const SizedBox(height: 4),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // Helper widget for yearly plan with badge and monthly breakdown
-  Widget _buildPlanCardWithBadge({
-    required int index,
-    required String title,
-    required String subtitle,
-    required String price,
-    required String period,
-    required String monthlyPrice,
-    required String badge,
-  }) {
-    return GestureDetector(
-      onTap: () => _selectPackage(index),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              gradient: _selectedIndex == index
-                  ? LinearGradient(
-                      colors: [
-                        const Color.fromARGB(255, 252, 6, 252).withValues(alpha: 0.25),
-                        const Color.fromARGB(255, 255, 0, 119).withValues(alpha: 0.25),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )
-                  : null,
-              border: Border.all(
-                color: _selectedIndex == index
-                    ? const Color.fromARGB(255, 252, 6, 252)
-                    : Colors.grey.withValues(alpha: 0.3),
-                width: 2,
-              ),
-              color: _selectedIndex == index ? null : Colors.white.withValues(alpha: 0.08),
-            ),
-            child: Row(
+  Widget _buildAlreadyPremiumView() {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
-                  width: 18,
-                  height: 18,
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _selectedIndex == index
-                          ? const Color.fromARGB(255, 252, 6, 252)
-                          : Colors.grey,
-                      width: 2,
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.accentPrimary.withOpacity(0.2),
+                        AppColors.accentSecondary.withOpacity(0.2),
+                      ],
                     ),
-                    color: _selectedIndex == index
-                        ? const Color.fromARGB(255, 252, 6, 252)
-                        : Colors.transparent,
                   ),
-                  child: _selectedIndex == index
-                      ? const Icon(Icons.check, color: Colors.white, size: 12)
-                      : null,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ],
+                  child: const Icon(
+                    Icons.workspace_premium_rounded,
+                    color: AppColors.accentPrimary,
+                    size: 50,
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      price,
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 252, 6, 252),
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
+                const SizedBox(height: 24),
+                ShaderMask(
+                  shaderCallback: (bounds) =>
+                      AppColors.accentGradient.createShader(bounds),
+                  child: const Text(
+                    "You're Premium!",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
                     ),
-                    Text(
-                      period,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 9,
-                      ),
-                    ),
-                    // Only show monthly breakdown for yearly plan (index 1)
-                    if (monthlyPrice.isNotEmpty) ...[
-                      const SizedBox(height: 2),
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Colors.amber, Colors.orange],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ).createShader(bounds),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "All features are unlocked.\nEnjoy the full experience!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 15,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 36),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.accentGradient,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(16),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => Navigator.pop(context),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
-                          monthlyPrice,
-                          style: const TextStyle(
+                          "Continue",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
-                      const Text(
-                        'per month',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 9,
-                        ),
-                      ),
-                    ],
-                  ],
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-          Positioned(
-            top: -6,
-            left: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color.fromARGB(255, 252, 6, 252),
-                    Color.fromARGB(255, 255, 0, 119),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                badge,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Helper widget for feature with image
-  Widget _buildFeature(String imagePath, String label) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.amber.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Image.asset(imagePath, fit: BoxFit.contain),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Helper widget for feature with icon
-  Widget _buildFeatureIcon(IconData icon, String label) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.amber.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(icon, color: Colors.amber, size: 20),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

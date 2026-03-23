@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:timecountdown/Component/CountdownCards/TemplateFunctions.dart';
 
 class Template4 extends StatefulWidget {
   Template4({
@@ -169,6 +170,47 @@ class _Template4State extends State<Template4> {
   }
 
   Widget _buildTemplateContent() {
+    final bool showYears = TemplateFunctions.shouldShowTimeUnit(
+      unit: 'years',
+      years: years,
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+    );
+    final bool showDays = TemplateFunctions.shouldShowTimeUnit(
+      unit: 'days',
+      years: years,
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+    );
+    final bool showHours = TemplateFunctions.shouldShowTimeUnit(
+      unit: 'hours',
+      years: years,
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+    );
+    final bool showMinutes = TemplateFunctions.shouldShowTimeUnit(
+      unit: 'minutes',
+      years: years,
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+    );
+    final bool showSeconds = TemplateFunctions.shouldShowTimeUnit(
+      unit: 'seconds',
+      years: years,
+      days: days,
+      hours: hours,
+      minutes: minutes,
+      seconds: seconds,
+    );
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -192,7 +234,7 @@ class _Template4State extends State<Template4> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  years != 0
+                  showYears
                       ? Column(
                           children: [
                             Text(
@@ -221,7 +263,7 @@ class _Template4State extends State<Template4> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              days != 0
+              showDays
                   ? Column(
                       children: [
                         Text(
@@ -243,7 +285,7 @@ class _Template4State extends State<Template4> {
                       ],
                     )
                   : Container(),
-              hours != 0
+              showHours
                   ? Column(
                       children: [
                         Text(
@@ -270,7 +312,7 @@ class _Template4State extends State<Template4> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              minutes != 0
+              showMinutes
                   ? Column(
                       children: [
                         Text(
@@ -292,7 +334,7 @@ class _Template4State extends State<Template4> {
                       ],
                     )
                   : Container(),
-              seconds != 0
+              showSeconds
                   ? Column(
                       children: [
                         Text(

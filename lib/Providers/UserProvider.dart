@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:timecountdown/Services/LocalStorageService.dart';
+import 'package:timecountdown/Services/RevenueCatService.dart';
 import 'package:timecountdown/Model/UserData.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -19,9 +19,9 @@ class UserProvider extends ChangeNotifier {
 
   Future<void> _checkPremiumStatus() async {
     try {
-      final customerInfo = await Purchases.getCustomerInfo();
-      // Fixed: Use correct entitlement ID from RevenueCatService
-      _isPremium = customerInfo.entitlements.all["pro"]?.isActive ?? false;
+      // Use RevenueCatService instead of calling Purchases SDK directly
+      // This respects test mode and handles initialization checks
+      _isPremium = await RevenueCatService.isPremiumUser();
       print("User is premium: $_isPremium");
       
       // Sync premium status to local storage
